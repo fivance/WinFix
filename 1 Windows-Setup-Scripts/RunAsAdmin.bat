@@ -1,9 +1,3 @@
-:: 2>nul :: ova linija bi trebala biti prva. Skriva pogrešku zbog BOM oznake ako je paketna datoteka "UTF-8 sa BOM"
-::
-
-@echo off
-chcp 65001 >nul
-
 :: raspored tipkovnice (keyboard layout): HR_EN_DE
 reg add "HKCU\Keyboard Layout\Preload" /v "1" /t REG_SZ /d "0000041a" /f 1>nul
 :: omogući NumLock na tipkovnici za sve, uključujući zaslon za prijavu
