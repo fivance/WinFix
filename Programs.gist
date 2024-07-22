@@ -1,4 +1,5 @@
 #:::Convenient way to install apps using choco + boxstarter:::
+#Couldnt get it to work on my custom W11 Enterprise edition - must be missing some files bcs i have updates off there.
 
 boxstarter command line argument to run app install from gists:
 START https://boxstarter.org/package/nr/url?[your gist raw link insert]
