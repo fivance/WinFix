@@ -2831,6 +2831,16 @@ foreach ($url in $regFiles) {
     Remove-Item $regFilePath
 }
 
+$menu = 'Open Windows PowerShell Here as Administrator'
+$command = "$PSHOMEpowershell.exe -NoExit -NoProfile -Command ""Set-Location '%V'"""
+
+'directory', 'directorybackground', 'drive' | ForEach-Object {
+New-Item -Path "Registry::HKEY_CLASSES_ROOT$_shell" -Name runascommand -Force |
+Set-ItemProperty -Name '(default)' -Value $command -PassThru |
+Set-ItemProperty -Path {$_.PSParentPath} -Name '(default)' -Value $menu -PassThru |
+Set-ItemProperty -Name HasLUAShield -Value ''
+}
+
 # clear %temp% folder
 Remove-Item -Path "$env:USERPROFILE\AppData\Local\Temp" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:USERPROFILE\AppData\Local" -Name "Temp" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
