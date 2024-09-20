@@ -10,7 +10,22 @@ $Host.UI.RawUI.BackgroundColor = "Black"
 $Host.PrivateData.ProgressBackgroundColor = "Black"
 $Host.PrivateData.ProgressForegroundColor = "White"
 Clear-Host
- 
+
+(Invoke-WebRequest "https://raw.githubusercontent.com/lptstr/winfetch/master/winfetch.ps1" -UseBasicParsing).Content.Remove(0,1) | Invoke-Expression
+Write-Host "Press Enter to continue:"
+Read-Host
+
+function Get-FileFromWeb {
+    param (
+        # Parameter help description
+        [Parameter(Mandatory)]
+        [string]$URL,
+  
+        # Parameter help description
+        [Parameter(Mandatory)]
+        [string]$File 
+    )
+    }
  
  Write-Host "Select an option:"
     Write-Host "1) Install apps"
@@ -18,6 +33,7 @@ Clear-Host
     Write-Host "3 Install Nvidia driver"
     Write-Host "4 Apply Nvidia settings"
     Write-Host "5) Continue with the rest of the script"
+    Write-Host "6) Winutil"
      while ($true) {
     $choice = Read-Host " "
     if ($choice -match '^[1-5]$') {
@@ -2826,3 +2842,8 @@ Start-Process cleanmgr.exe
 exit
  }
     } } else { Write-Host "Invalid input. Please select a valid option (1-5)." } }
+
+6 {
+    irm christitus.com/win | iex
+
+   }
