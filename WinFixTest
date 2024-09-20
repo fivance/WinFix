@@ -2841,10 +2841,9 @@ New-Item -Path "$env:SystemDrive\Windows" -Name "Temp" -ItemType Directory -Erro
 Start-Process cleanmgr.exe
 exit
  }
-    } } else { Write-Host "Invalid input. Please select a valid option (1-6)." } }
 
 6 {
     irm christitus.com/win | iex
 
    }
-   
+    } } else { Write-Host "Invalid input. Please select a valid option (1-6)." } }
