@@ -42,10 +42,12 @@
     }
 
  (Invoke-WebRequest "https://raw.githubusercontent.com/lptstr/winfetch/master/winfetch.ps1" -UseBasicParsing).Content.Remove(0,1) | Invoke-Expression
-   
+ 
+ Write-Host "Press Enter to continue"  
+ Read-Host
 
   function show-menu {
-	   Clear-Host
+	   
   Write-Host " 1. CTT Winutil"
   Write-Host " 2. Clean graphics driver - DDU"
   Write-Host " 3. Install NVIDIA Driver"
@@ -58,11 +60,14 @@
 show-menu
     while ($true) {
     $choice = Read-Host " "
-    if ($choice -match '^[1-9]$') {
+    if ($choice -match '^[1-8]$') {
     switch ($choice) {
 
+
+
+
   1 {
-      irm christitus.com/win | iex
+      start powershell {irm christitus.com/win | iex}
 
     }
 
@@ -369,6 +374,7 @@ Set-Content -Path "$env:TEMP\Inspector\Inspector.nip" -Value $MultilineComment -
 Start-Process -wait "$env:TEMP\Inspector\nvidiaProfileInspector.exe" -ArgumentList "$env:TEMP\Inspector\Inspector.nip"
 # open nvidiacontrolpanel
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
+Wait
     }  
   5 {
       Write-Host "Installing: Direct X . . ."
@@ -2161,6 +2167,10 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImageStatus" /t REG_DWORD /d "1" /f | Out-Null
 Write-Host "Set Lockscreen to black"
 
+#Set compact mode in file explorer
+reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "UseCompactMode" /t REG_DWORD /d "1" /f | Out-Null
+Clear-Host
+
 Clear-Host
 $progresspreference = 'silentlycontinue'
 Write-Host "Uninstalling: UWP Apps. Please wait . . ."
@@ -2559,18 +2569,20 @@ Start-Process cleanmgr.exe
     }  
 
   6 {
-      Start-Process -FilePath "C:/files/advanced.bat" -NewWindow -Wait
+      Start-Process -FilePath "C:/files/advanced.bat" -Wait
     }
 
   7 {
-      Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NewWindow -Wait
+      Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NoNewWindow -Wait
     } 
 
   8 {
+      Clear-Host
       exit
       $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-show-menu
-
+      show-menu
     }
+      
+
     } } else { Write-Host "Invalid input. Please select a valid option (1-8)." } }
-   
+      show-menu
