@@ -5,8 +5,8 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 # Set the URL for the raw file and destination path
-$fileUrl = "https://raw.githubusercontent.com/fivance/WinOpt/main/WinFixTest.ps1"  # Corrected URL
-$destinationFile = "C:\WinFixTest.ps1"
+$fileUrl = "https://raw.githubusercontent.com/fivance/WinOpt/main/WinFixFinal.ps1"  # Corrected URL
+$destinationFile = "C:\WinFixFinal.ps1"
 
 # Use Invoke-WebRequest (iwr) to download the specific file
 Invoke-WebRequest -Uri $fileUrl -OutFile $destinationFile -ErrorAction Stop
