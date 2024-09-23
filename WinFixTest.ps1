@@ -2524,7 +2524,7 @@ Write-Host "Hosts file updated successfully."
 
 6 {
     # advanced tweaks
-    Start-Process -FilePath "C:/files/advanced.bat" -NoNewWindow -Wait
+    Start-Process -FilePath "C:/files/advanced.bat" -NewWindow -Wait
    }
 
 
