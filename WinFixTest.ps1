@@ -2528,8 +2528,9 @@ Write-Host "Hosts file updated successfully."
    }
 
 
-6 {
-7   Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NewWindow -Wait
+
+7 
+  Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NewWindow -Wait
   }
 
 #Adds additional ContextMenu entries
