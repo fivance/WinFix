@@ -50,22 +50,20 @@ function Get-FileFromWeb {
     }
  
  Write-Host "Select an option:"
-    Write-Host "1) Install apps"
+    Write-Host "1) CTT Winutil"
     Write-Host "2) Clean graphics drivers with DDU"
     Write-Host "3 Install Nvidia driver"
     Write-Host "4 Apply Nvidia settings"
     Write-Host "5) Continue with the rest of the script"
-    Write-Host "6) Winutil"
      while ($true) {
     $choice = Read-Host " "
-    if ($choice -match '^[1-6]$') {
+    if ($choice -match '^[1-5]$') {
     switch ($choice) {
 
 
 1 {
-    Write-Host "Installing apps..."
-    # Replace the path below with the actual path to your installation script
-    Start-Process powershell -ArgumentList "-NoExit", "-File", "C:\files\apps.ps1"
+    irm christitus.com/win | iex
+
    }
 
 2 {
@@ -2874,10 +2872,7 @@ Start-Process cleanmgr.exe
 exit
  }
 
-6 {
-    irm christitus.com/win | iex
 
-   }
     } } else { Write-Host "Invalid input. Please select a valid option (1-6)." 
     Write-Host "Press Enter to continue..."
     Read-Host
