@@ -2612,5 +2612,5 @@ Start-Process cleanmgr.exe
     }
 
 
-    } } else { Write-Host "Invalid input. Please select a valid option (1-8)." } }
+    } } else { Write-Host "Invalid input. Please select a valid option (1-9)." } }
       show-menu
