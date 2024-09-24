@@ -106,6 +106,8 @@ reg add "HKCU\Control Panel\International\User Profile" /v "HttpAcceptLanguageOp
 
 :: Search in taskbar 0 = Hidden, 1 = Show search icon, 2 = Show search box
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "SearchboxTaskbarMode" /t REG_DWORD /d 0 /f 1>nul
+:: Set solid color wallpaper
+REG DELETE "HKCU\Control Panel\Desktop" /V Wallpaper /F
 :: change currency "kn" u "EUR"  HR & EN (Croatia)
 reg add "HKCU\Control Panel\International" /v "sCurrency" /t REG_SZ /d "EUR" /f 1>nul
 :: disable automatic folder type discovery
