@@ -55,12 +55,13 @@
   Write-Host " 5. Optimization script"
 	Write-Host " 6. Extra tweaks"
   Write-Host " 7. Disable MS Defender"
-  Write-Host " 8. Exit"
+  Write-Host " 8. Experimental Services tweak"
+  Write-Host " 9. Exit"
 		              }
 show-menu
     while ($true) {
     $choice = Read-Host " "
-    if ($choice -match '^[1-8]$') {
+    if ($choice -match '^[1-9]$') {
     switch ($choice) {
 
 
@@ -2600,12 +2601,16 @@ Start-Process cleanmgr.exe
     } 
 
   8 {
+      Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/services.ps1" -NoNewWindow -Wait
+    }
+      
+9 {
       Clear-Host
       exit
       $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
       show-menu
     }
-      
+
 
     } } else { Write-Host "Invalid input. Please select a valid option (1-8)." } }
       show-menu
