@@ -425,6 +425,29 @@ Start-Process -wait "$env:TEMP\vcredist2015_2017_2019_2022_x64.exe" -ArgumentLis
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v "LetAppsRunInBackground" /t REG_DWORD /d "2" /f | Out-Null
 Clear-Host
 
+Write-Host "Enabling MSI mode"
+Clear-Host
+# get all gpu driver ids
+$gpuDevices = Get-PnpDevice -Class Display
+foreach ($gpu in $gpuDevices) {
+$instanceID = $gpu.InstanceId
+# enable msi mode for all gpus regedit
+reg add "HKLM\SYSTEM\ControlSet001\Enum\$instanceID\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties" /v "MSISupported" /t REG_DWORD /d "1" /f | Out-Null
+}
+# display msi mode for all gpus
+foreach ($gpu in $gpuDevices) {
+$instanceID = $gpu.InstanceId
+$regPath = "Registry::HKLM\SYSTEM\ControlSet001\Enum\$instanceID\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties"
+try {
+$msiSupported = Get-ItemProperty -Path $regPath -Name "MSISupported" -ErrorAction Stop
+Write-Output "$instanceID"
+Write-Output "MSISupported: $($msiSupported.MSISupported)"
+} catch {
+Write-Output "$instanceID"
+Write-Output "MSISupported: Not found or error accessing the registry."
+}
+}
+
 # Clean taskbar
 # Unpin all taskbar icons
 cmd /c "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband /f >nul 2>&1"
