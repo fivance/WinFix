@@ -15,7 +15,7 @@ Menu style ps script that looks like this:
 3. Install NVIDIA driver
 4. Nvidia optimal settings
 5. Comprehensive optimization script
-6. Extra tweaks
+6. Extra tweaks (ignore errors - they pertain to services that you have no access as a local user and services that dont exist)
 7. Disable Defender
 8. Experimental services disable tweaks (dont use if you dont know what you're doing)
 9. Exit
