@@ -69,7 +69,8 @@ switch ($choice) {
     
 
 
-0 {Write-Output "Installing Apps..."
+0 {
+    Write-Host "Installing Apps..."
 $apps = @(
     @{name = "7zip.7zip"},
     @{name = "Google.Chrome"},
@@ -78,7 +79,7 @@ $apps = @(
     @{name = "SublimeHQ.SublimeText.4"},
     @{name = "Notepad++.Notepad++"},
     @{name = "Microsoft.VisualStudioCode"},
-    @{name = "Devolutions.RemoteDesktopManagerFree"},
+    @{name = "Devolutions.RemoteDesktopManager"},
     @{name = "Skillbrains.Lightshot"},
     @{name = "voidtools.Everything.Alpha"},
     @{name = "Ditto.Ditto"},
@@ -108,7 +109,7 @@ foreach ($app in $apps) {
     if (-not $isInstalled) {
         Write-Output "Installing: $($app.name)"
         try {
-            winget install -e -h --accept-source-agreements --accept-package-agreements --id $app.name
+            winget install -e -h --ignore-security-hash --accept-source-agreements --accept-package-agreements --id $app.name
         } catch {
             Write-Output "Failed to install: $($app.name) - $_"
         }
@@ -502,6 +503,7 @@ Write-Output "MSISupported: Not found or error accessing the registry."
 
 # Clean taskbar
 # Unpin all taskbar icons
+
 cmd /c "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband /f >nul 2>&1"
 Remove-Item -Recurse -Force "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch" -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer" -Name "Quick Launch" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
