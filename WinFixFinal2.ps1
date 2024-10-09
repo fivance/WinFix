@@ -49,6 +49,7 @@
 
   function show-menu {
 	   
+  Write-Host " 0. Winget app install"   
   Write-Host " 1. CTT Winutil"
   Write-Host " 2. Clean graphics driver - DDU"
   Write-Host " 3. Install NVIDIA Driver"
@@ -59,13 +60,62 @@
   Write-Host " 8. Experimental Services tweak"
   Write-Host " 9. Exit"
 		              }
+
+while ($true) {
 show-menu
-    while ($true) {
-    $choice = Read-Host " "
-    if ($choice -match '^[1-9]$') {
-    switch ($choice) {
+$choice = Read-Host "Please select an option:"
+
+switch ($choice) {
+    
 
 
+0 {Write-Output "Installing Apps..."
+$apps = @(
+    @{name = "7zip.7zip"},
+    @{name = "Google.Chrome"},
+    @{name = "Brave.Brave"},
+    @{name = "Mozilla.Firefox"},
+    @{name = "SublimeHQ.SublimeText.4"},
+    @{name = "Notepad++.Notepad++"},
+    @{name = "Microsoft.VisualStudioCode"},
+    @{name = "Devolutions.RemoteDesktopManagerFree"},
+    @{name = "Skillbrains.Lightshot"},
+    @{name = "voidtools.Everything.Alpha"},
+    @{name = "Ditto.Ditto"},
+    @{name = "BitSum.ProcessLasso"},
+    @{name = "AntibodySoftware.WizTree"},
+    @{name = "Termius.Termius"},
+    @{name = "Ghisler.TotalCommander"},
+    @{name = "Famatech.AdvancedIPScanner"},
+    @{name = "WiresharkFoundation.Wireshark"},
+    @{name = "GeekUninstaller.GeekUninstaller"},
+    @{name = "VideoLAN.VLC"},
+    @{name = "TeamSpeakSystems.TeamSpeakClient"},
+    @{name = "Discord.Discord"},
+    @{name = "Valve.Steam"},
+    @{name = "Rainmeter.Rainmeter"}
+)
+
+# Get the list of installed apps once at the beginning
+$installedApps = winget list | Select-Object -Skip 1 | ForEach-Object {
+    $columns = $_ -split '\s{2,}'  # Split by two or more spaces
+    @{ id = $columns[0]; name = $columns[1] }
+}
+
+foreach ($app in $apps) {
+    $isInstalled = $installedApps | Where-Object { $_.id -eq $app.name -or $_.name -eq $app.name }
+
+    if (-not $isInstalled) {
+        Write-Output "Installing: $($app.name)"
+        try {
+            winget install -e -h --accept-source-agreements --accept-package-agreements --id $app.name
+        } catch {
+            Write-Output "Failed to install: $($app.name) - $_"
+        }
+    } else {
+        Write-Output "Skipping: $($app.name) (already installed)"
+    }
+}}
 
 
   1 {
@@ -2948,11 +2998,12 @@ Start-Process cleanmgr.exe
       
 9 {
       Clear-Host
-      exit
-      $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-      show-menu
+      Write-Host "Exiting..."
+      break
     }
+    default {
+            Write-Host "Invalid selection. Please choose a number between 0 and 9."
 
-
-    } } else { Write-Host "Invalid input. Please select a valid option (1-9)." } }
-      show-menu
+         }
+    }
+}
