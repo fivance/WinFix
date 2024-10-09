@@ -2570,6 +2570,15 @@ $running = $false
 }
 Timeout /T 1 | Out-Null
 
+Clear-Host
+$progresspreference = 'silentlycontinue'
+Write-Host "Installing: Store. Please wait . . ."
+# install store and calculator
+Get-AppXPackage -AllUsers *Microsoft.WindowsStore* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+Get-AppXPackage -AllUsers *Microsoft.Microsoft.StorePurchaseApp * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+Clear-Host
+
 
 Clear-Host
 Write-Host "Network Adapter: Only Allow IPv4 . . ."
@@ -2989,6 +2998,7 @@ Start-Process cleanmgr.exe
   6 {
       #Start-Process -FilePath "C:/files/advanced.bat" -Wait
     # Set initial keyboard indicators for specific user SIDs
+
 Set-ItemProperty -Path "HKU\S-1-5-19\Control Panel\Keyboard" -Name "InitialKeyboardIndicators" -Value "2147483650" -Type String
 Set-ItemProperty -Path "HKU\S-1-5-20\Control Panel\Keyboard" -Name "InitialKeyboardIndicators" -Value "2147483650" -Type String
 
@@ -3019,7 +3029,7 @@ Set-WinSystemLocale "hr-HR"
 Set-WinUserLanguageList -Language "hr-HR" -Force
 
 # Set the region settings to Croatia
-Set-WinHomeLocation -GeoId 191 # GeoId for Croatia
+Set-WinHomeLocation -GeoId 108 # GeoId for Croatia
 
 # Display current settings
 Get-WinUserLanguageList
