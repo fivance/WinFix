@@ -11,7 +11,11 @@ Menu style ps script that looks like this:
 ------------------------------------------
 0. Winget install apps (comment or add your own in the main script)
 1. CTT WinInstall script 
-2.
+2. Clean GPU drivers with DDU
+3. Install NVIDIA driver
+4. Nvidia optimal settings
+5. Comprehensive optimization script
+6. Extra tweaks
 
 
 
