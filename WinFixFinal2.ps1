@@ -2605,6 +2605,12 @@ Disable-NetAdapterBinding -Name "*" -ComponentID ms_msclient -ErrorAction Silent
 Disable-NetAdapterBinding -Name "*" -ComponentID ms_pacer -ErrorAction SilentlyContinue
 
 Clear-Host
+Write-Host "Set Cloudflare DNS servers for adapter"
+$progresspreference = 'silentlycontinue'
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ("1.1.1.1","1.0.0.1")
+Set-DnsClientServerAddress -InterfaceAlias "Wi-fi" -ServerAddresses ("1.1.1.1","1.0.0.1")
+
+Clear-Host
 Write-Host "Updating hosts file..."
 
 # Define the path to the hosts file
@@ -3186,9 +3192,9 @@ schtasks /Create /F /RU "SYSTEM" /RL HIGHEST /SC HOURLY /TN PrilagodeniTasks /TR
 schtasks /Run /I /TN PrilagodeniTasks
 timeout /T 5
 schtasks /delete /F /TN PrilagodeniTasks
-#
-# set default DNS to Cloudflare.
-wmic nicconfig where (IPEnabled=TRUE) call SetDNSServerSearchOrder ("1.1.1.1", "1.0.0.1")
+ 
+								
+																						 
 # Register DNS
 ipconfig /registerdns
 # disable DNS Functions (LLMNR, Resolution, Devolution, ParallelAandAAAA)
