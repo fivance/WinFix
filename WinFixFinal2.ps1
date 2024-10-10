@@ -109,7 +109,7 @@ foreach ($app in $apps) {
     if (-not $isInstalled) {
         Write-Output "Installing: $($app.name)"
         try {
-            winget install -e -h --ignore-security-hash --accept-source-agreements --accept-package-agreements --id $app.name
+            winget install -e --accept-source-agreements --accept-package-agreements --id $app.name
         } catch {
             Write-Output "Failed to install: $($app.name) - $_"
         }
