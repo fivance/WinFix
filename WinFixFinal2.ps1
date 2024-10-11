@@ -1215,6 +1215,9 @@ Start-Process taskmgr.exe
 exit
 
 
+
+
+
 Clear-Host
 Write-Host "Registry: Optimize . . ."
 Start-Sleep -Seconds 3
@@ -1299,9 +1302,6 @@ Windows Registry Editor Version 5.00
 "RomeSdkChannelUserAuthzPolicy"=dword:00000000
 "NearShareChannelUserAuthzPolicy"=dword:00000000
 "CdpSessionUserAuthzPolicy"=dword:00000000
-
-;set desktop icons > small
-Set-ItemProperty -path HKCU:\Software\Microsoft\Windows\Shell\Bags\1\Desktop -name IconSize -value 36
 
 ; hide frequent folders in quick access
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer]
