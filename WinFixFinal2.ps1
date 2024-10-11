@@ -2399,8 +2399,8 @@ $path = "$env:TEMP\Registry Optimize.reg"
 Regedit.exe /S "$env:TEMP\Registry Optimize.reg"
 Clear-Host
 
-# black lockscreen
 Clear-Host
+# black lockscreen
 # create new image
 Add-Type -AssemblyName System.Windows.Forms
 $screenWidth = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Width
@@ -2441,7 +2441,8 @@ Start-Process explorer
 
 
 #OneDrive FileExplorer pin remove
-winget uninstall OneDriveSetup.exe
+winget uninstall OneDriveSetup.exe 
+
 
 Clear-Host
 $progresspreference = 'silentlycontinue'
@@ -2824,7 +2825,7 @@ Start-Process -FilePath "regedit.exe" -ArgumentList "/s $regFilePath" -Wait
 Remove-Item $regFilePath
 }
 
-Write-Host ""
+Write-Host "Adding Powershell context menus"
 $menu = 'Open Windows PowerShell Here as Administrator'
 $command = "$PSHOMEpowershell.exe -NoExit -NoProfile -Command ""Set-Location '%V'"""
 
