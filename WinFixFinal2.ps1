@@ -2418,6 +2418,8 @@ Write-Host "Set Lockscreen to black"
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "UseCompactMode" /t REG_DWORD /d "1" /f | Out-Null
 Clear-Host
 
+
+
 #OneDrive FileExplorer pin remove
 winget uninstall OneDriveSetup.exe
 
@@ -2592,7 +2594,7 @@ Timeout /T 1 | Out-Null
 
 Clear-Host
 $progresspreference = 'silentlycontinue'
-Write-Host "Installing: Store. Please wait . . ."
+Write-Host "Installing: Store and Calculator . . ."
 # install store and calculator
 Get-AppXPackage -AllUsers *Microsoft.WindowsStore* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Get-AppXPackage -AllUsers *Microsoft.Microsoft.StorePurchaseApp * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
@@ -2625,7 +2627,7 @@ Disable-NetAdapterBinding -Name "*" -ComponentID ms_msclient -ErrorAction Silent
 Disable-NetAdapterBinding -Name "*" -ComponentID ms_pacer -ErrorAction SilentlyContinue
 
 Clear-Host
-Write-Host "Set Cloudflare DNS servers for adapter"
+Write-Host "Set Cloudflare DNS servers for adapter..."
 $progresspreference = 'silentlycontinue'
 Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ("1.1.1.1","1.0.0.1")
 Set-DnsClientServerAddress -InterfaceAlias "Wi-fi" -ServerAddresses ("1.1.1.1","1.0.0.1")
@@ -2855,6 +2857,50 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Drive\shell\runas\command]
 @="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c"
 "IsolatedCommand"="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c"
+"@
+
+
+#Add context menu Open Powershell as Administrator to right click
+$regContent = @"
+
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\PowerShellAsAdmin]
+@="Open PowerShell window here as administrator"
+"Extended"=""
+"HasLUAShield"=""
+"Icon"="powershell.exe"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shell\PowerShellAsAdmin\command]
+@="cmd /c reg add hkcu\\software\\_dir /d \"%v\" /f & start powershell -WindowS H -noP -c Start-Process -v RunAs powershell.exe '-noL -noE -c cd -literalP (gp hkcu:\\software\\_dir).\\\"\\\"\\\"(default)\\\"\\\"\\\"; ri hkcu:\\software\\_dir'"
+
+
+[HKEY_CLASSES_ROOT\Directory\shell\PowerShellAsAdmin]
+@="Open PowerShell window here as administrator"
+"Extended"=""
+"HasLUAShield"=""
+"Icon"="powershell.exe"
+
+[HKEY_CLASSES_ROOT\Directory\shell\PowerShellAsAdmin\command]
+@="cmd /c reg add hkcu\\software\\_dir /d \"%v\" /f & start powershell -WindowS H -noP -c Start-Process -v RunAs powershell.exe '-noL -noE -c cd -literalP (gp hkcu:\\software\\_dir).\\\"\\\"\\\"(default)\\\"\\\"\\\"; ri hkcu:\\software\\_dir'"
+
+
+[HKEY_CLASSES_ROOT\Drive\shell\PowerShellAsAdmin]
+@="Open PowerShell window here as administrator"
+"Extended"=""
+"HasLUAShield"=""
+"Icon"="powershell.exe"
+
+[HKEY_CLASSES_ROOT\Drive\shell\PowerShellAsAdmin\command]
+@="cmd /c reg add hkcu\\software\\_dir /d \"%v\" /f & start powershell -WindowS H -noP -c Start-Process -v RunAs powershell.exe '-noL -noE -c cd -literalP (gp hkcu:\\software\\_dir).\\\"\\\"\\\"(default)\\\"\\\"\\\"; ri hkcu:\\software\\_dir'"
+
+
+[-HKEY_CLASSES_ROOT\LibraryFolder\Background\shell\PowerShellAsAdmin]
+
+
+; To allow mapped drives to be available in elevated PowerShell
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
+"EnableLinkedConnections"=dword:00000001
 "@
 
 # Write the registry content to a temporary file
