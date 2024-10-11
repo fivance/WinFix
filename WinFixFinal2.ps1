@@ -1212,7 +1212,7 @@ Set-Service -Name "Set Timer Resolution Service" -StartupType Auto -ErrorAction 
 Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction SilentlyContinue | Out-Null
 # start taskmanager
 Start-Process taskmgr.exe
-exit
+
 
 
 
