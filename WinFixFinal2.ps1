@@ -66,12 +66,30 @@ show-menu
 $choice = Read-Host "Please select an option:"
 
 switch ($choice) {
-    
-
 
 0 {
+
+    # Check if winget is installed by attempting to get the path
+$wingetPath = (Get-Command winget -ErrorAction SilentlyContinue).Path
+
+if ($wingetPath) {
+    Write-Host "winget is already installed at: $wingetPath"
+} else {
+    Write-Host "winget is not installed."
+
+    # winget is part of the App Installer package from the Microsoft Store
+    # Prompt the user to install it
+    Write-Host "Installing winget (App Installer) from the Microsoft Store..."
+
+    # Open Microsoft Store to the App Installer page for user to install
+    Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4NNS1"
+    
+    Write-Host "Please install 'App Installer' from the Microsoft Store to use winget."
+}
+
+
     Write-Host "Installing Apps..."
-$apps = @(
+  $apps = @(
     @{name = "7zip.7zip"},
     @{name = "Google.Chrome"},
     @{name = "Brave.Brave"},
