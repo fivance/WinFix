@@ -2881,7 +2881,7 @@ $regContent = @"
 Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\Directory\Background\shell\PowerShellAsAdmin]
-@="Open PowerShell window here as administrator"
+@="Open Powershell(admin)"
 "Extended"=""
 "HasLUAShield"=""
 "Icon"="powershell.exe"
@@ -2891,7 +2891,7 @@ Windows Registry Editor Version 5.00
 
 
 [HKEY_CLASSES_ROOT\Directory\shell\PowerShellAsAdmin]
-@="Open PowerShell window here as administrator"
+@="Open Powershell(admin)"
 "Extended"=""
 "HasLUAShield"=""
 "Icon"="powershell.exe"
@@ -2901,7 +2901,7 @@ Windows Registry Editor Version 5.00
 
 
 [HKEY_CLASSES_ROOT\Drive\shell\PowerShellAsAdmin]
-@="Open PowerShell window here as administrator"
+@="Open Powershell(admin)"
 "Extended"=""
 "HasLUAShield"=""
 "Icon"="powershell.exe"
