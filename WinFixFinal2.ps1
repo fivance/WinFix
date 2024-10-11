@@ -2403,13 +2403,13 @@ Clear-Host
 # black lockscreen
 # create new image
 Add-Type -AssemblyName System.Windows.Forms
-$screenWidth = [System.Windows.Forms.SystemInformation]#PrimaryMonitorSize.Width
-$screenHeight = [System.Windows.Forms.SystemInformation]#PrimaryMonitorSize.Height
+$screenWidth = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Width
+$screenHeight = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Height
 Add-Type -AssemblyName System.Drawing
 $file = "C:\Windows\Black.jpg"
 $edit = New-Object System.Drawing.Bitmap $screenWidth, $screenHeight
-$color = [System.Drawing.Brushes]#Black
-$graphics = [System.Drawing.Graphics]#FromImage($edit)
+$color = [System.Drawing.Brushes]::Black
+$graphics = [System.Drawing.Graphics]::FromImage($edit)
 $graphics.FillRectangle($color, 0, 0, $edit.Width, $edit.Height)
 $graphics.Dispose()
 $edit.Save($file)
