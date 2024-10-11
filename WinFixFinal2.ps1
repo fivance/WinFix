@@ -1,65 +1,65 @@
-  If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
-    {Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
-    Exit}
-    $Host.UI.RawUI.WindowTitle = $myInvocation.MyCommand.Definition + " (Administrator)"
-    $Host.UI.RawUI.BackgroundColor = "Black"
-	$Host.PrivateData.ProgressBackgroundColor = "Black"
-    $Host.PrivateData.ProgressForegroundColor = "White"
-    Clear-Host
+If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
+{Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
+Exit}
+$Host.UI.RawUI.WindowTitle = $myInvocation.MyCommand.Definition + " (Administrator)"
+$Host.UI.RawUI.BackgroundColor = "Black"
+$Host.PrivateData.ProgressBackgroundColor = "Black"
+$Host.PrivateData.ProgressForegroundColor = "White"
+Clear-Host
 
 
-    function Get-FileFromWeb {
-    param ([Parameter(Mandatory)][string]$URL, [Parameter(Mandatory)][string]$File)
-    function Show-Progress {
-    param ([Parameter(Mandatory)][Single]$TotalValue, [Parameter(Mandatory)][Single]$CurrentValue, [Parameter(Mandatory)][string]$ProgressText, [Parameter()][int]$BarSize = 10, [Parameter()][switch]$Complete)
-    $percent = $CurrentValue / $TotalValue
-    $percentComplete = $percent * 100
-    if ($psISE) { Write-Progress "$ProgressText" -id 0 -percentComplete $percentComplete }
-    else { Write-Host -NoNewLine "`r$ProgressText $(''.PadRight($BarSize * $percent, [char]9608).PadRight($BarSize, [char]9617)) $($percentComplete.ToString('##0.00').PadLeft(6)) % " }
-    }
-    try {
-    $request = [System.Net.HttpWebRequest]::Create($URL)
-    $response = $request.GetResponse()
-    if ($response.StatusCode -eq 401 -or $response.StatusCode -eq 403 -or $response.StatusCode -eq 404) { throw "Remote file either doesn't exist, is unauthorized, or is forbidden for '$URL'." }
-    if ($File -match '^\.\\') { $File = Join-Path (Get-Location -PSProvider 'FileSystem') ($File -Split '^\.')[1] }
-    if ($File -and !(Split-Path $File)) { $File = Join-Path (Get-Location -PSProvider 'FileSystem') $File }
-    if ($File) { $fileDirectory = $([System.IO.Path]::GetDirectoryName($File)); if (!(Test-Path($fileDirectory))) { [System.IO.Directory]::CreateDirectory($fileDirectory) | Out-Null } }
-    [long]$fullSize = $response.ContentLength
-    [byte[]]$buffer = new-object byte[] 1048576
-    [long]$total = [long]$count = 0
-    $reader = $response.GetResponseStream()
-    $writer = new-object System.IO.FileStream $File, 'Create'
-    do {
-    $count = $reader.Read($buffer, 0, $buffer.Length)
-    $writer.Write($buffer, 0, $count)
-    $total += $count
-    if ($fullSize -gt 0) { Show-Progress -TotalValue $fullSize -CurrentValue $total -ProgressText " $($File.Name)" }
-    } while ($count -gt 0)
-    }
-    finally {
-    $reader.Close()
-    $writer.Close()
-    }
-    }
+function Get-FileFromWeb {
+param ([Parameter(Mandatory)][string]$URL, [Parameter(Mandatory)][string]$File)
+function Show-Progress {
+param ([Parameter(Mandatory)][Single]$TotalValue, [Parameter(Mandatory)][Single]$CurrentValue, [Parameter(Mandatory)][string]$ProgressText, [Parameter()][int]$BarSize = 10, [Parameter()][switch]$Complete)
+$percent = $CurrentValue / $TotalValue
+$percentComplete = $percent * 100
+if ($psISE) { Write-Progress "$ProgressText" -id 0 -percentComplete $percentComplete }
+else { Write-Host -NoNewLine "`r$ProgressText $(''.PadRight($BarSize * $percent, [char]9608).PadRight($BarSize, [char]9617)) $($percentComplete.ToString('##0.00').PadLeft(6)) % " }
+}
+try {
+$request = [System.Net.HttpWebRequest]::Create($URL)
+$response = $request.GetResponse()
+if ($response.StatusCode -eq 401 -or $response.StatusCode -eq 403 -or $response.StatusCode -eq 404) { throw "Remote file either doesn't exist, is unauthorized, or is forbidden for '$URL'." }
+if ($File -match '^\.\\') { $File = Join-Path (Get-Location -PSProvider 'FileSystem') ($File -Split '^\.')[1] }
+if ($File -and !(Split-Path $File)) { $File = Join-Path (Get-Location -PSProvider 'FileSystem') $File }
+if ($File) { $fileDirectory = $([System.IO.Path]::GetDirectoryName($File)); if (!(Test-Path($fileDirectory))) { [System.IO.Directory]::CreateDirectory($fileDirectory) | Out-Null } }
+[long]$fullSize = $response.ContentLength
+[byte[]]$buffer = new-object byte[] 1048576
+[long]$total = [long]$count = 0
+$reader = $response.GetResponseStream()
+$writer = new-object System.IO.FileStream $File, 'Create'
+do {
+$count = $reader.Read($buffer, 0, $buffer.Length)
+$writer.Write($buffer, 0, $count)
+$total += $count
+if ($fullSize -gt 0) { Show-Progress -TotalValue $fullSize -CurrentValue $total -ProgressText " $($File.Name)" }
+} while ($count -gt 0)
+}
+finally {
+$reader.Close()
+$writer.Close()
+}
+}
 
- (Invoke-WebRequest "https://raw.githubusercontent.com/lptstr/winfetch/master/winfetch.ps1" -UseBasicParsing).Content.Remove(0,1) | Invoke-Expression
+(Invoke-WebRequest "https://raw.githubusercontent.com/lptstr/winfetch/master/winfetch.ps1" -UseBasicParsing).Content.Remove(0,1) | Invoke-Expression
+
+Write-Host "Press Enter to continue"  
+Read-Host
+
+function show-menu {
  
- Write-Host "Press Enter to continue"  
- Read-Host
-
-  function show-menu {
-	   
-  Write-Host " 0. Winget app install"   
-  Write-Host " 1. CTT Winutil"
-  Write-Host " 2. Clean graphics driver - DDU"
-  Write-Host " 3. Install NVIDIA Driver"
-	Write-Host " 4. Apply NVIDIA settings"
-  Write-Host " 5. Optimization script"
-	Write-Host " 6. Extra tweaks"
-  Write-Host " 7. Disable MS Defender"
-  Write-Host " 8. Experimental Services tweak"
-  Write-Host " 9. Exit"
-		              }
+Write-Host " 0. Winget app install"   
+Write-Host " 1. CTT Winutil"
+Write-Host " 2. Clean graphics driver - DDU"
+Write-Host " 3. Install NVIDIA Driver"
+Write-Host " 4. Apply NVIDIA settings"
+Write-Host " 5. Optimization script"
+Write-Host " 6. Extra tweaks"
+Write-Host " 7. Disable MS Defender"
+Write-Host " 8. Experimental Services tweak"
+Write-Host " 9. Exit"
+              }
 
 while ($true) {
 show-menu
@@ -69,81 +69,81 @@ switch ($choice) {
 
 0 {
 
-    # Check if winget is installed by attempting to get the path
+# Check if winget is installed by attempting to get the path
 $wingetPath = (Get-Command winget -ErrorAction SilentlyContinue).Path
 
 if ($wingetPath) {
-    Write-Host "winget is already installed at: $wingetPath"
+Write-Host "winget is already installed at: $wingetPath"
 } else {
-    Write-Host "winget is not installed."
+Write-Host "winget is not installed."
 
-    # winget is part of the App Installer package from the Microsoft Store
-    # Prompt the user to install it
-    Write-Host "Installing winget (App Installer) from the Microsoft Store..."
+# winget is part of the App Installer package from the Microsoft Store
+# Prompt the user to install it
+Write-Host "Installing winget (App Installer) from the Microsoft Store..."
 
-    # Open Microsoft Store to the App Installer page for user to install
-    Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4NNS1"
-    
-    Write-Host "Please install 'App Installer' from the Microsoft Store to use winget."
+# Open Microsoft Store to the App Installer page for user to install
+Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4NNS1"
+
+Write-Host "Please install 'App Installer' from the Microsoft Store to use winget."
 }
 
 
-    Write-Host "Installing Apps..."
-  $apps = @(
-    @{name = "7zip.7zip"},
-    @{name = "Google.Chrome"},
-    @{name = "Brave.Brave"},
-    @{name = "Mozilla.Firefox"},
-    @{name = "SublimeHQ.SublimeText.4"},
-    @{name = "Notepad++.Notepad++"},
-    @{name = "Microsoft.VisualStudioCode"},
-    @{name = "Devolutions.RemoteDesktopManager"},
-    @{name = "Skillbrains.Lightshot"},
-    @{name = "voidtools.Everything.Alpha"},
-    @{name = "Ditto.Ditto"},
-    @{name = "BitSum.ProcessLasso"},
-    @{name = "AntibodySoftware.WizTree"},
-    @{name = "Termius.Termius"},
-    @{name = "Ghisler.TotalCommander"},
-    @{name = "Famatech.AdvancedIPScanner"},
-    @{name = "WiresharkFoundation.Wireshark"},
-    @{name = "GeekUninstaller.GeekUninstaller"},
-    @{name = "VideoLAN.VLC"},
-    @{name = "TeamSpeakSystems.TeamSpeakClient"},
-    @{name = "Discord.Discord"},
-    @{name = "Valve.Steam"},
-    @{name = "Rainmeter.Rainmeter"}
+Write-Host "Installing Apps..."
+$apps = @(
+@{name = "7zip.7zip"},
+@{name = "Google.Chrome"},
+@{name = "Brave.Brave"},
+@{name = "Mozilla.Firefox"},
+@{name = "SublimeHQ.SublimeText.4"},
+@{name = "Notepad++.Notepad++"},
+@{name = "Microsoft.VisualStudioCode"},
+@{name = "Devolutions.RemoteDesktopManager"},
+@{name = "Skillbrains.Lightshot"},
+@{name = "voidtools.Everything.Alpha"},
+@{name = "Ditto.Ditto"},
+@{name = "BitSum.ProcessLasso"},
+@{name = "AntibodySoftware.WizTree"},
+@{name = "Termius.Termius"},
+@{name = "Ghisler.TotalCommander"},
+@{name = "Famatech.AdvancedIPScanner"},
+@{name = "WiresharkFoundation.Wireshark"},
+@{name = "GeekUninstaller.GeekUninstaller"},
+@{name = "VideoLAN.VLC"},
+@{name = "TeamSpeakSystems.TeamSpeakClient"},
+@{name = "Discord.Discord"},
+@{name = "Valve.Steam"},
+@{name = "Rainmeter.Rainmeter"}
 )
 
 # Get the list of installed apps once at the beginning
 $installedApps = winget list | Select-Object -Skip 1 | ForEach-Object {
-    $columns = $_ -split '\s{2,}'  # Split by two or more spaces
-    @{ id = $columns[0]; name = $columns[1] }
+$columns = $_ -split '\s{2,}'  # Split by two or more spaces
+@{ id = $columns[0]; name = $columns[1] }
 }
 
 foreach ($app in $apps) {
-    $isInstalled = $installedApps | Where-Object { $_.id -eq $app.name -or $_.name -eq $app.name }
+$isInstalled = $installedApps | Where-Object { $_.id -eq $app.name -or $_.name -eq $app.name }
 
-    if (-not $isInstalled) {
-        Write-Output "Installing: $($app.name)"
-        try {
-            winget install -e --accept-source-agreements --accept-package-agreements --id $app.name
-        } catch {
-            Write-Output "Failed to install: $($app.name) - $_"
-        }
-    } else {
-        Write-Output "Skipping: $($app.name) (already installed)"
+if (-not $isInstalled) {
+    Write-Output "Installing: $($app.name)"
+    try {
+        winget install -e --accept-source-agreements --accept-package-agreements --id $app.name
+    } catch {
+        Write-Output "Failed to install: $($app.name) - $_"
     }
+} else {
+    Write-Output "Skipping: $($app.name) (already installed)"
+}
 }}
 
 
-  1 {
-      start powershell {irm christitus.com/win | iex}
+1 {
+  start powershell {irm christitus.com/win | iex}
 
-    }
+}
 
-  2 { 
-      Write-Host "Installing: DDU . . ."
+2 { 
+  Write-Host "Installing: DDU . . ."
 # download DDU
 Get-FileFromWeb -URL "https://github.com/FR33THYFR33THY/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
 # extract files
@@ -152,32 +152,32 @@ Expand-Archive "$env:TEMP\DDU.zip" -DestinationPath "$env:TEMP\DDU" -ErrorAction
 $MultilineComment = @"
 <?xml version="1.0" encoding="utf-8"?>
 <DisplayDriverUninstaller Version="18.0.7.8">
-  <Settings>
-    <SelectedLanguage>en-US</SelectedLanguage>
-    <RemoveMonitors>True</RemoveMonitors>
-    <RemoveCrimsonCache>True</RemoveCrimsonCache>
-    <RemoveAMDDirs>True</RemoveAMDDirs>
-    <RemoveAudioBus>True</RemoveAudioBus>
-    <RemoveAMDKMPFD>True</RemoveAMDKMPFD>
-    <RemoveNvidiaDirs>True</RemoveNvidiaDirs>
-    <RemovePhysX>True</RemovePhysX>
-    <Remove3DTVPlay>True</Remove3DTVPlay>
-    <RemoveGFE>True</RemoveGFE>
-    <RemoveNVBROADCAST>True</RemoveNVBROADCAST>
-    <RemoveNVCP>True</RemoveNVCP>
-    <RemoveINTELCP>True</RemoveINTELCP>
-    <RemoveAMDCP>True</RemoveAMDCP>
-    <UseRoamingConfig>False</UseRoamingConfig>
-    <CheckUpdates>False</CheckUpdates>
-    <CreateRestorePoint>False</CreateRestorePoint>
-    <SaveLogs>False</SaveLogs>
-    <RemoveVulkan>False</RemoveVulkan>
-    <ShowOffer>False</ShowOffer>
-    <EnableSafeModeDialog>False</EnableSafeModeDialog>
-    <PreventWinUpdate>True</PreventWinUpdate>
-    <UsedBCD>False</UsedBCD>
-    <KeepNVCPopt>False</KeepNVCPopt>
-  </Settings>
+<Settings>
+<SelectedLanguage>en-US</SelectedLanguage>
+<RemoveMonitors>True</RemoveMonitors>
+<RemoveCrimsonCache>True</RemoveCrimsonCache>
+<RemoveAMDDirs>True</RemoveAMDDirs>
+<RemoveAudioBus>True</RemoveAudioBus>
+<RemoveAMDKMPFD>True</RemoveAMDKMPFD>
+<RemoveNvidiaDirs>True</RemoveNvidiaDirs>
+<RemovePhysX>True</RemovePhysX>
+<Remove3DTVPlay>True</Remove3DTVPlay>
+<RemoveGFE>True</RemoveGFE>
+<RemoveNVBROADCAST>True</RemoveNVBROADCAST>
+<RemoveNVCP>True</RemoveNVCP>
+<RemoveINTELCP>True</RemoveINTELCP>
+<RemoveAMDCP>True</RemoveAMDCP>
+<UseRoamingConfig>False</UseRoamingConfig>
+<CheckUpdates>False</CheckUpdates>
+<CreateRestorePoint>False</CreateRestorePoint>
+<SaveLogs>False</SaveLogs>
+<RemoveVulkan>False</RemoveVulkan>
+<ShowOffer>False</ShowOffer>
+<EnableSafeModeDialog>False</EnableSafeModeDialog>
+<PreventWinUpdate>True</PreventWinUpdate>
+<UsedBCD>False</UsedBCD>
+<KeepNVCPopt>False</KeepNVCPopt>
+</Settings>
 </DisplayDriverUninstaller>
 "@
 Set-Content -Path "$env:TEMP\DDU\Settings\Settings.xml" -Value $MultilineComment -Force
@@ -202,10 +202,10 @@ $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
 # restart
 shutdown -r -t 00
-    }
+}
 
-  3 {
-      Clear-Host
+3 {
+  Clear-Host
 # clean old files
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver" -ErrorAction SilentlyContinue | Out-Null
@@ -233,10 +233,10 @@ Start-Process -wait "$env:TEMP\7-Zip.exe" /S
 cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\NvidiaDriver.exe" -o"$env:TEMP\NvidiaDriver" -y | Out-Null
 # install nvidia driver
 Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
-    }
+}
 
-  4 {
-      Clear-Host
+4 {
+  Clear-Host
 Write-Host "Installing: NvidiaProfileInspector . . ."
 # download inspector
 Get-FileFromWeb -URL "https://github.com/FR33THYFR33THY/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
@@ -246,198 +246,198 @@ Expand-Archive "$env:TEMP\Inspector.zip" -DestinationPath "$env:TEMP\Inspector" 
 $MultilineComment = @"
 <?xml version="1.0" encoding="utf-16"?>
 <ArrayOfProfile>
-  <Profile>
-    <ProfileName>Base Profile</ProfileName>
-    <Executeables />
-    <Settings>
-      <ProfileSetting>
-        <SettingNameInfo> </SettingNameInfo>
-        <SettingID>390467</SettingID>
-        <SettingValue>2</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Texture filtering - Negative LOD bias</SettingNameInfo>
-        <SettingID>1686376</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Texture filtering - Trilinear optimization</SettingNameInfo>
-        <SettingID>3066610</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Vertical Sync Tear Control</SettingNameInfo>
-        <SettingID>5912412</SettingID>
-        <SettingValue>2525368439</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Preferred refresh rate</SettingNameInfo>
-        <SettingID>6600001</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Maximum pre-rendered frames</SettingNameInfo>
-        <SettingID>8102046</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Texture filtering - Anisotropic filter optimization</SettingNameInfo>
-        <SettingID>8703344</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Vertical Sync</SettingNameInfo>
-        <SettingID>11041231</SettingID>
-        <SettingValue>138504007</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Shader disk cache maximum size</SettingNameInfo>
-        <SettingID>11306135</SettingID>
-        <SettingValue>4294967295</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Texture filtering - Quality</SettingNameInfo>
-        <SettingID>13510289</SettingID>
-        <SettingValue>20</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Texture filtering - Anisotropic sample optimization</SettingNameInfo>
-        <SettingID>15151633</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Display the VRR Indicator</SettingNameInfo>
-        <SettingID>268604728</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Flag to control smooth AFR behavior</SettingNameInfo>
-        <SettingID>270198627</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Anisotropic filtering setting</SettingNameInfo>
-        <SettingID>270426537</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Power management mode</SettingNameInfo>
-        <SettingID>274197361</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Antialiasing - Gamma correction</SettingNameInfo>
-        <SettingID>276652957</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Antialiasing - Mode</SettingNameInfo>
-        <SettingID>276757595</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>FRL Low Latency</SettingNameInfo>
-        <SettingID>277041152</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Frame Rate Limiter</SettingNameInfo>
-        <SettingID>277041154</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Frame Rate Limiter for NVCPL</SettingNameInfo>
-        <SettingID>277041162</SettingID>
-        <SettingValue>357</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Toggle the VRR global feature</SettingNameInfo>
-        <SettingID>278196567</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>VRR requested state</SettingNameInfo>
-        <SettingID>278196727</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>G-SYNC</SettingNameInfo>
-        <SettingID>279476687</SettingID>
-        <SettingValue>4</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Anisotropic filtering mode</SettingNameInfo>
-        <SettingID>282245910</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Antialiasing - Setting</SettingNameInfo>
-        <SettingID>282555346</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>CUDA Sysmem Fallback Policy</SettingNameInfo>
-        <SettingID>283962569</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Enable G-SYNC globally</SettingNameInfo>
-        <SettingID>294973784</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>OpenGL GDI compatibility</SettingNameInfo>
-        <SettingID>544392611</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Threaded optimization</SettingNameInfo>
-        <SettingID>549528094</SettingID>
-        <SettingValue>1</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Preferred OpenGL GPU</SettingNameInfo>
-        <SettingID>550564838</SettingID>
-        <SettingValue>id,2.0:268410DE,00000100,GF - (400,2,161,24564) @ (0)</SettingValue>
-        <ValueType>String</ValueType>
-      </ProfileSetting>
-      <ProfileSetting>
-        <SettingNameInfo>Vulkan/OpenGL present method</SettingNameInfo>
-        <SettingID>550932728</SettingID>
-        <SettingValue>0</SettingValue>
-        <ValueType>Dword</ValueType>
-      </ProfileSetting>
-    </Settings>
-  </Profile>
+<Profile>
+<ProfileName>Base Profile</ProfileName>
+<Executeables />
+<Settings>
+  <ProfileSetting>
+    <SettingNameInfo> </SettingNameInfo>
+    <SettingID>390467</SettingID>
+    <SettingValue>2</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Texture filtering - Negative LOD bias</SettingNameInfo>
+    <SettingID>1686376</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Texture filtering - Trilinear optimization</SettingNameInfo>
+    <SettingID>3066610</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Vertical Sync Tear Control</SettingNameInfo>
+    <SettingID>5912412</SettingID>
+    <SettingValue>2525368439</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Preferred refresh rate</SettingNameInfo>
+    <SettingID>6600001</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Maximum pre-rendered frames</SettingNameInfo>
+    <SettingID>8102046</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Texture filtering - Anisotropic filter optimization</SettingNameInfo>
+    <SettingID>8703344</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Vertical Sync</SettingNameInfo>
+    <SettingID>11041231</SettingID>
+    <SettingValue>138504007</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Shader disk cache maximum size</SettingNameInfo>
+    <SettingID>11306135</SettingID>
+    <SettingValue>4294967295</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Texture filtering - Quality</SettingNameInfo>
+    <SettingID>13510289</SettingID>
+    <SettingValue>20</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Texture filtering - Anisotropic sample optimization</SettingNameInfo>
+    <SettingID>15151633</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Display the VRR Indicator</SettingNameInfo>
+    <SettingID>268604728</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Flag to control smooth AFR behavior</SettingNameInfo>
+    <SettingID>270198627</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Anisotropic filtering setting</SettingNameInfo>
+    <SettingID>270426537</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Power management mode</SettingNameInfo>
+    <SettingID>274197361</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Antialiasing - Gamma correction</SettingNameInfo>
+    <SettingID>276652957</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Antialiasing - Mode</SettingNameInfo>
+    <SettingID>276757595</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>FRL Low Latency</SettingNameInfo>
+    <SettingID>277041152</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Frame Rate Limiter</SettingNameInfo>
+    <SettingID>277041154</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Frame Rate Limiter for NVCPL</SettingNameInfo>
+    <SettingID>277041162</SettingID>
+    <SettingValue>357</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Toggle the VRR global feature</SettingNameInfo>
+    <SettingID>278196567</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>VRR requested state</SettingNameInfo>
+    <SettingID>278196727</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>G-SYNC</SettingNameInfo>
+    <SettingID>279476687</SettingID>
+    <SettingValue>4</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Anisotropic filtering mode</SettingNameInfo>
+    <SettingID>282245910</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Antialiasing - Setting</SettingNameInfo>
+    <SettingID>282555346</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>CUDA Sysmem Fallback Policy</SettingNameInfo>
+    <SettingID>283962569</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Enable G-SYNC globally</SettingNameInfo>
+    <SettingID>294973784</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>OpenGL GDI compatibility</SettingNameInfo>
+    <SettingID>544392611</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Threaded optimization</SettingNameInfo>
+    <SettingID>549528094</SettingID>
+    <SettingValue>1</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Preferred OpenGL GPU</SettingNameInfo>
+    <SettingID>550564838</SettingID>
+    <SettingValue>id,2.0:268410DE,00000100,GF - (400,2,161,24564) @ (0)</SettingValue>
+    <ValueType>String</ValueType>
+  </ProfileSetting>
+  <ProfileSetting>
+    <SettingNameInfo>Vulkan/OpenGL present method</SettingNameInfo>
+    <SettingID>550932728</SettingID>
+    <SettingValue>0</SettingValue>
+    <ValueType>Dword</ValueType>
+  </ProfileSetting>
+</Settings>
+</Profile>
 </ArrayOfProfile>
 "@
 Set-Content -Path "$env:TEMP\Inspector\Inspector.nip" -Value $MultilineComment -Force
@@ -446,9 +446,9 @@ Start-Process -wait "$env:TEMP\Inspector\nvidiaProfileInspector.exe" -ArgumentLi
 # open nvidiacontrolpanel
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 Wait
-    }  
-  5 {
-      Write-Host "Installing: Direct X . . ."
+}  
+5 {
+  Write-Host "Installing: Direct X . . ."
 # download direct x
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
 # download 7zip
@@ -540,23 +540,23 @@ Windows Registry Editor Version 5.00
 ; pin file explorer to taskbar
 [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Taskband]
 "Favorites"=hex:00,aa,01,00,00,3a,00,1f,80,c8,27,34,1f,10,5c,10,42,aa,03,2e,e4,\
-  52,87,d6,68,26,00,01,00,26,00,ef,be,10,00,00,00,f4,7e,76,fa,de,9d,da,01,40,\
-  61,5d,09,df,9d,da,01,19,b8,5f,09,df,9d,da,01,14,00,56,00,31,00,00,00,00,00,\
-  a4,58,a9,26,10,00,54,61,73,6b,42,61,72,00,40,00,09,00,04,00,ef,be,a4,58,a9,\
-  26,a4,58,a9,26,2e,00,00,00,de,9c,01,00,00,00,02,00,00,00,00,00,00,00,00,00,\
-  00,00,00,00,00,00,0c,f4,85,00,54,00,61,00,73,00,6b,00,42,00,61,00,72,00,00,\
-  00,16,00,18,01,32,00,8a,04,00,00,a4,58,b6,26,20,00,46,49,4c,45,45,58,7e,31,\
-  2e,4c,4e,4b,00,00,54,00,09,00,04,00,ef,be,a4,58,b6,26,a4,58,b6,26,2e,00,00,\
-  00,b7,a8,01,00,00,00,04,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,c0,5a,\
-  1e,01,46,00,69,00,6c,00,65,00,20,00,45,00,78,00,70,00,6c,00,6f,00,72,00,65,\
-  00,72,00,2e,00,6c,00,6e,00,6b,00,00,00,1c,00,22,00,00,00,1e,00,ef,be,02,00,\
-  55,00,73,00,65,00,72,00,50,00,69,00,6e,00,6e,00,65,00,64,00,00,00,1c,00,12,\
-  00,00,00,2b,00,ef,be,19,b8,5f,09,df,9d,da,01,1c,00,74,00,00,00,1d,00,ef,be,\
-  02,00,7b,00,46,00,33,00,38,00,42,00,46,00,34,00,30,00,34,00,2d,00,31,00,44,\
-  00,34,00,33,00,2d,00,34,00,32,00,46,00,32,00,2d,00,39,00,33,00,30,00,35,00,\
-  2d,00,36,00,37,00,44,00,45,00,30,00,42,00,32,00,38,00,46,00,43,00,32,00,33,\
-  00,7d,00,5c,00,65,00,78,00,70,00,6c,00,6f,00,72,00,65,00,72,00,2e,00,65,00,\
-  78,00,65,00,00,00,1c,00,00,00,ff
+52,87,d6,68,26,00,01,00,26,00,ef,be,10,00,00,00,f4,7e,76,fa,de,9d,da,01,40,\
+61,5d,09,df,9d,da,01,19,b8,5f,09,df,9d,da,01,14,00,56,00,31,00,00,00,00,00,\
+a4,58,a9,26,10,00,54,61,73,6b,42,61,72,00,40,00,09,00,04,00,ef,be,a4,58,a9,\
+26,a4,58,a9,26,2e,00,00,00,de,9c,01,00,00,00,02,00,00,00,00,00,00,00,00,00,\
+00,00,00,00,00,00,0c,f4,85,00,54,00,61,00,73,00,6b,00,42,00,61,00,72,00,00,\
+00,16,00,18,01,32,00,8a,04,00,00,a4,58,b6,26,20,00,46,49,4c,45,45,58,7e,31,\
+2e,4c,4e,4b,00,00,54,00,09,00,04,00,ef,be,a4,58,b6,26,a4,58,b6,26,2e,00,00,\
+00,b7,a8,01,00,00,00,04,00,00,00,00,00,00,00,00,00,00,00,00,00,00,00,c0,5a,\
+1e,01,46,00,69,00,6c,00,65,00,20,00,45,00,78,00,70,00,6c,00,6f,00,72,00,65,\
+00,72,00,2e,00,6c,00,6e,00,6b,00,00,00,1c,00,22,00,00,00,1e,00,ef,be,02,00,\
+55,00,73,00,65,00,72,00,50,00,69,00,6e,00,6e,00,65,00,64,00,00,00,1c,00,12,\
+00,00,00,2b,00,ef,be,19,b8,5f,09,df,9d,da,01,1c,00,74,00,00,00,1d,00,ef,be,\
+02,00,7b,00,46,00,33,00,38,00,42,00,46,00,34,00,30,00,34,00,2d,00,31,00,44,\
+00,34,00,33,00,2d,00,34,00,32,00,46,00,32,00,2d,00,39,00,33,00,30,00,35,00,\
+2d,00,36,00,37,00,44,00,45,00,30,00,42,00,32,00,38,00,46,00,43,00,32,00,33,\
+00,7d,00,5c,00,65,00,78,00,70,00,6c,00,6f,00,72,00,65,00,72,00,2e,00,65,00,\
+78,00,65,00,00,00,1c,00,00,00,ff
 
 ; remove windows widgets from taskbar
 [HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Dsh]
@@ -755,12 +755,12 @@ Remove-Item -Recurse -Force "$env:SystemDrive\Windows\StartMenuLayout.xml" -Erro
 # create startmenulayout.xml
 $MultilineComment = @"
 <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
-    <LayoutOptions StartTileGroupCellWidth="6" />
-    <DefaultLayoutOverride>
-        <StartLayoutCollection>
-            <defaultlayout:StartLayout GroupCellWidth="6" />
-        </StartLayoutCollection>
-    </DefaultLayoutOverride>
+<LayoutOptions StartTileGroupCellWidth="6" />
+<DefaultLayoutOverride>
+    <StartLayoutCollection>
+        <defaultlayout:StartLayout GroupCellWidth="6" />
+    </StartLayoutCollection>
+</DefaultLayoutOverride>
 </LayoutModificationTemplate>
 "@
 Set-Content -Path "C:\Windows\StartMenuLayout.xml" -Value $MultilineComment -Force -Encoding ASCII
@@ -1002,7 +1002,6 @@ powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41a
 # open settings
 Start-Process powercfg.cpl
 Clear-Host
-Clear-Host
 Write-Host "Installing: Set Timer Resolution Service . . ."
 # create .cs file
 $MultilineComment = @"
@@ -1021,185 +1020,185 @@ using System.Diagnostics;
 [assembly: AssemblyProduct("Set Timer Resolution service")]
 namespace WindowsService
 {
-    class WindowsService : ServiceBase
+class WindowsService : ServiceBase
+{
+    public WindowsService()
     {
-        public WindowsService()
-        {
-            this.ServiceName = "STR";
-            this.EventLog.Log = "Application";
-            this.CanStop = true;
-            this.CanHandlePowerEvent = false;
-            this.CanHandleSessionChangeEvent = false;
-            this.CanPauseAndContinue = false;
-            this.CanShutdown = false;
-        }
-        static void Main()
-        {
-            ServiceBase.Run(new WindowsService());
-        }
-        protected override void OnStart(string[] args)
-        {
-            base.OnStart(args);
-            ReadProcessList();
-            NtQueryTimerResolution(out this.MininumResolution, out this.MaximumResolution, out this.DefaultResolution);
-            if(null != this.EventLog)
-                try { this.EventLog.WriteEntry(String.Format("Minimum={0}; Maximum={1}; Default={2}; Processes='{3}'", this.MininumResolution, this.MaximumResolution, this.DefaultResolution, null != this.ProcessesNames ? String.Join("','", this.ProcessesNames) : "")); }
-                catch {}
-            if(null == this.ProcessesNames)
-            {
-                SetMaximumResolution();
-                return;
-            }
-            if(0 == this.ProcessesNames.Count)
-            {
-                return;
-            }
-            this.ProcessStartDelegate = new OnProcessStart(this.ProcessStarted);
-            try
-            {
-                String query = String.Format("SELECT * FROM __InstanceCreationEvent WITHIN 0.5 WHERE (TargetInstance isa \"Win32_Process\") AND (TargetInstance.Name=\"{0}\")", String.Join("\" OR TargetInstance.Name=\"", this.ProcessesNames));
-                this.startWatch = new ManagementEventWatcher(query);
-                this.startWatch.EventArrived += this.startWatch_EventArrived;
-                this.startWatch.Start();
-            }
-            catch(Exception ee)
-            {
-                if(null != this.EventLog)
-                    try { this.EventLog.WriteEntry(ee.ToString(), EventLogEntryType.Error); }
-                    catch {}
-            }
-        }
-        protected override void OnStop()
-        {
-            if(null != this.startWatch)
-            {
-                this.startWatch.Stop();
-            }
-
-            base.OnStop();
-        }
-        ManagementEventWatcher startWatch;
-        void startWatch_EventArrived(object sender, EventArrivedEventArgs e) 
-        {
-            try
-            {
-                ManagementBaseObject process = (ManagementBaseObject)e.NewEvent.Properties["TargetInstance"].Value;
-                UInt32 processId = (UInt32)process.Properties["ProcessId"].Value;
-                this.ProcessStartDelegate.BeginInvoke(processId, null, null);
-            } 
-            catch(Exception ee) 
-            {
-                if(null != this.EventLog)
-                    try { this.EventLog.WriteEntry(ee.ToString(), EventLogEntryType.Warning); }
-                    catch {}
-
-            }
-        }
-        [DllImport("kernel32.dll", SetLastError=true)]
-        static extern Int32 WaitForSingleObject(IntPtr Handle, Int32 Milliseconds);
-        [DllImport("kernel32.dll", SetLastError=true)]
-        static extern IntPtr OpenProcess(UInt32 DesiredAccess, Int32 InheritHandle, UInt32 ProcessId);
-        [DllImport("kernel32.dll", SetLastError=true)]
-        static extern Int32 CloseHandle(IntPtr Handle);
-        const UInt32 SYNCHRONIZE = 0x00100000;
-        delegate void OnProcessStart(UInt32 processId);
-        OnProcessStart ProcessStartDelegate = null;
-        void ProcessStarted(UInt32 processId)
+        this.ServiceName = "STR";
+        this.EventLog.Log = "Application";
+        this.CanStop = true;
+        this.CanHandlePowerEvent = false;
+        this.CanHandleSessionChangeEvent = false;
+        this.CanPauseAndContinue = false;
+        this.CanShutdown = false;
+    }
+    static void Main()
+    {
+        ServiceBase.Run(new WindowsService());
+    }
+    protected override void OnStart(string[] args)
+    {
+        base.OnStart(args);
+        ReadProcessList();
+        NtQueryTimerResolution(out this.MininumResolution, out this.MaximumResolution, out this.DefaultResolution);
+        if(null != this.EventLog)
+            try { this.EventLog.WriteEntry(String.Format("Minimum={0}; Maximum={1}; Default={2}; Processes='{3}'", this.MininumResolution, this.MaximumResolution, this.DefaultResolution, null != this.ProcessesNames ? String.Join("','", this.ProcessesNames) : "")); }
+            catch {}
+        if(null == this.ProcessesNames)
         {
             SetMaximumResolution();
-            IntPtr processHandle = IntPtr.Zero;
-            try
-            {
-                processHandle = OpenProcess(SYNCHRONIZE, 0, processId);
-                if(processHandle != IntPtr.Zero)
-                    WaitForSingleObject(processHandle, -1);
-            } 
-            catch(Exception ee) 
-            {
-                if(null != this.EventLog)
-                    try { this.EventLog.WriteEntry(ee.ToString(), EventLogEntryType.Warning); }
-                    catch {}
-            }
-            finally
-            {
-                if(processHandle != IntPtr.Zero)
-                    CloseHandle(processHandle); 
-            }
-            SetDefaultResolution();
+            return;
         }
-        List<String> ProcessesNames = null;
-        void ReadProcessList()
+        if(0 == this.ProcessesNames.Count)
         {
-            String iniFilePath = Assembly.GetExecutingAssembly().Location + ".ini";
-            if(File.Exists(iniFilePath))
+            return;
+        }
+        this.ProcessStartDelegate = new OnProcessStart(this.ProcessStarted);
+        try
+        {
+            String query = String.Format("SELECT * FROM __InstanceCreationEvent WITHIN 0.5 WHERE (TargetInstance isa \"Win32_Process\") AND (TargetInstance.Name=\"{0}\")", String.Join("\" OR TargetInstance.Name=\"", this.ProcessesNames));
+            this.startWatch = new ManagementEventWatcher(query);
+            this.startWatch.EventArrived += this.startWatch_EventArrived;
+            this.startWatch.Start();
+        }
+        catch(Exception ee)
+        {
+            if(null != this.EventLog)
+                try { this.EventLog.WriteEntry(ee.ToString(), EventLogEntryType.Error); }
+                catch {}
+        }
+    }
+    protected override void OnStop()
+    {
+        if(null != this.startWatch)
+        {
+            this.startWatch.Stop();
+        }
+
+        base.OnStop();
+    }
+    ManagementEventWatcher startWatch;
+    void startWatch_EventArrived(object sender, EventArrivedEventArgs e) 
+    {
+        try
+        {
+            ManagementBaseObject process = (ManagementBaseObject)e.NewEvent.Properties["TargetInstance"].Value;
+            UInt32 processId = (UInt32)process.Properties["ProcessId"].Value;
+            this.ProcessStartDelegate.BeginInvoke(processId, null, null);
+        } 
+        catch(Exception ee) 
+        {
+            if(null != this.EventLog)
+                try { this.EventLog.WriteEntry(ee.ToString(), EventLogEntryType.Warning); }
+                catch {}
+
+        }
+    }
+    [DllImport("kernel32.dll", SetLastError=true)]
+    static extern Int32 WaitForSingleObject(IntPtr Handle, Int32 Milliseconds);
+    [DllImport("kernel32.dll", SetLastError=true)]
+    static extern IntPtr OpenProcess(UInt32 DesiredAccess, Int32 InheritHandle, UInt32 ProcessId);
+    [DllImport("kernel32.dll", SetLastError=true)]
+    static extern Int32 CloseHandle(IntPtr Handle);
+    const UInt32 SYNCHRONIZE = 0x00100000;
+    delegate void OnProcessStart(UInt32 processId);
+    OnProcessStart ProcessStartDelegate = null;
+    void ProcessStarted(UInt32 processId)
+    {
+        SetMaximumResolution();
+        IntPtr processHandle = IntPtr.Zero;
+        try
+        {
+            processHandle = OpenProcess(SYNCHRONIZE, 0, processId);
+            if(processHandle != IntPtr.Zero)
+                WaitForSingleObject(processHandle, -1);
+        } 
+        catch(Exception ee) 
+        {
+            if(null != this.EventLog)
+                try { this.EventLog.WriteEntry(ee.ToString(), EventLogEntryType.Warning); }
+                catch {}
+        }
+        finally
+        {
+            if(processHandle != IntPtr.Zero)
+                CloseHandle(processHandle); 
+        }
+        SetDefaultResolution();
+    }
+    List<String> ProcessesNames = null;
+    void ReadProcessList()
+    {
+        String iniFilePath = Assembly.GetExecutingAssembly().Location + ".ini";
+        if(File.Exists(iniFilePath))
+        {
+            this.ProcessesNames = new List<String>();
+            String[] iniFileLines = File.ReadAllLines(iniFilePath);
+            foreach(var line in iniFileLines)
             {
-                this.ProcessesNames = new List<String>();
-                String[] iniFileLines = File.ReadAllLines(iniFilePath);
-                foreach(var line in iniFileLines)
+                String[] names = line.Split(new char[] {',', ' ', ';'} , StringSplitOptions.RemoveEmptyEntries);
+                foreach(var name in names)
                 {
-                    String[] names = line.Split(new char[] {',', ' ', ';'} , StringSplitOptions.RemoveEmptyEntries);
-                    foreach(var name in names)
-                    {
-                        String lwr_name = name.ToLower();
-                        if(!lwr_name.EndsWith(".exe"))
-                            lwr_name += ".exe";
-                        if(!this.ProcessesNames.Contains(lwr_name))
-                            this.ProcessesNames.Add(lwr_name);
-                    }
+                    String lwr_name = name.ToLower();
+                    if(!lwr_name.EndsWith(".exe"))
+                        lwr_name += ".exe";
+                    if(!this.ProcessesNames.Contains(lwr_name))
+                        this.ProcessesNames.Add(lwr_name);
                 }
             }
         }
-        [DllImport("ntdll.dll", SetLastError=true)]
-        static extern int NtSetTimerResolution(uint DesiredResolution, bool SetResolution, out uint CurrentResolution);
-        [DllImport("ntdll.dll", SetLastError=true)]
-        static extern int NtQueryTimerResolution(out uint MinimumResolution, out uint MaximumResolution, out uint ActualResolution);
-        uint DefaultResolution = 0;
-        uint MininumResolution = 0;
-        uint MaximumResolution = 0;
-        long processCounter = 0;
-        void SetMaximumResolution()
-        {
-            long counter = Interlocked.Increment(ref this.processCounter);
-            if(counter <= 1)
-            {
-                uint actual = 0;
-                NtSetTimerResolution(this.MaximumResolution, true, out actual);
-                if(null != this.EventLog)
-                    try { this.EventLog.WriteEntry(String.Format("Actual resolution = {0}", actual)); }
-                    catch {}
-            }
-        }
-        void SetDefaultResolution()
-        {
-            long counter = Interlocked.Decrement(ref this.processCounter);
-            if(counter < 1)
-            {
-                uint actual = 0;
-                NtSetTimerResolution(this.DefaultResolution, true, out actual);
-                if(null != this.EventLog)
-                    try { this.EventLog.WriteEntry(String.Format("Actual resolution = {0}", actual)); }
-                    catch {}
-            }
-        }
     }
-    [RunInstaller(true)]
-    public class WindowsServiceInstaller : Installer
+    [DllImport("ntdll.dll", SetLastError=true)]
+    static extern int NtSetTimerResolution(uint DesiredResolution, bool SetResolution, out uint CurrentResolution);
+    [DllImport("ntdll.dll", SetLastError=true)]
+    static extern int NtQueryTimerResolution(out uint MinimumResolution, out uint MaximumResolution, out uint ActualResolution);
+    uint DefaultResolution = 0;
+    uint MininumResolution = 0;
+    uint MaximumResolution = 0;
+    long processCounter = 0;
+    void SetMaximumResolution()
     {
-        public WindowsServiceInstaller()
+        long counter = Interlocked.Increment(ref this.processCounter);
+        if(counter <= 1)
         {
-            ServiceProcessInstaller serviceProcessInstaller = 
-                               new ServiceProcessInstaller();
-            ServiceInstaller serviceInstaller = new ServiceInstaller();
-            serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
-            serviceProcessInstaller.Username = null;
-            serviceProcessInstaller.Password = null;
-            serviceInstaller.DisplayName = "Set Timer Resolution Service";
-            serviceInstaller.StartType = ServiceStartMode.Automatic;
-            serviceInstaller.ServiceName = "STR";
-            this.Installers.Add(serviceProcessInstaller);
-            this.Installers.Add(serviceInstaller);
+            uint actual = 0;
+            NtSetTimerResolution(this.MaximumResolution, true, out actual);
+            if(null != this.EventLog)
+                try { this.EventLog.WriteEntry(String.Format("Actual resolution = {0}", actual)); }
+                catch {}
         }
     }
+    void SetDefaultResolution()
+    {
+        long counter = Interlocked.Decrement(ref this.processCounter);
+        if(counter < 1)
+        {
+            uint actual = 0;
+            NtSetTimerResolution(this.DefaultResolution, true, out actual);
+            if(null != this.EventLog)
+                try { this.EventLog.WriteEntry(String.Format("Actual resolution = {0}", actual)); }
+                catch {}
+        }
+    }
+}
+[RunInstaller(true)]
+public class WindowsServiceInstaller : Installer
+{
+    public WindowsServiceInstaller()
+    {
+        ServiceProcessInstaller serviceProcessInstaller = 
+                           new ServiceProcessInstaller();
+        ServiceInstaller serviceInstaller = new ServiceInstaller();
+        serviceProcessInstaller.Account = ServiceAccount.LocalSystem;
+        serviceProcessInstaller.Username = null;
+        serviceProcessInstaller.Password = null;
+        serviceInstaller.DisplayName = "Set Timer Resolution Service";
+        serviceInstaller.StartType = ServiceStartMode.Automatic;
+        serviceInstaller.ServiceName = "STR";
+        this.Installers.Add(serviceProcessInstaller);
+        this.Installers.Add(serviceInstaller);
+    }
+}
 }
 "@
 Set-Content -Path "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -Value $MultilineComment -Force
@@ -1211,9 +1210,15 @@ Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -ErrorAction
 New-Service -Name "Set Timer Resolution Service" -BinaryPathName "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -ErrorAction SilentlyContinue | Out-Null
 Set-Service -Name "Set Timer Resolution Service" -StartupType Auto -ErrorAction SilentlyContinue | Out-Null
 Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction SilentlyContinue | Out-Null
+# start taskmanager
+Start-Process taskmgr.exe
+exit
+
 
 Clear-Host
 Write-Host "Registry: Optimize . . ."
+Start-Sleep -Seconds 3
+
 # create reg file
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
@@ -2369,17 +2374,17 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_CURRENT_USER\Control Panel\Mouse]
 "MouseSensitivity"="10"
 "SmoothMouseXCurve"=hex:\
-  00,00,00,00,00,00,00,00,\
-  C0,CC,0C,00,00,00,00,00,\
-  80,99,19,00,00,00,00,00,\
-  40,66,26,00,00,00,00,00,\
-  00,33,33,00,00,00,00,00
+00,00,00,00,00,00,00,00,\
+C0,CC,0C,00,00,00,00,00,\
+80,99,19,00,00,00,00,00,\
+40,66,26,00,00,00,00,00,\
+00,33,33,00,00,00,00,00
 "SmoothMouseYCurve"=hex:\
-  00,00,00,00,00,00,00,00,\
-  00,00,38,00,00,00,00,00,\
-  00,00,70,00,00,00,00,00,\
-  00,00,A8,00,00,00,00,00,\
-  00,00,E0,00,00,00,00,00
+00,00,00,00,00,00,00,00,\
+00,00,38,00,00,00,00,00,\
+00,00,70,00,00,00,00,00,\
+00,00,A8,00,00,00,00,00,\
+00,00,E0,00,00,00,00,00
 
 [HKEY_USERS\.DEFAULT\Control Panel\Mouse]
 "MouseSpeed"="0"
@@ -2424,7 +2429,7 @@ $iconSizeValue = 32
 
 # Create the registry key path if it doesn't exist
 If (-not (Test-Path $desktopIconSizeKey)) {
-    New-Item -Path $desktopIconSizeKey -Force
+New-Item -Path $desktopIconSizeKey -Force
 }
 
 # Set the Icon Size for desktop
@@ -2807,16 +2812,16 @@ Write-Host "Hosts file updated successfully."
 #Adds additional ContextMenu entries
 Write-Host "Installing ContextMenu entries..."
 $regFiles = @(
-    "https://raw.githubusercontent.com/fivance/ContextMenu/main/CommandStore.reg",
-    "https://raw.githubusercontent.com/fivance/ContextMenu/main/SystemShortcutsContextMenu.reg"
-    "https://raw.githubusercontent.com/fivance/ContextMenu/main/SystemToolsContextMenu.reg"
+"https://raw.githubusercontent.com/fivance/ContextMenu/main/CommandStore.reg",
+"https://raw.githubusercontent.com/fivance/ContextMenu/main/SystemShortcutsContextMenu.reg"
+"https://raw.githubusercontent.com/fivance/ContextMenu/main/SystemToolsContextMenu.reg"
 )
 
 foreach ($url in $regFiles) {
-    $regFilePath = "$env:TEMP\" + [System.IO.Path]::GetFileName($url)
-    Invoke-WebRequest -Uri $url -OutFile $regFilePath
-    Start-Process -FilePath "regedit.exe" -ArgumentList "/s $regFilePath" -Wait
-    Remove-Item $regFilePath
+$regFilePath = "$env:TEMP\" + [System.IO.Path]::GetFileName($url)
+Invoke-WebRequest -Uri $url -OutFile $regFilePath
+Start-Process -FilePath "regedit.exe" -ArgumentList "/s $regFilePath" -Wait
+Remove-Item $regFilePath
 }
 
 Write-Host ""
@@ -2930,147 +2935,147 @@ Remove-Item -Path $tempRegFile
 
 # Check if import was successful
 if ($LASTEXITCODE -eq 0) {
-    Write-Host "Registry settings applied successfully."
+Write-Host "Registry settings applied successfully."
 } else {
-    Write-Host "Failed to apply registry settings. Exit code: $LASTEXITCODE"
+Write-Host "Failed to apply registry settings. Exit code: $LASTEXITCODE"
 }
 
 
 Write-Host 'Removing Scheduled Tasks...'
-      # Removes all scheduled tasks 
-      $tasks = Get-ScheduledTask -TaskPath '*'
-      $i = 0
-      $barLength = 50
-      foreach ($task in $tasks) {
-        if (!($task.TaskName -eq 'SvcRestartTask' -or $task.TaskName -eq 'MsCtfMonitor')) {
-          $i++
-          #if the task isnt ctf mon or svcrestarttask then stop it and unregister it
-          $PercentComplete = [math]::Round($(($i / $tasks.Count) * 100)) 
-          $progress = [math]::Round(($PercentComplete / 100) * $barLength)
-          $bar = '#' * $progress
-          $emptySpace = ' ' * ($barLength - $progress)
-          $status = "[$bar$emptySpace] $PercentComplete% Complete"
+  # Removes all scheduled tasks 
+  $tasks = Get-ScheduledTask -TaskPath '*'
+  $i = 0
+  $barLength = 50
+  foreach ($task in $tasks) {
+    if (!($task.TaskName -eq 'SvcRestartTask' -or $task.TaskName -eq 'MsCtfMonitor')) {
+      $i++
+      #if the task isnt ctf mon or svcrestarttask then stop it and unregister it
+      $PercentComplete = [math]::Round($(($i / $tasks.Count) * 100)) 
+      $progress = [math]::Round(($PercentComplete / 100) * $barLength)
+      $bar = '#' * $progress
+      $emptySpace = ' ' * ($barLength - $progress)
+      $status = "[$bar$emptySpace] $PercentComplete% Complete"
 
-          Write-Host -NoNewline "`r$status"
-          Unregister-ScheduledTask -TaskName $task.TaskName -Confirm:$false -ErrorAction SilentlyContinue
-          
-        }
-
-      }
+      Write-Host -NoNewline "`r$status"
+      Unregister-ScheduledTask -TaskName $task.TaskName -Confirm:$false -ErrorAction SilentlyContinue
       
-	# Set all services to manual (that are allowed)
-  Write-Host "Services to Manual ..."
-      $services = Get-Service
-      $servicesKeep = 'AudioEndpointBuilder
-      Audiosrv
-      EventLog
-      SysMain
-      Themes
-      WSearch
-      NVDisplay.ContainerLocalSystem
-      WlanSvc'
-      foreach ($service in $services) { 
-        if ($service.StartType -like '*Auto*') {
-          if (!($servicesKeep -match $service.Name)) {
-              
-            Set-Service -Name $service.Name -StartupType Manual -ErrorAction SilentlyContinue
-             
-          }         
-        }
-      }
-      Write-Host 'Services Set to Manual...'
+    }
 
-	 Write-Host 'Disabling Blocked Files...'
-      Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Security' /V 'DisableSecuritySettingsCheck' /T 'REG_DWORD' /D '00000001' /F
-      Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
-      Reg.exe add 'HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
-	
-	
-	#show all current tray icons
-      Write-Host 'Showing All Apps on Taskbar'
-      Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'EnableAutoTray' /t REG_DWORD /d '0' /f
-      $keys = Get-ChildItem -Path 'registry::HKEY_CURRENT_USER\Control Panel\NotifyIconSettings' -Recurse -Force
-      foreach ($key in $keys) {
-        Set-ItemProperty -Path "registry::$key" -Name 'IsPromoted' -Value 1 -Force
+  }
+  
+# Set all services to manual (that are allowed)
+Write-Host "Services to Manual ..."
+  $services = Get-Service
+  $servicesKeep = 'AudioEndpointBuilder
+  Audiosrv
+  EventLog
+  SysMain
+  Themes
+  WSearch
+  NVDisplay.ContainerLocalSystem
+  WlanSvc'
+  foreach ($service in $services) { 
+    if ($service.StartType -like '*Auto*') {
+      if (!($servicesKeep -match $service.Name)) {
+          
+        Set-Service -Name $service.Name -StartupType Manual -ErrorAction SilentlyContinue
+         
+      }         
+    }
+  }
+  Write-Host 'Services Set to Manual...'
 
-      }
-      #create task to update task tray on log on
+Write-Host 'Disabling Blocked Files...'
+  Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Security' /V 'DisableSecuritySettingsCheck' /T 'REG_DWORD' /D '00000001' /F
+  Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
+  Reg.exe add 'HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
 
-      #create updater script
-      $scriptContent = @"
+
+#show all current tray icons
+  Write-Host 'Showing All Apps on Taskbar'
+  Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'EnableAutoTray' /t REG_DWORD /d '0' /f
+  $keys = Get-ChildItem -Path 'registry::HKEY_CURRENT_USER\Control Panel\NotifyIconSettings' -Recurse -Force
+  foreach ($key in $keys) {
+    Set-ItemProperty -Path "registry::$key" -Name 'IsPromoted' -Value 1 -Force
+
+  }
+  #create task to update task tray on log on
+
+  #create updater script
+  $scriptContent = @"
 `$keys = Get-ChildItem -Path 'registry::HKEY_CURRENT_USER\Control Panel\NotifyIconSettings' -Recurse -Force
 
 foreach (`$key in `$keys) {
-    #if the value is set to 0 do not set it to 1
-    #set 1 when no reg key is there (new apps)
-    if ((Get-ItemProperty -Path "registry::`$key").IsPromoted -eq 0) {
-    }
-    else {
-        Set-ItemProperty -Path "registry::`$key" -Name 'IsPromoted' -Value 1 -Force
-    }
+#if the value is set to 0 do not set it to 1
+#set 1 when no reg key is there (new apps)
+if ((Get-ItemProperty -Path "registry::`$key").IsPromoted -eq 0) {
+}
+else {
+    Set-ItemProperty -Path "registry::`$key" -Name 'IsPromoted' -Value 1 -Force
+}
 }
 "@
 
-      $scriptPath = "$env:ProgramData\UpdateTaskTrayIcons.ps1"
-      Set-Content -Path $scriptPath -Value $scriptContent -Force
+  $scriptPath = "$env:ProgramData\UpdateTaskTrayIcons.ps1"
+  Set-Content -Path $scriptPath -Value $scriptContent -Force
 
-      #get username and sid
-      $currentUserName = $env:COMPUTERNAME + '\' + $env:USERNAME
-      $username = Get-LocalUser -Name $env:USERNAME | Select-Object -ExpandProperty sid
+  #get username and sid
+  $currentUserName = $env:COMPUTERNAME + '\' + $env:USERNAME
+  $username = Get-LocalUser -Name $env:USERNAME | Select-Object -ExpandProperty sid
 
-      $content = @"
+  $content = @"
 <?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
-  <RegistrationInfo>
-    <Date>2024-05-20T12:59:50.8741407</Date>
-    <Author>$currentUserName</Author>
-    <URI>\UpdateTaskTray</URI>
-  </RegistrationInfo>
-   <Triggers>
-    <LogonTrigger>
-      <Enabled>true</Enabled>
-    </LogonTrigger>
-  </Triggers>
-  <Principals>
-    <Principal id="Author">
-      <UserId>$username</UserId>
-      <LogonType>InteractiveToken</LogonType>
-      <RunLevel>HighestAvailable</RunLevel>
-    </Principal>
-  </Principals>
-  <Settings>
-    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
-    <DisallowStartIfOnBatteries>true</DisallowStartIfOnBatteries>
-    <StopIfGoingOnBatteries>true</StopIfGoingOnBatteries>
-    <AllowHardTerminate>true</AllowHardTerminate>
-    <StartWhenAvailable>false</StartWhenAvailable>
-    <RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
-    <IdleSettings>
-      <StopOnIdleEnd>true</StopOnIdleEnd>
-      <RestartOnIdle>false</RestartOnIdle>
-    </IdleSettings>
-    <AllowStartOnDemand>true</AllowStartOnDemand>
-    <Enabled>true</Enabled>
-    <Hidden>false</Hidden>
-    <RunOnlyIfIdle>false</RunOnlyIfIdle>
-    <WakeToRun>false</WakeToRun>
-    <ExecutionTimeLimit>PT72H</ExecutionTimeLimit>
-    <Priority>7</Priority>
-  </Settings>
-  <Actions Context="Author">
-    <Exec>
-      <Command>PowerShell.exe</Command>
-      <Arguments>-ExecutionPolicy Bypass -WindowStyle Hidden -File C:\ProgramData\UpdateTaskTrayIcons.ps1</Arguments>
-    </Exec>
-  </Actions>
+<RegistrationInfo>
+<Date>2024-05-20T12:59:50.8741407</Date>
+<Author>$currentUserName</Author>
+<URI>\UpdateTaskTray</URI>
+</RegistrationInfo>
+<Triggers>
+<LogonTrigger>
+  <Enabled>true</Enabled>
+</LogonTrigger>
+</Triggers>
+<Principals>
+<Principal id="Author">
+  <UserId>$username</UserId>
+  <LogonType>InteractiveToken</LogonType>
+  <RunLevel>HighestAvailable</RunLevel>
+</Principal>
+</Principals>
+<Settings>
+<MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+<DisallowStartIfOnBatteries>true</DisallowStartIfOnBatteries>
+<StopIfGoingOnBatteries>true</StopIfGoingOnBatteries>
+<AllowHardTerminate>true</AllowHardTerminate>
+<StartWhenAvailable>false</StartWhenAvailable>
+<RunOnlyIfNetworkAvailable>false</RunOnlyIfNetworkAvailable>
+<IdleSettings>
+  <StopOnIdleEnd>true</StopOnIdleEnd>
+  <RestartOnIdle>false</RestartOnIdle>
+</IdleSettings>
+<AllowStartOnDemand>true</AllowStartOnDemand>
+<Enabled>true</Enabled>
+<Hidden>false</Hidden>
+<RunOnlyIfIdle>false</RunOnlyIfIdle>
+<WakeToRun>false</WakeToRun>
+<ExecutionTimeLimit>PT72H</ExecutionTimeLimit>
+<Priority>7</Priority>
+</Settings>
+<Actions Context="Author">
+<Exec>
+  <Command>PowerShell.exe</Command>
+  <Arguments>-ExecutionPolicy Bypass -WindowStyle Hidden -File C:\ProgramData\UpdateTaskTrayIcons.ps1</Arguments>
+</Exec>
+</Actions>
 </Task>
 "@
-      Set-Content -Path "$env:TEMP\UpdateTaskTray" -Value $content -Force
+  Set-Content -Path "$env:TEMP\UpdateTaskTray" -Value $content -Force
 
-      schtasks /Create /XML "$env:TEMP\UpdateTaskTray" /TN '\UpdateTaskTray' /F | Out-Null 
+  schtasks /Create /XML "$env:TEMP\UpdateTaskTray" /TN '\UpdateTaskTray' /F | Out-Null 
 
-      Remove-Item -Path "$env:TEMP\UpdateTaskTray" -Force -ErrorAction SilentlyContinue
-      Write-Host 'Update Task Tray Created...New Apps Will Be Shown Upon Restarting'
+  Remove-Item -Path "$env:TEMP\UpdateTaskTray" -Force -ErrorAction SilentlyContinue
+  Write-Host 'Update Task Tray Created...New Apps Will Be Shown Upon Restarting'
 
 # clear %temp% folder
 Remove-Item -Path "$env:USERPROFILE\AppData\Local\Temp" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
@@ -3080,9 +3085,9 @@ Remove-Item -Path "$env:SystemDrive\Windows\Temp" -Recurse -Force -ErrorAction S
 New-Item -Path "$env:SystemDrive\Windows" -Name "Temp" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 # open disk cleanup
 Start-Process cleanmgr.exe
-    }  
+}  
 
-  6 {
+6 {
 
 Start-Process cmd.exe /c
 #registry numlock enabled everywhere
@@ -3273,9 +3278,9 @@ schtasks /Create /F /RU "SYSTEM" /RL HIGHEST /SC HOURLY /TN PrilagodeniTasks /TR
 schtasks /Run /I /TN PrilagodeniTasks
 timeout /T 5
 schtasks /delete /F /TN PrilagodeniTasks
- 
-								
-																						 
+
+            
+                                         
 # Register DNS
 ipconfig /registerdns
 # disable DNS Functions (LLMNR, Resolution, Devolution, ParallelAandAAAA)
@@ -3406,57 +3411,57 @@ schtasks /change /tn "Microsoft\Windows\WwanSvc\OobeDiscovery" /disable
 # MsCtfMonitor Task (keylogger) je potreban da biste mogli tipkati unutar postavki itd.
 # schtasks /change /tn "Microsoft\Windows\TextServicesFramework\MsCtfMonitor" /disable
 exit
-    }
+}
 
-  7 {
-      #Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NoNewWindow -Wait
-       function RunAsTI($cmd, $arg) {
-    $id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
-    $I=[int32]; $M=$I.module.gettype("System.Runtime.Interop`Services.Mar`shal"); $P=$I.module.gettype("System.Int`Ptr"); $S=[string]
-    $D=@(); $T=@(); $DM=[AppDomain]::CurrentDomain."DefineDynami`cAssembly"(1,1)."DefineDynami`cModule"(1); $Z=[uintptr]::size
-    0..5|% {$D += $DM."Defin`eType"("AveYo_$_",1179913,[ValueType])}; $D += [uintptr]; 4..6|% {$D += $D[$_]."MakeByR`efType"()}
-    $F='kernel','advapi','advapi', ($S,$S,$I,$I,$I,$I,$I,$S,$D[7],$D[8]), ([uintptr],$S,$I,$I,$D[9]),([uintptr],$S,$I,$I,[byte[]],$I)
-    0..2|% {$9=$D[0]."DefinePInvok`eMethod"(('CreateProcess','RegOpenKeyEx','RegSetValueEx')[$_],$F[$_]+'32',8214,1,$S,$F[$_+3],1,4)}
-    $DF=($P,$I,$P),($I,$I,$I,$I,$P,$D[1]),($I,$S,$S,$S,$I,$I,$I,$I,$I,$I,$I,$I,[int16],[int16],$P,$P,$P,$P),($D[3],$P),($P,$P,$I,$I)
-    1..5|% {$k=$_; $n=1; $DF[$_-1]|% {$9=$D[$k]."Defin`eField"('f' + $n++, $_, 6)}}; 0..5|% {$T += $D[$_]."Creat`eType"()}
-    0..5|% {nv "A$_" ([Activator]::CreateInstance($T[$_])) -fo}; function F ($1,$2) {$T[0]."G`etMethod"($1).invoke(0,$2)}
-    $TI=(whoami /groups)-like'*1-16-16384*'; $As=0; if(!$cmd) {$cmd='control';$arg='admintools'}; if ($cmd-eq'This PC'){$cmd='file:'}
-    if (!$TI) {'TrustedInstaller','lsass','winlogon'|% {if (!$As) {$9=sc.exe start $_; $As=@(get-process -name $_ -ea 0|% {$_})[0]}}
-    function M ($1,$2,$3) {$M."G`etMethod"($1,[type[]]$2).invoke(0,$3)}; $H=@(); $Z,(4*$Z+16)|% {$H += M "AllocHG`lobal" $I $_}
-    M "WriteInt`Ptr" ($P,$P) ($H[0],$As.Handle); $A1.f1=131072; $A1.f2=$Z; $A1.f3=$H[0]; $A2.f1=1; $A2.f2=1; $A2.f3=1; $A2.f4=1
-    $A2.f6=$A1; $A3.f1=10*$Z+32; $A4.f1=$A3; $A4.f2=$H[1]; M "StructureTo`Ptr" ($D[2],$P,[boolean]) (($A2 -as $D[2]),$A4.f2,$false)
-    $Run=@($null, "powershell -win 1 -nop -c iex `$env:R; # $id", 0, 0, 0, 0x0E080600, 0, $null, ($A4 -as $T[4]), ($A5 -as $T[5]))
-    F 'CreateProcess' $Run; return}; $env:R=''; rp $key $id -force; $priv=[diagnostics.process]."GetM`ember"('SetPrivilege',42)[0]
-    'SeSecurityPrivilege','SeTakeOwnershipPrivilege','SeBackupPrivilege','SeRestorePrivilege' |% {$priv.Invoke($null, @("$_",2))}
-    $HKU=[uintptr][uint32]2147483651; $NT='S-1-5-18'; $reg=($HKU,$NT,8,2,($HKU -as $D[9])); F 'RegOpenKeyEx' $reg; $LNK=$reg[4]
-    function L ($1,$2,$3) {sp 'HKLM:\Software\Classes\AppID\{CDCBCFCA-3CDC-436f-A4E2-0E02075250C2}' 'RunAs' $3 -force -ea 0
-    $b=[Text.Encoding]::Unicode.GetBytes("\Registry\User\$1"); F 'RegSetValueEx' @($2,'SymbolicLinkValue',0,6,[byte[]]$b,$b.Length)}
-    function Q {[int](gwmi win32_process -filter 'name="explorer.exe"'|?{$_.getownersid().sid-eq$NT}|select -last 1).ProcessId}
-    $11bug=($((gwmi Win32_OperatingSystem).BuildNumber)-eq'22000')-AND(($cmd-eq'file:')-OR(test-path -lit $cmd -PathType Container))
-    if ($11bug) {'System.Windows.Forms','Microsoft.VisualBasic' |% {[Reflection.Assembly]::LoadWithPartialName("'$_")}}
-    if ($11bug) {$path='^(l)'+$($cmd -replace '([\+\^\%\~\(\)\[\]])','{$1}')+'{ENTER}'; $cmd='control.exe'; $arg='admintools'}
-    L ($key-split'\\')[1] $LNK ''; $R=[diagnostics.process]::start($cmd,$arg); if ($R) {$R.PriorityClass='High'; $R.WaitForExit()}
-    if ($11bug) {$w=0; do {if($w-gt40){break}; sleep -mi 250;$w++} until (Q); [Microsoft.VisualBasic.Interaction]::AppActivate($(Q))}
-    if ($11bug) {[Windows.Forms.SendKeys]::SendWait($path)}; do {sleep 7} while(Q); L '.Default' $LNK 'Interactive User'
+7 {
+  #Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NoNewWindow -Wait
+   function RunAsTI($cmd, $arg) {
+$id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
+$I=[int32]; $M=$I.module.gettype("System.Runtime.Interop`Services.Mar`shal"); $P=$I.module.gettype("System.Int`Ptr"); $S=[string]
+$D=@(); $T=@(); $DM=[AppDomain]::CurrentDomain."DefineDynami`cAssembly"(1,1)."DefineDynami`cModule"(1); $Z=[uintptr]::size
+0..5|% {$D += $DM."Defin`eType"("AveYo_$_",1179913,[ValueType])}; $D += [uintptr]; 4..6|% {$D += $D[$_]."MakeByR`efType"()}
+$F='kernel','advapi','advapi', ($S,$S,$I,$I,$I,$I,$I,$S,$D[7],$D[8]), ([uintptr],$S,$I,$I,$D[9]),([uintptr],$S,$I,$I,[byte[]],$I)
+0..2|% {$9=$D[0]."DefinePInvok`eMethod"(('CreateProcess','RegOpenKeyEx','RegSetValueEx')[$_],$F[$_]+'32',8214,1,$S,$F[$_+3],1,4)}
+$DF=($P,$I,$P),($I,$I,$I,$I,$P,$D[1]),($I,$S,$S,$S,$I,$I,$I,$I,$I,$I,$I,$I,[int16],[int16],$P,$P,$P,$P),($D[3],$P),($P,$P,$I,$I)
+1..5|% {$k=$_; $n=1; $DF[$_-1]|% {$9=$D[$k]."Defin`eField"('f' + $n++, $_, 6)}}; 0..5|% {$T += $D[$_]."Creat`eType"()}
+0..5|% {nv "A$_" ([Activator]::CreateInstance($T[$_])) -fo}; function F ($1,$2) {$T[0]."G`etMethod"($1).invoke(0,$2)}
+$TI=(whoami /groups)-like'*1-16-16384*'; $As=0; if(!$cmd) {$cmd='control';$arg='admintools'}; if ($cmd-eq'This PC'){$cmd='file:'}
+if (!$TI) {'TrustedInstaller','lsass','winlogon'|% {if (!$As) {$9=sc.exe start $_; $As=@(get-process -name $_ -ea 0|% {$_})[0]}}
+function M ($1,$2,$3) {$M."G`etMethod"($1,[type[]]$2).invoke(0,$3)}; $H=@(); $Z,(4*$Z+16)|% {$H += M "AllocHG`lobal" $I $_}
+M "WriteInt`Ptr" ($P,$P) ($H[0],$As.Handle); $A1.f1=131072; $A1.f2=$Z; $A1.f3=$H[0]; $A2.f1=1; $A2.f2=1; $A2.f3=1; $A2.f4=1
+$A2.f6=$A1; $A3.f1=10*$Z+32; $A4.f1=$A3; $A4.f2=$H[1]; M "StructureTo`Ptr" ($D[2],$P,[boolean]) (($A2 -as $D[2]),$A4.f2,$false)
+$Run=@($null, "powershell -win 1 -nop -c iex `$env:R; # $id", 0, 0, 0, 0x0E080600, 0, $null, ($A4 -as $T[4]), ($A5 -as $T[5]))
+F 'CreateProcess' $Run; return}; $env:R=''; rp $key $id -force; $priv=[diagnostics.process]."GetM`ember"('SetPrivilege',42)[0]
+'SeSecurityPrivilege','SeTakeOwnershipPrivilege','SeBackupPrivilege','SeRestorePrivilege' |% {$priv.Invoke($null, @("$_",2))}
+$HKU=[uintptr][uint32]2147483651; $NT='S-1-5-18'; $reg=($HKU,$NT,8,2,($HKU -as $D[9])); F 'RegOpenKeyEx' $reg; $LNK=$reg[4]
+function L ($1,$2,$3) {sp 'HKLM:\Software\Classes\AppID\{CDCBCFCA-3CDC-436f-A4E2-0E02075250C2}' 'RunAs' $3 -force -ea 0
+$b=[Text.Encoding]::Unicode.GetBytes("\Registry\User\$1"); F 'RegSetValueEx' @($2,'SymbolicLinkValue',0,6,[byte[]]$b,$b.Length)}
+function Q {[int](gwmi win32_process -filter 'name="explorer.exe"'|?{$_.getownersid().sid-eq$NT}|select -last 1).ProcessId}
+$11bug=($((gwmi Win32_OperatingSystem).BuildNumber)-eq'22000')-AND(($cmd-eq'file:')-OR(test-path -lit $cmd -PathType Container))
+if ($11bug) {'System.Windows.Forms','Microsoft.VisualBasic' |% {[Reflection.Assembly]::LoadWithPartialName("'$_")}}
+if ($11bug) {$path='^(l)'+$($cmd -replace '([\+\^\%\~\(\)\[\]])','{$1}')+'{ENTER}'; $cmd='control.exe'; $arg='admintools'}
+L ($key-split'\\')[1] $LNK ''; $R=[diagnostics.process]::start($cmd,$arg); if ($R) {$R.PriorityClass='High'; $R.WaitForExit()}
+if ($11bug) {$w=0; do {if($w-gt40){break}; sleep -mi 250;$w++} until (Q); [Microsoft.VisualBasic.Interaction]::AppActivate($(Q))}
+if ($11bug) {[Windows.Forms.SendKeys]::SendWait($path)}; do {sleep 7} while(Q); L '.Default' $LNK 'Interactive User'
 '@; $V = ''; 'cmd', 'arg', 'id', 'key' | ForEach-Object { $V += "`n`$$_='$($(Get-Variable $_ -val)-replace"'","''")';" }; Set-ItemProperty $key $id $($V, $code) -type 7 -force -ea 0
-    Start-Process powershell -args "-win 1 -nop -c `n$V `$env:R=(gi `$key -ea 0).getvalue(`$id)-join''; iex `$env:R" -verb runas -Wait
-    }
+Start-Process powershell -args "-win 1 -nop -c `n$V `$env:R=(gi `$key -ea 0).getvalue(`$id)-join''; iex `$env:R" -verb runas -Wait
+}
 
-    Write-Host "1. Security: Off"
-    Write-Host "2. Security: On"
-    while ($true) {
-    $choice = Read-Host " "
-    if ($choice -match '^[1-2]$') {
-    switch ($choice) {
-    1 {
-    Clear-Host
-    Write-Host "1. Step: One"
-    Write-Host "2. Step: Two (Im In Safe Mode)"
-    while ($true) {
-    $choice = Read-Host " "
-    if ($choice -match '^[1-2]$') {
-    switch ($choice) {
-    1 {
+Write-Host "1. Security: Off"
+Write-Host "2. Security: On"
+while ($true) {
+$choice = Read-Host " "
+if ($choice -match '^[1-2]$') {
+switch ($choice) {
+1 {
+Clear-Host
+Write-Host "1. Step: One"
+Write-Host "2. Step: Two (Im In Safe Mode)"
+while ($true) {
+$choice = Read-Host " "
+if ($choice -match '^[1-2]$') {
+switch ($choice) {
+1 {
 
 Clear-Host
 Write-Host "This script intentionally disables all Windows Security:" -ForegroundColor Red
@@ -3911,8 +3916,8 @@ cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
 shutdown -r -t 00
 exit
 
-    }
-    2 {
+}
+2 {
 
 Clear-Host
 Write-Host "This script intentionally disables all Windows Security:" -ForegroundColor Red
@@ -3967,19 +3972,19 @@ cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
 shutdown -r -t 00
 exit
 
-    }
-    } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
-    exit
-    }
-    2 {
-    Clear-Host
-    Write-Host "1. Step: One"
-    Write-Host "2. Step: Two (Im In Safe Mode)"
-    while ($true) {
-    $choice = Read-Host " "
-    if ($choice -match '^[1-2]$') {
-    switch ($choice) {
-    1 {
+}
+} } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
+exit
+}
+2 {
+Clear-Host
+Write-Host "1. Step: One"
+Write-Host "2. Step: Two (Im In Safe Mode)"
+while ($true) {
+$choice = Read-Host " "
+if ($choice -match '^[1-2]$') {
+switch ($choice) {
+1 {
 
 Clear-Host
 Write-Host "Step: One. Please wait . . ."
@@ -4413,8 +4418,8 @@ cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
 shutdown -r -t 00
 exit
 
-    }
-    2 {
+}
+2 {
 
 Clear-Host
 Write-Host "Step: Two. Please wait . . ."
@@ -4448,56 +4453,56 @@ cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
 shutdown -r -t 00
 exit
 
-    }
-    } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
-    exit
-    }
-    } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
+}
+} } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
+exit
+}
+} } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
 
-    } 
+} 
 
-  8 {
-      #Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/services.ps1" -NoNewWindow -Wait
-          If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
-    {Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
-    Exit}
-    $Host.UI.RawUI.WindowTitle = $myInvocation.MyCommand.Definition + " (Administrator)"
-    $Host.UI.RawUI.BackgroundColor = "Black"
-	$Host.PrivateData.ProgressBackgroundColor = "Black"
-    $Host.PrivateData.ProgressForegroundColor = "White"
-    Clear-Host
+8 {
+  #Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/services.ps1" -NoNewWindow -Wait
+      If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
+{Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
+Exit}
+$Host.UI.RawUI.WindowTitle = $myInvocation.MyCommand.Definition + " (Administrator)"
+$Host.UI.RawUI.BackgroundColor = "Black"
+$Host.PrivateData.ProgressBackgroundColor = "Black"
+$Host.PrivateData.ProgressForegroundColor = "White"
+Clear-Host
 
-    function RunAsTI($cmd, $arg) {
-    $id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
-    $I=[int32]; $M=$I.module.gettype("System.Runtime.Interop`Services.Mar`shal"); $P=$I.module.gettype("System.Int`Ptr"); $S=[string]
-    $D=@(); $T=@(); $DM=[AppDomain]::CurrentDomain."DefineDynami`cAssembly"(1,1)."DefineDynami`cModule"(1); $Z=[uintptr]::size
-    0..5|% {$D += $DM."Defin`eType"("AveYo_$_",1179913,[ValueType])}; $D += [uintptr]; 4..6|% {$D += $D[$_]."MakeByR`efType"()}
-    $F='kernel','advapi','advapi', ($S,$S,$I,$I,$I,$I,$I,$S,$D[7],$D[8]), ([uintptr],$S,$I,$I,$D[9]),([uintptr],$S,$I,$I,[byte[]],$I)
-    0..2|% {$9=$D[0]."DefinePInvok`eMethod"(('CreateProcess','RegOpenKeyEx','RegSetValueEx')[$_],$F[$_]+'32',8214,1,$S,$F[$_+3],1,4)}
-    $DF=($P,$I,$P),($I,$I,$I,$I,$P,$D[1]),($I,$S,$S,$S,$I,$I,$I,$I,$I,$I,$I,$I,[int16],[int16],$P,$P,$P,$P),($D[3],$P),($P,$P,$I,$I)
-    1..5|% {$k=$_; $n=1; $DF[$_-1]|% {$9=$D[$k]."Defin`eField"('f' + $n++, $_, 6)}}; 0..5|% {$T += $D[$_]."Creat`eType"()}
-    0..5|% {nv "A$_" ([Activator]::CreateInstance($T[$_])) -fo}; function F ($1,$2) {$T[0]."G`etMethod"($1).invoke(0,$2)}
-    $TI=(whoami /groups)-like'*1-16-16384*'; $As=0; if(!$cmd) {$cmd='control';$arg='admintools'}; if ($cmd-eq'This PC'){$cmd='file:'}
-    if (!$TI) {'TrustedInstaller','lsass','winlogon'|% {if (!$As) {$9=sc.exe start $_; $As=@(get-process -name $_ -ea 0|% {$_})[0]}}
-    function M ($1,$2,$3) {$M."G`etMethod"($1,[type[]]$2).invoke(0,$3)}; $H=@(); $Z,(4*$Z+16)|% {$H += M "AllocHG`lobal" $I $_}
-    M "WriteInt`Ptr" ($P,$P) ($H[0],$As.Handle); $A1.f1=131072; $A1.f2=$Z; $A1.f3=$H[0]; $A2.f1=1; $A2.f2=1; $A2.f3=1; $A2.f4=1
-    $A2.f6=$A1; $A3.f1=10*$Z+32; $A4.f1=$A3; $A4.f2=$H[1]; M "StructureTo`Ptr" ($D[2],$P,[boolean]) (($A2 -as $D[2]),$A4.f2,$false)
-    $Run=@($null, "powershell -win 1 -nop -c iex `$env:R; # $id", 0, 0, 0, 0x0E080600, 0, $null, ($A4 -as $T[4]), ($A5 -as $T[5]))
-    F 'CreateProcess' $Run; return}; $env:R=''; rp $key $id -force; $priv=[diagnostics.process]."GetM`ember"('SetPrivilege',42)[0]
-    'SeSecurityPrivilege','SeTakeOwnershipPrivilege','SeBackupPrivilege','SeRestorePrivilege' |% {$priv.Invoke($null, @("$_",2))}
-    $HKU=[uintptr][uint32]2147483651; $NT='S-1-5-18'; $reg=($HKU,$NT,8,2,($HKU -as $D[9])); F 'RegOpenKeyEx' $reg; $LNK=$reg[4]
-    function L ($1,$2,$3) {sp 'HKLM:\Software\Classes\AppID\{CDCBCFCA-3CDC-436f-A4E2-0E02075250C2}' 'RunAs' $3 -force -ea 0
-    $b=[Text.Encoding]::Unicode.GetBytes("\Registry\User\$1"); F 'RegSetValueEx' @($2,'SymbolicLinkValue',0,6,[byte[]]$b,$b.Length)}
-    function Q {[int](gwmi win32_process -filter 'name="explorer.exe"'|?{$_.getownersid().sid-eq$NT}|select -last 1).ProcessId}
-    $11bug=($((gwmi Win32_OperatingSystem).BuildNumber)-eq'22000')-AND(($cmd-eq'file:')-OR(test-path -lit $cmd -PathType Container))
-    if ($11bug) {'System.Windows.Forms','Microsoft.VisualBasic' |% {[Reflection.Assembly]::LoadWithPartialName("'$_")}}
-    if ($11bug) {$path='^(l)'+$($cmd -replace '([\+\^\%\~\(\)\[\]])','{$1}')+'{ENTER}'; $cmd='control.exe'; $arg='admintools'}
-    L ($key-split'\\')[1] $LNK ''; $R=[diagnostics.process]::start($cmd,$arg); if ($R) {$R.PriorityClass='High'; $R.WaitForExit()}
-    if ($11bug) {$w=0; do {if($w-gt40){break}; sleep -mi 250;$w++} until (Q); [Microsoft.VisualBasic.Interaction]::AppActivate($(Q))}
-    if ($11bug) {[Windows.Forms.SendKeys]::SendWait($path)}; do {sleep 7} while(Q); L '.Default' $LNK 'Interactive User'
+function RunAsTI($cmd, $arg) {
+$id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
+$I=[int32]; $M=$I.module.gettype("System.Runtime.Interop`Services.Mar`shal"); $P=$I.module.gettype("System.Int`Ptr"); $S=[string]
+$D=@(); $T=@(); $DM=[AppDomain]::CurrentDomain."DefineDynami`cAssembly"(1,1)."DefineDynami`cModule"(1); $Z=[uintptr]::size
+0..5|% {$D += $DM."Defin`eType"("AveYo_$_",1179913,[ValueType])}; $D += [uintptr]; 4..6|% {$D += $D[$_]."MakeByR`efType"()}
+$F='kernel','advapi','advapi', ($S,$S,$I,$I,$I,$I,$I,$S,$D[7],$D[8]), ([uintptr],$S,$I,$I,$D[9]),([uintptr],$S,$I,$I,[byte[]],$I)
+0..2|% {$9=$D[0]."DefinePInvok`eMethod"(('CreateProcess','RegOpenKeyEx','RegSetValueEx')[$_],$F[$_]+'32',8214,1,$S,$F[$_+3],1,4)}
+$DF=($P,$I,$P),($I,$I,$I,$I,$P,$D[1]),($I,$S,$S,$S,$I,$I,$I,$I,$I,$I,$I,$I,[int16],[int16],$P,$P,$P,$P),($D[3],$P),($P,$P,$I,$I)
+1..5|% {$k=$_; $n=1; $DF[$_-1]|% {$9=$D[$k]."Defin`eField"('f' + $n++, $_, 6)}}; 0..5|% {$T += $D[$_]."Creat`eType"()}
+0..5|% {nv "A$_" ([Activator]::CreateInstance($T[$_])) -fo}; function F ($1,$2) {$T[0]."G`etMethod"($1).invoke(0,$2)}
+$TI=(whoami /groups)-like'*1-16-16384*'; $As=0; if(!$cmd) {$cmd='control';$arg='admintools'}; if ($cmd-eq'This PC'){$cmd='file:'}
+if (!$TI) {'TrustedInstaller','lsass','winlogon'|% {if (!$As) {$9=sc.exe start $_; $As=@(get-process -name $_ -ea 0|% {$_})[0]}}
+function M ($1,$2,$3) {$M."G`etMethod"($1,[type[]]$2).invoke(0,$3)}; $H=@(); $Z,(4*$Z+16)|% {$H += M "AllocHG`lobal" $I $_}
+M "WriteInt`Ptr" ($P,$P) ($H[0],$As.Handle); $A1.f1=131072; $A1.f2=$Z; $A1.f3=$H[0]; $A2.f1=1; $A2.f2=1; $A2.f3=1; $A2.f4=1
+$A2.f6=$A1; $A3.f1=10*$Z+32; $A4.f1=$A3; $A4.f2=$H[1]; M "StructureTo`Ptr" ($D[2],$P,[boolean]) (($A2 -as $D[2]),$A4.f2,$false)
+$Run=@($null, "powershell -win 1 -nop -c iex `$env:R; # $id", 0, 0, 0, 0x0E080600, 0, $null, ($A4 -as $T[4]), ($A5 -as $T[5]))
+F 'CreateProcess' $Run; return}; $env:R=''; rp $key $id -force; $priv=[diagnostics.process]."GetM`ember"('SetPrivilege',42)[0]
+'SeSecurityPrivilege','SeTakeOwnershipPrivilege','SeBackupPrivilege','SeRestorePrivilege' |% {$priv.Invoke($null, @("$_",2))}
+$HKU=[uintptr][uint32]2147483651; $NT='S-1-5-18'; $reg=($HKU,$NT,8,2,($HKU -as $D[9])); F 'RegOpenKeyEx' $reg; $LNK=$reg[4]
+function L ($1,$2,$3) {sp 'HKLM:\Software\Classes\AppID\{CDCBCFCA-3CDC-436f-A4E2-0E02075250C2}' 'RunAs' $3 -force -ea 0
+$b=[Text.Encoding]::Unicode.GetBytes("\Registry\User\$1"); F 'RegSetValueEx' @($2,'SymbolicLinkValue',0,6,[byte[]]$b,$b.Length)}
+function Q {[int](gwmi win32_process -filter 'name="explorer.exe"'|?{$_.getownersid().sid-eq$NT}|select -last 1).ProcessId}
+$11bug=($((gwmi Win32_OperatingSystem).BuildNumber)-eq'22000')-AND(($cmd-eq'file:')-OR(test-path -lit $cmd -PathType Container))
+if ($11bug) {'System.Windows.Forms','Microsoft.VisualBasic' |% {[Reflection.Assembly]::LoadWithPartialName("'$_")}}
+if ($11bug) {$path='^(l)'+$($cmd -replace '([\+\^\%\~\(\)\[\]])','{$1}')+'{ENTER}'; $cmd='control.exe'; $arg='admintools'}
+L ($key-split'\\')[1] $LNK ''; $R=[diagnostics.process]::start($cmd,$arg); if ($R) {$R.PriorityClass='High'; $R.WaitForExit()}
+if ($11bug) {$w=0; do {if($w-gt40){break}; sleep -mi 250;$w++} until (Q); [Microsoft.VisualBasic.Interaction]::AppActivate($(Q))}
+if ($11bug) {[Windows.Forms.SendKeys]::SendWait($path)}; do {sleep 7} while(Q); L '.Default' $LNK 'Interactive User'
 '@; $V = ''; 'cmd', 'arg', 'id', 'key' | ForEach-Object { $V += "`n`$$_='$($(Get-Variable $_ -val)-replace"'","''")';" }; Set-ItemProperty $key $id $($V, $code) -type 7 -force -ea 0
-    Start-Process powershell -args "-win 1 -nop -c `n$V `$env:R=(gi `$key -ea 0).getvalue(`$id)-join''; iex `$env:R" -verb runas -Wait
-    }
+Start-Process powershell -args "-win 1 -nop -c `n$V `$env:R=(gi `$key -ea 0).getvalue(`$id)-join''; iex `$env:R" -verb runas -Wait
+}
 
 try {
 $safeBoot = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SafeBoot\Option" -ErrorAction Stop
@@ -4531,14 +4536,14 @@ exit
 }
 }
 
-    Clear-Host
-    Write-Host "1. Services: Off"
-    Write-Host "2. Services: Default"
-    while ($true) {
-    $choice = Read-Host " "
-    if ($choice -match '^[1-2]$') {
-    switch ($choice) {
-    1 {
+Clear-Host
+Write-Host "1. Services: Off"
+Write-Host "2. Services: Default"
+while ($true) {
+$choice = Read-Host " "
+if ($choice -match '^[1-2]$') {
+switch ($choice) {
+1 {
 
 Clear-Host
 Write-Host "This script does not support Wi-Fi & Bluetooth." -ForegroundColor Red
@@ -5400,8 +5405,8 @@ cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
 shutdown -r -t 00
 exit
 
-      }
-    2 {
+  }
+2 {
 
 Clear-Host
 Write-Host "Services: Default . . ."
@@ -6244,22 +6249,22 @@ cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
 shutdown -r -t 00
 exit
 
-      }
-    } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
+  }
+} } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
 
 
 
 
-    }
-      
+}
+  
 9 {
-      Clear-Host
-      Write-Host "Exiting..."
-      break
-    }
-    default {
-            Write-Host "Invalid selection. Please choose a number between 0 and 9."
+  Clear-Host
+  Write-Host "Exiting..."
+  break
+}
+default {
+        Write-Host "Invalid selection. Please choose a number between 0 and 9."
 
-         }
-    }
+     }
+}
 }
