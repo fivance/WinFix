@@ -4,6 +4,8 @@ Use at your own risk, if anything breaks it's on you.
 
 INFO: if you see error messages at certain parts script probably tried to delete/change a reg key/app/feature that is already deleted/removed, not to worry
 
+Must be run as admin and with Set-ExecutionPolicy Unrestricted
+
 Script contains the following: 
 
 Menu style ps script that looks like this:
