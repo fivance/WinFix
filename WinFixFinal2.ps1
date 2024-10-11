@@ -112,7 +112,8 @@ $apps = @(
 @{name = "TeamSpeakSystems.TeamSpeakClient"},
 @{name = "Discord.Discord"},
 @{name = "Valve.Steam"},
-@{name = "Rainmeter.Rainmeter"}
+@{name = "Rainmeter.Rainmeter"},
+@{name = "Oracle.VirtualBox"}
 )
 
 # Get the list of installed apps once at the beginning
@@ -2880,66 +2881,6 @@ Windows Registry Editor Version 5.00
 "IsolatedCommand"="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c"
 "@
 
-
-#Add context menu Open Powershell as Administrator to right click
-$regContent = @"
-
-Windows Registry Editor Version 5.00
-
-[HKEY_CLASSES_ROOT\Directory\Background\shell\PowerShellAsAdmin]
-@="Open Powershell(admin)"
-"Extended"=""
-"HasLUAShield"=""
-"Icon"="powershell.exe"
-
-[HKEY_CLASSES_ROOT\Directory\Background\shell\PowerShellAsAdmin\command]
-@="cmd /c reg add hkcu\\software\\_dir /d \"%v\" /f & start powershell -WindowS H -noP -c Start-Process -v RunAs powershell.exe '-noL -noE -c cd -literalP (gp hkcu:\\software\\_dir).\\\"\\\"\\\"(default)\\\"\\\"\\\"; ri hkcu:\\software\\_dir'"
-
-
-[HKEY_CLASSES_ROOT\Directory\shell\PowerShellAsAdmin]
-@="Open Powershell(admin)"
-"Extended"=""
-"HasLUAShield"=""
-"Icon"="powershell.exe"
-
-[HKEY_CLASSES_ROOT\Directory\shell\PowerShellAsAdmin\command]
-@="cmd /c reg add hkcu\\software\\_dir /d \"%v\" /f & start powershell -WindowS H -noP -c Start-Process -v RunAs powershell.exe '-noL -noE -c cd -literalP (gp hkcu:\\software\\_dir).\\\"\\\"\\\"(default)\\\"\\\"\\\"; ri hkcu:\\software\\_dir'"
-
-
-[HKEY_CLASSES_ROOT\Drive\shell\PowerShellAsAdmin]
-@="Open Powershell(admin)"
-"Extended"=""
-"HasLUAShield"=""
-"Icon"="powershell.exe"
-
-[HKEY_CLASSES_ROOT\Drive\shell\PowerShellAsAdmin\command]
-@="cmd /c reg add hkcu\\software\\_dir /d \"%v\" /f & start powershell -WindowS H -noP -c Start-Process -v RunAs powershell.exe '-noL -noE -c cd -literalP (gp hkcu:\\software\\_dir).\\\"\\\"\\\"(default)\\\"\\\"\\\"; ri hkcu:\\software\\_dir'"
-
-
-[-HKEY_CLASSES_ROOT\LibraryFolder\Background\shell\PowerShellAsAdmin]
-
-
-; To allow mapped drives to be available in elevated PowerShell
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
-"EnableLinkedConnections"=dword:00000001
-"@
-
-# Write the registry content to a temporary file
-$tempRegFile = [System.IO.Path]::GetTempFileName() + ".reg"
-Set-Content -Path $tempRegFile -Value $regContent
-
-# Import the .reg file using reg.exe
-Start-Process -FilePath "reg.exe" -ArgumentList "import", "`"$tempRegFile`"" -Wait -NoNewWindow
-
-# Clean up the temporary file
-Remove-Item -Path $tempRegFile
-
-# Check if import was successful
-if ($LASTEXITCODE -eq 0) {
-Write-Host "Registry settings applied successfully."
-} else {
-Write-Host "Failed to apply registry settings. Exit code: $LASTEXITCODE"
-}
 
 
 Write-Host 'Removing Scheduled Tasks...'
