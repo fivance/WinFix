@@ -2650,7 +2650,7 @@ Clear-Host
 Write-Host "Set Cloudflare DNS servers for adapter..."
 $progresspreference = 'silentlycontinue'
 Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ("1.1.1.1","1.0.0.1")
-Set-DnsClientServerAddress -InterfaceAlias "Wi-fi" -ServerAddresses ("1.1.1.1","1.0.0.1")
+
 
 Clear-Host
 Write-Host "Updating hosts file..."
