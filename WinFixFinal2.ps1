@@ -87,13 +87,14 @@ Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4NNS1"
 Write-Host "Please install 'App Installer' from the Microsoft Store to use winget."
 }
 
+winget update Microsoft.AppInstaller
 
 Write-Host "Installing Apps..."
 $apps = @(
 @{name = "7zip.7zip"},
-@{name = "Google.Chrome"},
+#@{name = "Google.Chrome"},
 @{name = "Brave.Brave"},
-@{name = "Mozilla.Firefox"},
+#@{name = "Mozilla.Firefox"},
 @{name = "SublimeHQ.SublimeText.4"},
 @{name = "Notepad++.Notepad++"},
 @{name = "Microsoft.VisualStudioCode"},
@@ -105,14 +106,14 @@ $apps = @(
 @{name = "AntibodySoftware.WizTree"},
 @{name = "Termius.Termius"},
 @{name = "Ghisler.TotalCommander"},
-@{name = "Famatech.AdvancedIPScanner"},
+#@{name = "Famatech.AdvancedIPScanner"},
 @{name = "WiresharkFoundation.Wireshark"},
 @{name = "GeekUninstaller.GeekUninstaller"},
 @{name = "VideoLAN.VLC"},
 @{name = "TeamSpeakSystems.TeamSpeakClient"},
 @{name = "Discord.Discord"},
 @{name = "Valve.Steam"},
-@{name = "Rainmeter.Rainmeter"},
+#@{name = "Rainmeter.Rainmeter"},
 @{name = "Oracle.VirtualBox"}
 )
 
@@ -446,7 +447,6 @@ Set-Content -Path "$env:TEMP\Inspector\Inspector.nip" -Value $MultilineComment -
 Start-Process -wait "$env:TEMP\Inspector\nvidiaProfileInspector.exe" -ArgumentList "$env:TEMP\Inspector\Inspector.nip"
 # open nvidiacontrolpanel
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
-Wait
 }  
 5 {
   Write-Host "Installing: Direct X . . ."
@@ -1000,8 +1000,6 @@ Clear-Host
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da e69653ca-cf7f-4f05-aa73-cb833fa90ad4 0x00000000
 Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da e69653ca-cf7f-4f05-aa73-cb833fa90ad4 0x00000000
-# open settings
-Start-Process powercfg.cpl
 Clear-Host
 Write-Host "Installing: Set Timer Resolution Service . . ."
 # create .cs file
@@ -1211,8 +1209,7 @@ Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -ErrorAction
 New-Service -Name "Set Timer Resolution Service" -BinaryPathName "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -ErrorAction SilentlyContinue | Out-Null
 Set-Service -Name "Set Timer Resolution Service" -StartupType Auto -ErrorAction SilentlyContinue | Out-Null
 Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction SilentlyContinue | Out-Null
-# start taskmanager
-Start-Process taskmgr.exe
+
 
 
 
@@ -2441,8 +2438,54 @@ Stop-Process -Name explorer -Force
 Start-Process explorer
 
 
-#OneDrive FileExplorer pin remove
-winget uninstall OneDriveSetup.exe 
+# This script will remove and disable OneDrive integration.
+Write-Output "Kill OneDrive process"
+taskkill.exe /F /IM "OneDrive.exe"
+taskkill.exe /F /IM "explorer.exe"
+
+Write-Output "Remove OneDrive"
+if (Test-Path "$env:systemroot\System32\OneDriveSetup.exe") {
+    & "$env:systemroot\System32\OneDriveSetup.exe" /uninstall
+}
+if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
+    & "$env:systemroot\SysWOW64\OneDriveSetup.exe" /uninstall
+}
+
+Write-Output "Removing OneDrive leftovers"
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:localappdata\Microsoft\OneDrive"
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:programdata\Microsoft OneDrive"
+Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:systemdrive\OneDriveTemp"
+# check if directory is empty before removing:
+If ((Get-ChildItem "$env:userprofile\OneDrive" -Recurse | Measure-Object).Count -eq 0) {
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:userprofile\OneDrive"
+}
+
+
+Write-Output "Remove Onedrive from explorer sidebar"
+New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Name "HKCR"
+mkdir -Force "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
+Set-ItemProperty -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" "System.IsPinnedToNameSpaceTree" 0
+mkdir -Force "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
+Set-ItemProperty -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" "System.IsPinnedToNameSpaceTree" 0
+Remove-PSDrive "HKCR"
+
+# Thank you Matthew Israelsson
+Write-Output "Removing run hook for new users"
+reg load "hku\Default" "C:\Users\Default\NTUSER.DAT"
+reg delete "HKEY_USERS\Default\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "OneDriveSetup" /f
+reg unload "hku\Default"
+
+Write-Output "Removing startmenu entry"
+Remove-Item -Force -ErrorAction SilentlyContinue "$env:userprofile\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk"
+
+Write-Output "Removing scheduled task"
+Get-ScheduledTask -TaskPath '\' -TaskName 'OneDrive*' -ea SilentlyContinue | Unregister-ScheduledTask -Confirm:$false
+
+Write-Output "Restarting explorer"
+Start-Process "explorer.exe"
+
+Write-Output "Waiting for explorer to complete loading"
+Start-Sleep 5
 
 
 Clear-Host
@@ -3184,13 +3227,7 @@ schtasks /change /tn "Mozilla\Firefox Background Update 308046B0AF4A39CB" /disab
 # \Microsoft\Windows\RetailDemo\CleanupOfflineContent
 schtasks /delete /tn "Microsoft\Windows\RetailDemo\CleanupOfflineContent" /f
 # schtasks /delete /tn "Microsoft\Windows\RetailDemo" /f
-# CleanUp
-#del /f /q %windir%\PrilagodeniTasks.cmd
-del /f /q %ProgramData%\Microsoft\Diagnosis\*.rbs
-del /f /q /s %ProgramData%\Microsoft\Diagnosis\ETLLogs\*
-del /f /q /s "%ProgramData%\Microsoft\Windows Defender\Scans\*"
-del /f /q %SystemRoot%\Panther\*
-#rd /s /q "%windir%\Setup\Scripts"
+
 
 # disable activity log and clipboard
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowCrossDeviceClipboard" /t REG_DWORD /d 0 /f
@@ -3226,10 +3263,10 @@ schtasks /delete /F /TN PrilagodeniTasks
 # Register DNS
 ipconfig /registerdns
 # disable DNS Functions (LLMNR, Resolution, Devolution, ParallelAandAAAA)
-# netsh.exe winhttp reset proxy
+ netsh.exe winhttp reset proxy
 # disable NetBIOS over TCP/IP-a
-wmic nicconfig where TcpipNetbiosOptions=0 call SetTcpipNetbios 2
-wmic nicconfig where TcpipNetbiosOptions=1 call SetTcpipNetbios 2
+Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 0 } | ForEach-Object { $_.SetTcpipNetbios(2) }
+Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 1 } | ForEach-Object { $_.SetTcpipNetbios(2) }
 # bootloader
 bcdedit /timeout 4
 # force install uncertified drivers
@@ -6202,7 +6239,8 @@ exit
 9 {
   Clear-Host
   Write-Host "Exiting..."
-  break
+break
+exit
 }
 default {
         Write-Host "Invalid selection. Please choose a number between 0 and 9."
