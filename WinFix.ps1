@@ -3282,9 +3282,9 @@ schtasks /delete /F /TN PrilagodeniTasks
 ipconfig /registerdns
 # disable DNS Functions (LLMNR, Resolution, Devolution, ParallelAandAAAA)
  netsh.exe winhttp reset proxy
-# disable NetBIOS over TCP/IP-a
-Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 0 } | ForEach-Object { $_.SetTcpipNetbios(2) }
-Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 1 } | ForEach-Object { $_.SetTcpipNetbios(2) }
+# disable NetBIOS over TCP/IP
+#Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 0 } | ForEach-Object { $_.SetTcpipNetbios(2) }
+#Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 1 } | ForEach-Object { $_.SetTcpipNetbios(2) }
 # bootloader
 bcdedit /timeout 4
 # force install uncertified drivers
