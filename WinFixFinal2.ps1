@@ -113,7 +113,7 @@ $apps = @(
 @{name = "VideoLAN.VLC"},
 @{name = "TeamSpeakSystems.TeamSpeakClient"},
 @{name = "Discord.Discord"},
-@{name = "Valve.Steam"},
+@{name = "Valve.Steam"}
 #@{name = "Rainmeter.Rainmeter"},
 #@{name = "Oracle.VirtualBox"}
 )
