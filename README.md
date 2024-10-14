@@ -22,7 +22,8 @@ Menu style ps script that looks like this:
 8. Experimental services disable tweaks (dont use if you dont know what you're doing)
 9. Exit
 
-
+most of the scripts are from @fr33thyfr33thy, @zoicware - amazing guys
+Some are made by me
 
 
 ------------------------------------------
