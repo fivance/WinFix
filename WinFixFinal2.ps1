@@ -96,26 +96,26 @@ $apps = @(
 #@{name = "Google.Chrome"},
 @{name = "Brave.Brave"},
 #@{name = "Mozilla.Firefox"},
-@{name = "SublimeHQ.SublimeText.4"},
+#@{name = "SublimeHQ.SublimeText.4"},
 @{name = "Notepad++.Notepad++"},
-@{name = "Microsoft.VisualStudioCode"},
-@{name = "Devolutions.RemoteDesktopManager"},
+#@{name = "Microsoft.VisualStudioCode"},
+#@{name = "Devolutions.RemoteDesktopManager"},
 @{name = "Skillbrains.Lightshot"},
 @{name = "voidtools.Everything.Alpha"},
 @{name = "Ditto.Ditto"},
-@{name = "BitSum.ProcessLasso"},
-@{name = "AntibodySoftware.WizTree"},
-@{name = "Termius.Termius"},
-@{name = "Ghisler.TotalCommander"},
+#@{name = "BitSum.ProcessLasso"},
+#@{name = "AntibodySoftware.WizTree"},
+#@{name = "Termius.Termius"},
+#@{name = "Ghisler.TotalCommander"},
 #@{name = "Famatech.AdvancedIPScanner"},
-@{name = "WiresharkFoundation.Wireshark"},
+#@{name = "WiresharkFoundation.Wireshark"},
 @{name = "GeekUninstaller.GeekUninstaller"},
 @{name = "VideoLAN.VLC"},
 @{name = "TeamSpeakSystems.TeamSpeakClient"},
 @{name = "Discord.Discord"},
 @{name = "Valve.Steam"},
 #@{name = "Rainmeter.Rainmeter"},
-@{name = "Oracle.VirtualBox"}
+#@{name = "Oracle.VirtualBox"}
 )
 
 # Get the list of installed apps once at the beginning
@@ -148,7 +148,7 @@ if (-not $isInstalled) {
 2 { 
   Write-Host "Installing: DDU . . ."
 # download DDU
-Get-FileFromWeb -URL "https://github.com/FR33THYFR33THY/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
+Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
 # extract files
 Expand-Archive "$env:TEMP\DDU.zip" -DestinationPath "$env:TEMP\DDU" -ErrorAction SilentlyContinue
 # create config for ddu
@@ -229,7 +229,7 @@ Get-FileFromWeb -URL $url -File "$env:TEMP\NvidiaDriver.exe"
 Clear-Host
 Write-Host "Installing: Nvidia Driver . . ."
 # download 7zip
-Get-FileFromWeb -URL "https://github.com/FR33THYFR33THY/files/raw/main/7-Zip.exe" -File "$env:TEMP\7-Zip.exe"
+Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/7-Zip.exe" -File "$env:TEMP\7-Zip.exe"
 # install 7zip
 Start-Process -wait "$env:TEMP\7-Zip.exe" /S
 # extract files with 7zip
@@ -242,7 +242,7 @@ Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
   Clear-Host
 Write-Host "Installing: NvidiaProfileInspector . . ."
 # download inspector
-Get-FileFromWeb -URL "https://github.com/FR33THYFR33THY/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
+Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
 # extract files
 Expand-Archive "$env:TEMP\Inspector.zip" -DestinationPath "$env:TEMP\Inspector" -ErrorAction SilentlyContinue
 # create config for inspector
@@ -463,6 +463,9 @@ cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\DirectX.exe" -o"$env:TEMP\Di
 Start-Process "$env:TEMP\DirectX\DXSETUP.exe"
 # Pause for 5 seconds
 Start-Sleep -Seconds 5
+
+Clear-Host
+
 #install c++
 Write-Host "Installing: C ++ . . ."
 # download c++ installers
@@ -498,7 +501,8 @@ Start-Process -wait "$env:TEMP\vcredist2015_2017_2019_2022_x64.exe" -ArgumentLis
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v "LetAppsRunInBackground" /t REG_DWORD /d "2" /f | Out-Null
 Clear-Host
 
-Write-Host "Enabling MSI mode"
+Write-Host "Enabling MSI mode..."
+Start-Sleep -Seconds 3
 Clear-Host
 # get all gpu driver ids
 $gpuDevices = Get-PnpDevice -Class Display
@@ -521,6 +525,7 @@ Write-Output "MSISupported: Not found or error accessing the registry."
 }
 }
 
+Write-Host "Cleaning start menu and taskbar..."
 # Clean taskbar
 # Unpin all taskbar icons
 
@@ -801,7 +806,6 @@ Get-AppxPackage -allusers *Microsoft.Windows.Ai.Copilot.Provider* | Remove-AppxP
 # disable copilot regedit
 reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "1" /f | Out-Null
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "1" /f | Out-Null
-Write-Host "Restart to apply . . ."
 Clear-Host
 # disable widgets regedit
 reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\NewsAndInterests\AllowNewsAndInterests" /v "value" /t REG_DWORD /d "0" /f | Out-Null
@@ -811,6 +815,8 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v "AllowNewsAndInterests" /t REG
 Stop-Process -Force -Name Widgets -ErrorAction SilentlyContinue | Out-Null
 Stop-Process -Force -Name WidgetService -ErrorAction SilentlyContinue | Out-Null
 Clear-Host
+Write-Host "Disabling Xbox Gamebar"
+Start-Sleep -Seconds 3
 $progresspreference = 'silentlycontinue'
 # disable gamebar regedit
 reg add "HKCU\System\GameConfigStore" /v "GameDVR_Enabled" /t REG_DWORD /d "0" /f | Out-Null
@@ -840,6 +846,9 @@ Get-AppxPackage -allusers *Microsoft.XboxGamingOverlay* | Remove-AppxPackage
 Get-AppxPackage -allusers *Microsoft.XboxIdentityProvider* | Remove-AppxPackage
 Get-AppxPackage -allusers *Microsoft.XboxSpeechToTextOverlay* | Remove-AppxPackage
 Clear-Host
+
+Write-Host "Installing powerplan..."
+Start-Sleep -Seconds 3
 # import ultimate power plan
 cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 99999999-9999-9999-9999-999999999999 >nul 2>&1"
 # set ultimate power plan active
@@ -1003,6 +1012,7 @@ Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da e69653ca-cf7f-4f05-aa73-cb833fa90ad4 0x00000000
 Clear-Host
 Write-Host "Installing: Set Timer Resolution Service . . ."
+Start-Sleep -Seconds 3
 # create .cs file
 $MultilineComment = @"
 using System;
@@ -2399,6 +2409,8 @@ Regedit.exe /S "$env:TEMP\Registry Optimize.reg"
 Clear-Host
 
 Clear-Host
+Write-Host "Applying black lockscreen..."
+Start-Sleep -Seconds 3
 # black lockscreen
 # create new image
 Add-Type -AssemblyName System.Windows.Forms
@@ -2418,6 +2430,8 @@ reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImageStatus" /t REG_DWORD /d "1" /f | Out-Null
 Write-Host "Set Lockscreen to black"
 
+Write-Host "Applying compact mode for explorer and small icons for desktop..."
+Start-Sleep -Seconds 3
 #Set compact mode in file explorer
 reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "UseCompactMode" /t REG_DWORD /d "1" /f | Out-Null
 Clear-Host
@@ -2437,8 +2451,9 @@ Set-ItemProperty -Path $desktopIconSizeKey -Name IconSize -Value $iconSizeValue
 # Restart explorer.exe to apply changes
 Stop-Process -Name explorer -Force
 Start-Process explorer
+Clear-Host
 
-
+Write-Host "Removing OneDrive...(ignore if erors come up)"
 # This script will remove and disable OneDrive integration.
 Write-Output "Kill OneDrive process"
 taskkill.exe /F /IM "OneDrive.exe"
@@ -2510,6 +2525,14 @@ Get-AppXPackage -AllUsers *Microsoft.Windows.Photos* | Foreach {Add-AppxPackage 
 Timeout /T 2 | Out-Null
 # install notepad w11
 Get-AppXPackage -AllUsers *Microsoft.WindowsNotepad* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+Timeout /T 2 | Out-Null
+# install store
+Get-AppXPackage -AllUsers *Microsoft.WindowsStore* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+Timeout /T 2 | Out-Null
+Get-AppXPackage -AllUsers *Microsoft.Microsoft.StorePurchaseApp * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+Timeout /T 2 | Out-Null
+#install calculator
+Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
 Clear-Host
 Write-Host "Uninstalling: UWP Features. Please wait . . ."
@@ -2589,7 +2612,7 @@ Remove-WindowsCapability -Online -Name "OneCoreUAP.OneSync~~~~0.0.1.0" | Out-Nul
 Remove-WindowsCapability -Online -Name "Print.Fax.Scan~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "Print.Management.Console~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "VBSCRIPT~~~~" | Out-Null
-#Remove-WindowsCapability -Online -Name "WMIC~~~~" | Out-Null
+Remove-WindowsCapability -Online -Name "WMIC~~~~" | Out-Null
 # breaks uwp snippingtool w10
 # Remove-WindowsCapability -Online -Name "Windows.Client.ShellComponents~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "Windows.Kernel.LA57~~~~0.0.1.0" | Out-Null
@@ -2608,9 +2631,9 @@ Dism /Online /NoRestart /Disable-Feature /FeatureName:Printing-Foundation-Intern
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MSRDC-Infrastructure | Out-Null
 # breaks search
 # Dism /Online /NoRestart /Disable-Feature /FeatureName:SearchEngine-Client-Package | Out-Null
-Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol | Out-Null
+#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Client | Out-Null
-Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Deprecation | Out-Null
+#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Deprecation | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:SmbDirect | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:Windows-Identity-Foundation | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MicrosoftWindowsPowerShellV2Root | Out-Null
@@ -2657,16 +2680,6 @@ $running = $false
 } else {
 }
 Timeout /T 1 | Out-Null
-
-Clear-Host
-$progresspreference = 'silentlycontinue'
-Write-Host "Installing: Store and Calculator . . ."
-# install store and calculator
-Get-AppXPackage -AllUsers *Microsoft.WindowsStore* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-Get-AppXPackage -AllUsers *Microsoft.Microsoft.StorePurchaseApp * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-Clear-Host
-
 
 Clear-Host
 Write-Host "Network Adapter: Only Allow IPv4 . . ."
@@ -2951,6 +2964,7 @@ Write-Host 'Removing Scheduled Tasks...'
   
 # Set all services to manual (that are allowed)
 Write-Host "Services to Manual ..."
+Start-Sleep -Seconds 3
   $services = Get-Service
   $servicesKeep = 'AudioEndpointBuilder
   Audiosrv
@@ -2970,6 +2984,7 @@ Write-Host "Services to Manual ..."
     }
   }
   Write-Host 'Services Set to Manual...'
+  Start-Sleep -Seconds 3
 
 Write-Host 'Disabling Blocked Files...'
   Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Security' /V 'DisableSecuritySettingsCheck' /T 'REG_DWORD' /D '00000001' /F
@@ -2979,6 +2994,7 @@ Write-Host 'Disabling Blocked Files...'
 
 #show all current tray icons
   Write-Host 'Showing All Apps on Taskbar'
+  Start-Sleep -Seconds 3
   Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'EnableAutoTray' /t REG_DWORD /d '0' /f
   $keys = Get-ChildItem -Path 'registry::HKEY_CURRENT_USER\Control Panel\NotifyIconSettings' -Recurse -Force
   foreach ($key in $keys) {
@@ -3074,6 +3090,7 @@ Start-Process cleanmgr.exe
 }  
 
 6 {
+  Write-Host "Enabling advanced stuff..."
 
 Start-Process cmd.exe /c
 #registry numlock enabled everywhere
