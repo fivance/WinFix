@@ -87,6 +87,7 @@ Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4NNS1"
 Write-Host "Please install 'App Installer' from the Microsoft Store to use winget."
 }
 
+Write-Host "Updating Microsoft.AppInstaller..."
 winget update Microsoft.AppInstaller
 
 Write-Host "Installing Apps..."
