@@ -2631,9 +2631,9 @@ Dism /Online /NoRestart /Disable-Feature /FeatureName:Printing-Foundation-Intern
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MSRDC-Infrastructure | Out-Null
 # breaks search
 # Dism /Online /NoRestart /Disable-Feature /FeatureName:SearchEngine-Client-Package | Out-Null
-#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol | Out-Null
+Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Client | Out-Null
-#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Deprecation | Out-Null
+Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Deprecation | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:SmbDirect | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:Windows-Identity-Foundation | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MicrosoftWindowsPowerShellV2Root | Out-Null
