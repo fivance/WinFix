@@ -6257,6 +6257,7 @@ exit
 9 {
   Clear-Host
   Write-Host "Exiting..."
+  Start-Sleep -Seconds 3
 exit
 }
 default {
