@@ -44,21 +44,24 @@ $writer.Close()
 
 (Invoke-WebRequest "https://raw.githubusercontent.com/lptstr/winfetch/master/winfetch.ps1" -UseBasicParsing).Content.Remove(0,1) | Invoke-Expression
 
-Write-Host "Press Enter to continue"  
-Read-Host
 
 function show-menu {
- 
 Write-Host " 0. Winget app install"   
 Write-Host " 1. CTT Winutil"
 Write-Host " 2. Clean graphics driver - DDU"
 Write-Host " 3. Install NVIDIA Driver"
 Write-Host " 4. Apply NVIDIA settings"
 Write-Host " 5. Optimization script"
+Write-Host ""
+
+Write-Host `n "" ""   "[EXTRAS]"
+Write-Host "`n"
+
+
 Write-Host " 6. Extra tweaks"
 Write-Host " 7. Disable MS Defender"
-Write-Host " 8. Experimental Services tweak"
-Write-Host " 9. Exit"
+Write-Host " 8. Winget fix"
+Write-Host " 9. Exit script"
               }
 
 while ($true) {
@@ -146,7 +149,7 @@ if (-not $isInstalled) {
 }
 
 2 { 
-  Write-Host "Installing: DDU . . ."
+  Write-Host "Installing: DDU..."
 # download DDU
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
 # extract files
@@ -199,7 +202,7 @@ $Shortcut = $WshShell.CreateShortcut("$Home\Desktop\Display Driver Uninstaller.l
 $Shortcut.TargetPath = "$env:TEMP\DDU\Display Driver Uninstaller.exe"
 $Shortcut.Save()
 Clear-Host
-Write-Host "Restarting To Safe Mode: Press any key to restart . . ."
+Write-Host "Restarting To Safe Mode: Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # toggle safe mode
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
@@ -223,11 +226,11 @@ $windowsVersion = if ([Environment]::OSVersion.Version -ge (new-object 'Version'
 $windowsArchitecture = if ([Environment]::Is64BitOperatingSystem) {"64bit"} else {"32bit"}
 # create download link
 $url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-dch-whql.exe"
-Write-Output "Downloading: Nvidia Driver $version . . ."
+Write-Output "Downloading: Nvidia Driver $version..."
 # download nvidia driver
 Get-FileFromWeb -URL $url -File "$env:TEMP\NvidiaDriver.exe"
 Clear-Host
-Write-Host "Installing: Nvidia Driver . . ."
+Write-Host "Installing: Nvidia Driver..."
 # download 7zip
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/7-Zip.exe" -File "$env:TEMP\7-Zip.exe"
 # install 7zip
@@ -240,7 +243,7 @@ Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
 
 4 {
   Clear-Host
-Write-Host "Installing: NvidiaProfileInspector . . ."
+Write-Host "Installing: NvidiaProfileInspector..."
 # download inspector
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
 # extract files
@@ -450,7 +453,7 @@ Start-Process -wait "$env:TEMP\Inspector\nvidiaProfileInspector.exe" -ArgumentLi
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 }  
 5 {
-  Write-Host "Installing: Direct X . . ."
+  Write-Host "Installing: Direct X..."
 # download direct x
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
 # download 7zip
@@ -463,11 +466,10 @@ cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\DirectX.exe" -o"$env:TEMP\Di
 Start-Process "$env:TEMP\DirectX\DXSETUP.exe"
 # Pause for 5 seconds
 Start-Sleep -Seconds 5
-
 Clear-Host
 
 #install c++
-Write-Host "Installing: C ++ . . ."
+Write-Host "Installing: C++..."
 # download c++ installers
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x86.EXE" -File "$env:TEMP\vcredist2005_x86.exe"
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x64.EXE" -File "$env:TEMP\vcredist2005_x64.exe"
@@ -815,7 +817,7 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v "AllowNewsAndInterests" /t REG
 Stop-Process -Force -Name Widgets -ErrorAction SilentlyContinue | Out-Null
 Stop-Process -Force -Name WidgetService -ErrorAction SilentlyContinue | Out-Null
 Clear-Host
-Write-Host "Disabling Xbox Gamebar"
+Write-Host "Disabling Xbox Gamebar..."
 Start-Sleep -Seconds 3
 $progresspreference = 'silentlycontinue'
 # disable gamebar regedit
@@ -1011,7 +1013,7 @@ powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41a
 Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da e69653ca-cf7f-4f05-aa73-cb833fa90ad4 0x00000000
 Clear-Host
-Write-Host "Installing: Set Timer Resolution Service . . ."
+Write-Host "Installing: Set Timer Resolution Service..."
 Start-Sleep -Seconds 3
 # create .cs file
 $MultilineComment = @"
@@ -1228,7 +1230,7 @@ Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction Si
 
 
 Clear-Host
-Write-Host "Registry: Optimize . . ."
+Write-Host "Registry: Optimize..."
 Start-Sleep -Seconds 3
 
 # create reg file
@@ -2428,8 +2430,7 @@ $edit.Dispose()
 # set image settings
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImagePath" /t REG_SZ /d "C:\Windows\Black.jpg" /f | Out-Null
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImageStatus" /t REG_DWORD /d "1" /f | Out-Null
-Write-Host "Set Lockscreen to black"
-
+Clear-Host
 Write-Host "Applying compact mode for explorer and small icons for desktop..."
 Start-Sleep -Seconds 3
 #Set compact mode in file explorer
@@ -2453,7 +2454,7 @@ Stop-Process -Name explorer -Force
 Start-Process explorer
 Clear-Host
 
-Write-Host "Removing OneDrive...(ignore if erors come up)"
+Write-Host "Removing OneDrive..."
 # This script will remove and disable OneDrive integration.
 Write-Output "Kill OneDrive process"
 taskkill.exe /F /IM "OneDrive.exe"
@@ -2467,7 +2468,7 @@ if (Test-Path "$env:systemroot\SysWOW64\OneDriveSetup.exe") {
     & "$env:systemroot\SysWOW64\OneDriveSetup.exe" /uninstall
 }
 
-Write-Output "Removing OneDrive leftovers"
+Write-Output "Removing OneDrive leftovers..."
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:localappdata\Microsoft\OneDrive"
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:programdata\Microsoft OneDrive"
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:systemdrive\OneDriveTemp"
@@ -2477,7 +2478,7 @@ If ((Get-ChildItem "$env:userprofile\OneDrive" -Recurse | Measure-Object).Count 
 }
 
 
-Write-Output "Remove Onedrive from explorer sidebar"
+Write-Output "Removing Onedrive from explorer sidebar..."
 New-PSDrive -PSProvider "Registry" -Root "HKEY_CLASSES_ROOT" -Name "HKCR"
 mkdir -Force "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
 Set-ItemProperty -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" "System.IsPinnedToNameSpaceTree" 0
@@ -2485,31 +2486,30 @@ mkdir -Force "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}"
 Set-ItemProperty -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" "System.IsPinnedToNameSpaceTree" 0
 Remove-PSDrive "HKCR"
 
-# Thank you Matthew Israelsson
-Write-Output "Removing run hook for new users"
 reg load "hku\Default" "C:\Users\Default\NTUSER.DAT"
 reg delete "HKEY_USERS\Default\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "OneDriveSetup" /f
 reg unload "hku\Default"
 
-Write-Output "Removing startmenu entry"
+Write-Output "Removing Start menu entry..."
 Remove-Item -Force -ErrorAction SilentlyContinue "$env:userprofile\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\OneDrive.lnk"
 
-Write-Output "Removing scheduled task"
+Write-Output "Removing scheduled task..."
 Get-ScheduledTask -TaskPath '\' -TaskName 'OneDrive*' -ea SilentlyContinue | Unregister-ScheduledTask -Confirm:$false
 
-Write-Output "Restarting explorer"
+Write-Output "Restarting explorer..."
+Start-Sleep -Seconds 1
 Start-Process "explorer.exe"
 
-Write-Output "Waiting for explorer to complete loading"
-Start-Sleep 5
+Write-Output "Waiting for explorer to complete loading..."
+Start-Sleep 3
 
 
 Clear-Host
 $progresspreference = 'silentlycontinue'
-Write-Host "Uninstalling: UWP Apps. Please wait . . ."
+Write-Host "Uninstalling UWP Apps..."
 # uninstall all uwp apps keep nvidia & cbs
 # cbs needed for w11 explorer
-Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
+Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*SMB*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
 Timeout /T 2 | Out-Null
 # install hevc video extension needed for amd recording
 Get-AppXPackage -AllUsers *Microsoft.HEVCVideoExtension* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
@@ -2535,7 +2535,7 @@ Timeout /T 2 | Out-Null
 Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
 Clear-Host
-Write-Host "Uninstalling: UWP Features. Please wait . . ."
+Write-Host "Uninstalling UWP Features..."
 # uninstall all uwp features
 # network drivers, paint & notepad left out
 Remove-WindowsCapability -Online -Name "App.StepsRecorder~~~~0.0.1.0" | Out-Null
@@ -2617,7 +2617,7 @@ Remove-WindowsCapability -Online -Name "WMIC~~~~" | Out-Null
 # Remove-WindowsCapability -Online -Name "Windows.Client.ShellComponents~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "Windows.Kernel.LA57~~~~0.0.1.0" | Out-Null
 Clear-Host
-Write-Host "Uninstalling: Legacy Features. Please wait . . ."
+Write-Host "Uninstalling Legacy Features..."
 # uninstall all legacy features
 # .net framework 4.8 advanced services left out
 # Dism /Online /NoRestart /Disable-Feature /FeatureName:NetFx4-AdvSrvs | Out-Null
@@ -2631,16 +2631,16 @@ Dism /Online /NoRestart /Disable-Feature /FeatureName:Printing-Foundation-Intern
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MSRDC-Infrastructure | Out-Null
 # breaks search
 # Dism /Online /NoRestart /Disable-Feature /FeatureName:SearchEngine-Client-Package | Out-Null
-Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol | Out-Null
-Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Client | Out-Null
-Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Deprecation | Out-Null
-Dism /Online /NoRestart /Disable-Feature /FeatureName:SmbDirect | Out-Null
+#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol | Out-Null
+#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Client | Out-Null
+#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Deprecation | Out-Null
+#Dism /Online /NoRestart /Disable-Feature /FeatureName:SmbDirect | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:Windows-Identity-Foundation | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MicrosoftWindowsPowerShellV2Root | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MicrosoftWindowsPowerShellV2 | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:WorkFolders-Client | Out-Null
 Clear-Host
-Write-Host "Uninstalling: Legacy Apps. Please wait . . ."
+Write-Host "Uninstalling Legacy Apps..."
 # uninstall microsoft update health tools w11
 cmd /c "MsiExec.exe /X{C6FD611E-7EFE-488C-A0E0-974C09EF6473} /qn >nul 2>&1"
 # uninstall microsoft update health tools w10
@@ -2682,7 +2682,7 @@ $running = $false
 Timeout /T 1 | Out-Null
 
 Clear-Host
-Write-Host "Network Adapter: Only Allow IPv4 . . ."
+Write-Host "Network Adapter: Only Allow IPv4..."
 $progresspreference = 'silentlycontinue'
 # disable all adapter settings keep ipv4
 Disable-NetAdapterBinding -Name "*" -ComponentID ms_lldp -ErrorAction SilentlyContinue
@@ -2706,7 +2706,7 @@ Disable-NetAdapterBinding -Name "*" -ComponentID ms_msclient -ErrorAction Silent
 Disable-NetAdapterBinding -Name "*" -ComponentID ms_pacer -ErrorAction SilentlyContinue
 
 Clear-Host
-Write-Host "Set Cloudflare DNS servers for adapter..."
+Write-Host "Applying Cloudflare DNS servers for adapter..."
 $progresspreference = 'silentlycontinue'
 Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ("1.1.1.1","1.0.0.1")
 
@@ -2883,19 +2883,7 @@ Start-Process -FilePath "regedit.exe" -ArgumentList "/s $regFilePath" -Wait
 Remove-Item $regFilePath
 }
 
-Write-Host "Adding Powershell context menus"
-$menu = 'Open Windows PowerShell Here as Administrator'
-$command = "$PSHOMEpowershell.exe -NoExit -NoProfile -Command ""Set-Location '%V'"""
-
-'directory', 'directorybackground', 'drive' | ForEach-Object {
-New-Item -Path "Registry::HKEY_CLASSES_ROOT$_shell" -Name runascommand -Force |
-Set-ItemProperty -Name '(default)' -Value $command -PassThru |
-Set-ItemProperty -Path {$_.PSParentPath} -Name '(default)' -Value $menu -PassThru |
-Set-ItemProperty -Name HasLUAShield -Value ''
-}
-
-#Take Ownership context menu
-# Registry file content as a here-string (multiline string)
+# adds take ownership context menu
 $regContent = @"
 Windows Registry Editor Version 5.00
 
@@ -2913,6 +2901,7 @@ Windows Registry Editor Version 5.00
 @="powershell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l' -Verb runAs\""
 "IsolatedCommand"= "powershell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l' -Verb runAs\""
 
+
 [HKEY_CLASSES_ROOT\Directory\shell\TakeOwnership]
 @="Take Ownership"
 "AppliesTo"="NOT (System.ItemPathDisplay:=\"C:\\Users\" OR System.ItemPathDisplay:=\"C:\\ProgramData\" OR System.ItemPathDisplay:=\"C:\\Windows\" OR System.ItemPathDisplay:=\"C:\\Windows\\System32\" OR System.ItemPathDisplay:=\"C:\\Program Files\" OR System.ItemPathDisplay:=\"C:\\Program Files (x86)\")"
@@ -2924,6 +2913,8 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\Directory\shell\TakeOwnership\command]
 @="powershell -windowstyle hidden -command \"$Y = ($null | choice).Substring(1,1); Start-Process cmd -ArgumentList ('/c takeown /f \\\"%1\\\" /r /d ' + $Y + ' && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l /q') -Verb runAs\""
 "IsolatedCommand"="powershell -windowstyle hidden -command \"$Y = ($null | choice).Substring(1,1); Start-Process cmd -ArgumentList ('/c takeown /f \\\"%1\\\" /r /d ' + $Y + ' && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l /q') -Verb runAs\""
+
+
 
 [HKEY_CLASSES_ROOT\Drive\shell\runas]
 @="Take Ownership"
@@ -2937,8 +2928,6 @@ Windows Registry Editor Version 5.00
 @="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c"
 "IsolatedCommand"="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c"
 "@
-
-
 
 Write-Host 'Removing Scheduled Tasks...'
   # Removes all scheduled tasks 
@@ -2986,7 +2975,6 @@ Start-Sleep -Seconds 3
   Write-Host 'Services Set to Manual...'
   Start-Sleep -Seconds 3
 
-Write-Host 'Disabling Blocked Files...'
   Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Security' /V 'DisableSecuritySettingsCheck' /T 'REG_DWORD' /D '00000001' /F
   Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
   Reg.exe add 'HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
@@ -3091,7 +3079,7 @@ Start-Process cleanmgr.exe
 
 6 {
   Write-Host "Enabling advanced stuff..."
-
+  Start-Sleep -Seconds 3
 Start-Process cmd.exe /c
 #registry numlock enabled everywhere
 reg add "HKU\S-1-5-19\Control Panel\Keyboard" /v "InitialKeyboardIndicators" /t REG_SZ /d "2147483650" /f $nul
@@ -3303,7 +3291,7 @@ fsutil behavior set memoryusage 2
 setx DOTNET_CLI_TELEMETRY_OPTOUT 1
 # disable automatic repair
 fsutil repair set c: 0
-# disalbe tracking IPsec filtera firewall (wfpdiag.etl, Process Hacker omogućuje ovo praćenje)
+# disable tracking IPsec filtera firewall (wfpdiag.etl, Process Hacker omogućuje ovo praćenje)
 netsh.exe wfp set options netevents = off
 # passwords never expire
 net.exe accounts /maxpwage:unlimited
@@ -3480,7 +3468,7 @@ Write-Host "If uncomfortable, please close this window!" -ForegroundColor Red
 Write-Host ""
 Pause
 Clear-Host
-Write-Host "Step: One. Please wait . . ."
+Write-Host "Step: One. Please wait..."
 # disable exploit protection, leaving control flow guard cfg on for vanguard anticheat
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Control\Session Manager\kernel`" /v `"MitigationOptions`" /t REG_BINARY /d `"222222000001000000000000000000000000000000000000`" /f >nul 2>&1"
 Timeout /T 2 | Out-Null
@@ -3905,7 +3893,7 @@ schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cleanu
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan" /Disable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Verification" /Disable | Out-Null
 Clear-Host
-Write-Host "Restarting To Safe Mode: Press any key to restart . . ."
+Write-Host "Restarting To Safe Mode: Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # toggle safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
@@ -3936,7 +3924,7 @@ Write-Host "If uncomfortable, please close this window!" -ForegroundColor Red
 Write-Host ""
 Pause
 Clear-Host
-Write-Host "Step: Two. Please wait . . ."
+Write-Host "Step: Two. Please wait..."
 # import reg file
 Regedit.exe /S "$env:TEMP\SecurityOff.reg"
 Timeout /T 5 | Out-Null
@@ -3961,7 +3949,7 @@ Dism /Online /NoRestart /Disable-Feature /FeatureName:Windows-Defender-Applicati
 # disable data execution prevention
 cmd /c "bcdedit /set nx AlwaysOff >nul 2>&1"
 Clear-Host
-Write-Host "Press any key to restart . . ."
+Write-Host "Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # toggle normal boot
 cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
@@ -3984,7 +3972,7 @@ switch ($choice) {
 1 {
 
 Clear-Host
-Write-Host "Step: One. Please wait . . ."
+Write-Host "Step: One. Please wait..."
 # create reg file
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
@@ -4407,7 +4395,7 @@ schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cleanu
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan" /Enable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Verification" /Enable | Out-Null
 Clear-Host
-Write-Host "Restarting To Safe Mode: Press any key to restart . . ."
+Write-Host "Restarting To Safe Mode: Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # toggle safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
@@ -4419,7 +4407,7 @@ exit
 2 {
 
 Clear-Host
-Write-Host "Step: Two. Please wait . . ."
+Write-Host "Step: Two. Please wait..."
 # import reg file
 Regedit.exe /S "$env:TEMP\SecurityOn.reg"
 Timeout /T 5 | Out-Null
@@ -4442,7 +4430,7 @@ Timeout /T 5 | Out-Null
 # enable data execution prevention
 cmd /c "bcdedit /deletevalue nx >nul 2>&1"
 Clear-Host
-Write-Host "Press any key to restart . . ."
+Write-Host "Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # toggle normal boot
 cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
@@ -4459,1805 +4447,85 @@ exit
 } 
 
 8 {
-  #Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/services.ps1" -NoNewWindow -Wait
-      If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
-{Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
-Exit}
-$Host.UI.RawUI.WindowTitle = $myInvocation.MyCommand.Definition + " (Administrator)"
-$Host.UI.RawUI.BackgroundColor = "Black"
-$Host.PrivateData.ProgressBackgroundColor = "Black"
-$Host.PrivateData.ProgressForegroundColor = "White"
-Clear-Host
+function Install-WinGet {
+    $tempFolderName = "WinGetInstall"
+    $tempFolder = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath $tempFolderName
+    New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 
-function RunAsTI($cmd, $arg) {
-$id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
-$I=[int32]; $M=$I.module.gettype("System.Runtime.Interop`Services.Mar`shal"); $P=$I.module.gettype("System.Int`Ptr"); $S=[string]
-$D=@(); $T=@(); $DM=[AppDomain]::CurrentDomain."DefineDynami`cAssembly"(1,1)."DefineDynami`cModule"(1); $Z=[uintptr]::size
-0..5|% {$D += $DM."Defin`eType"("AveYo_$_",1179913,[ValueType])}; $D += [uintptr]; 4..6|% {$D += $D[$_]."MakeByR`efType"()}
-$F='kernel','advapi','advapi', ($S,$S,$I,$I,$I,$I,$I,$S,$D[7],$D[8]), ([uintptr],$S,$I,$I,$D[9]),([uintptr],$S,$I,$I,[byte[]],$I)
-0..2|% {$9=$D[0]."DefinePInvok`eMethod"(('CreateProcess','RegOpenKeyEx','RegSetValueEx')[$_],$F[$_]+'32',8214,1,$S,$F[$_+3],1,4)}
-$DF=($P,$I,$P),($I,$I,$I,$I,$P,$D[1]),($I,$S,$S,$S,$I,$I,$I,$I,$I,$I,$I,$I,[int16],[int16],$P,$P,$P,$P),($D[3],$P),($P,$P,$I,$I)
-1..5|% {$k=$_; $n=1; $DF[$_-1]|% {$9=$D[$k]."Defin`eField"('f' + $n++, $_, 6)}}; 0..5|% {$T += $D[$_]."Creat`eType"()}
-0..5|% {nv "A$_" ([Activator]::CreateInstance($T[$_])) -fo}; function F ($1,$2) {$T[0]."G`etMethod"($1).invoke(0,$2)}
-$TI=(whoami /groups)-like'*1-16-16384*'; $As=0; if(!$cmd) {$cmd='control';$arg='admintools'}; if ($cmd-eq'This PC'){$cmd='file:'}
-if (!$TI) {'TrustedInstaller','lsass','winlogon'|% {if (!$As) {$9=sc.exe start $_; $As=@(get-process -name $_ -ea 0|% {$_})[0]}}
-function M ($1,$2,$3) {$M."G`etMethod"($1,[type[]]$2).invoke(0,$3)}; $H=@(); $Z,(4*$Z+16)|% {$H += M "AllocHG`lobal" $I $_}
-M "WriteInt`Ptr" ($P,$P) ($H[0],$As.Handle); $A1.f1=131072; $A1.f2=$Z; $A1.f3=$H[0]; $A2.f1=1; $A2.f2=1; $A2.f3=1; $A2.f4=1
-$A2.f6=$A1; $A3.f1=10*$Z+32; $A4.f1=$A3; $A4.f2=$H[1]; M "StructureTo`Ptr" ($D[2],$P,[boolean]) (($A2 -as $D[2]),$A4.f2,$false)
-$Run=@($null, "powershell -win 1 -nop -c iex `$env:R; # $id", 0, 0, 0, 0x0E080600, 0, $null, ($A4 -as $T[4]), ($A5 -as $T[5]))
-F 'CreateProcess' $Run; return}; $env:R=''; rp $key $id -force; $priv=[diagnostics.process]."GetM`ember"('SetPrivilege',42)[0]
-'SeSecurityPrivilege','SeTakeOwnershipPrivilege','SeBackupPrivilege','SeRestorePrivilege' |% {$priv.Invoke($null, @("$_",2))}
-$HKU=[uintptr][uint32]2147483651; $NT='S-1-5-18'; $reg=($HKU,$NT,8,2,($HKU -as $D[9])); F 'RegOpenKeyEx' $reg; $LNK=$reg[4]
-function L ($1,$2,$3) {sp 'HKLM:\Software\Classes\AppID\{CDCBCFCA-3CDC-436f-A4E2-0E02075250C2}' 'RunAs' $3 -force -ea 0
-$b=[Text.Encoding]::Unicode.GetBytes("\Registry\User\$1"); F 'RegSetValueEx' @($2,'SymbolicLinkValue',0,6,[byte[]]$b,$b.Length)}
-function Q {[int](gwmi win32_process -filter 'name="explorer.exe"'|?{$_.getownersid().sid-eq$NT}|select -last 1).ProcessId}
-$11bug=($((gwmi Win32_OperatingSystem).BuildNumber)-eq'22000')-AND(($cmd-eq'file:')-OR(test-path -lit $cmd -PathType Container))
-if ($11bug) {'System.Windows.Forms','Microsoft.VisualBasic' |% {[Reflection.Assembly]::LoadWithPartialName("'$_")}}
-if ($11bug) {$path='^(l)'+$($cmd -replace '([\+\^\%\~\(\)\[\]])','{$1}')+'{ENTER}'; $cmd='control.exe'; $arg='admintools'}
-L ($key-split'\\')[1] $LNK ''; $R=[diagnostics.process]::start($cmd,$arg); if ($R) {$R.PriorityClass='High'; $R.WaitForExit()}
-if ($11bug) {$w=0; do {if($w-gt40){break}; sleep -mi 250;$w++} until (Q); [Microsoft.VisualBasic.Interaction]::AppActivate($(Q))}
-if ($11bug) {[Windows.Forms.SendKeys]::SendWait($path)}; do {sleep 7} while(Q); L '.Default' $LNK 'Interactive User'
-'@; $V = ''; 'cmd', 'arg', 'id', 'key' | ForEach-Object { $V += "`n`$$_='$($(Get-Variable $_ -val)-replace"'","''")';" }; Set-ItemProperty $key $id $($V, $code) -type 7 -force -ea 0
-Start-Process powershell -args "-win 1 -nop -c `n$V `$env:R=(gi `$key -ea 0).getvalue(`$id)-join''; iex `$env:R" -verb runas -Wait
+    $apiLatestUrl = if ($Prerelease) { "https://api.github.com/repos/microsoft/winget-cli/releases?per_page=1" } else { "https://api.github.com/repos/microsoft/winget-cli/releases/latest" }
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $WebClient = New-Object System.Net.WebClient
+
+    function Get-LatestUrl {
+        # Properly quote the regular expression used with -match
+        ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match "^Microsoft\.DesktopAppInstaller_8wekyb3d8bbwe\.msixbundle$" }).browser_download_url
+    }
+
+    function Get-LatestHash {
+        # Properly quote the regular expression used with -match
+        $shaUrl = ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match "^Microsoft\.DesktopAppInstaller_8wekyb3d8bbwe\.txt$" }).browser_download_url
+        $shaFile = Join-Path -Path $tempFolder -ChildPath "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt"
+        $WebClient.DownloadFile($shaUrl, $shaFile)
+        Get-Content $shaFile
+    }
+
+    $desktopAppInstaller = @{
+        fileName = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+        url      = $(Get-LatestUrl)
+        hash     = $(Get-LatestHash)
+    }
+
+    $vcLibsUwp = @{
+        fileName = "Microsoft.VCLibs.x64.14.00.Desktop.appx"
+        url      = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
+        hash     = "9BFDE6CFCC530EF073AB4BC9C4817575F63BE1251DD75AAA58CB89299697A569"
+    }
+
+    $uiLibsUwp = @{
+        fileName = "Microsoft.UI.Xaml.2.7.zip"
+        url      = "https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0"
+        hash     = "422FD24B231E87A842C4DAEABC6A335112E0D35B86FAC91F5CE7CF327E36A591"
+    }
+
+    $dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
+    Write-Host "--> Checking dependencies"
+    foreach ($dependency in $dependencies) {
+        $dependency.file = Join-Path -Path $tempFolder -ChildPath $dependency.fileName
+        if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
+            # Fixed the formatting of Write-Host to correctly display the URL
+            Write-Host ("- Downloading: `n{0}" -f $dependency.url)
+            try {
+                $WebClient.DownloadFile($dependency.url, $dependency.file)
+            }
+            catch {
+                throw [System.Net.WebException]::new("Error downloading $($dependency.url).", $_.Exception)
+            }
+            if (-not ($dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
+                throw [System.Activities.VersionMismatchException]::new("Dependency hash does not match the downloaded file")
+            }
+        }
+    }
+
+    if (-Not (Test-Path (Join-Path -Path $tempFolder -ChildPath "Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"))) {
+        Expand-Archive -Path $uiLibsUwp.file -DestinationPath ($tempFolder + "\Microsoft.UI.Xaml.2.7") -Force
+    }
+
+    $uiLibsUwp.file = (Join-Path -Path $tempFolder -ChildPath "Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx")
+    Add-AppxPackage -Path $($desktopAppInstaller.file) -DependencyPath $($vcLibsUwp.file), $($uiLibsUwp.file)
+    Remove-Item $tempFolder -recurse -force
 }
 
-try {
-$safeBoot = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SafeBoot\Option" -ErrorAction Stop
-} catch {
-# check if the volume shadow copy service (vss) is set to manual
-$service = Get-Service -Name VSS
-if ($service.StartType -eq "Manual") {
-Write-Host "Create a restore point . . ."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# open system protection
-Start-Process "C:\Windows\System32\control.exe" -ArgumentList "sysdm.cpl ,4"
-Write-Host ""
-Pause
-Clear-Host
-Write-Host "Restarting To Safe Mode: Press any key to restart . . ."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# Toggle safe boot
-cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
-# Restart
-shutdown -r -t 00
-exit
-} else {
-Clear-Host
-Write-Host "Restarting To Safe Mode: Press any key to restart . . ."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# Toggle safe boot
-cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
-# Restart
-shutdown -r -t 00
-exit
-}
-}
-
-Clear-Host
-Write-Host "1. Services: Off"
-Write-Host "2. Services: Default"
-while ($true) {
-$choice = Read-Host " "
-if ($choice -match '^[1-2]$') {
-switch ($choice) {
-1 {
-
-Clear-Host
-Write-Host "This script does not support Wi-Fi & Bluetooth." -ForegroundColor Red
-Write-Host "If your PC depends on Wi-Fi or Bluetooth, please close this window!" -ForegroundColor Red
-Write-Host ""
-Write-Host "This script will intentionally run minimal services." -ForegroundColor Red
-Write-Host "Certain programs, settings and options may encounter issues or fail to run." -ForegroundColor Red
-Write-Host "If you experience any problems, please switch back to (Services: Default)." -ForegroundColor Red
-Write-Host ""
-Write-Host "If Windows fails to boot or log in after applying this script," -ForegroundColor Red
-Write-Host "please access your restore point from the advanced setup recovery menu." -ForegroundColor Red
-Write-Host ""
-Pause
-Clear-Host
-Write-Host "Services: Off . . ."
-# create reg file
-$MultilineComment = @"
-Windows Registry Editor Version 5.00
-
-; W10 & W11 SERVICES OFF
-; graphic driver & defender services left out.
-; sppsvc set to auto for windows activation. (can disable).
-; seclogon left out, as it will always enable itself. (can disable).
-; appxsvc & TextInputManagementService left out, needed for w11. (w10 can disable).
-; SENS & gpsvc left out, needed for multiple account logins. (single account can disable).
-; Schedule left out, needed for MSI Afterburner to apply GPU overclocks on startup. (can disable).
-; TermService, KeyIso, NgcCtnrSvc & NgcSvc left out, needed for microsoft account login. (local account can disable).
-; camsvc & netprofm left out, needed for mic to work. (can disable. camsvc & netprofm both need to be manual on w11. w10 can run camsvc independently)
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AarSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AJRouter]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ALG]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppIDSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Appinfo]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppMgmt]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppReadiness]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppVClient]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppXSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AssignedAccessManagerSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AudioEndpointBuilder]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Audiosrv]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\autotimesvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AxInstSV]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BcastDVRUserService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BDESVC]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BFE]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BITS]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BluetoothUserService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Browser]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BrokerInfrastructure]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BTAGService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BthAvctpSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\bthserv]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\camsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CaptureService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\cbdhsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CDPSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CDPUserSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CertPropSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ClipSVC]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CloudBackupRestoreSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\cloudidsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\COMSysApp]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ConsentUxUserSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CoreMessagingRegistrar]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CredentialEnrollmentManagerUserSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CryptSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CscService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DcomLaunch]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\dcsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\defragsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DeviceAssociationBrokerSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DeviceAssociationService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DeviceInstall]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DevicePickerUserSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DevicesFlowUserSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DevQueryBroker]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Dhcp]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\diagnosticshub.standardcollector.service]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\diagsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DiagTrack]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DialogBlockingService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DispBrokerDesktopSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DisplayEnhancementService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DmEnrollmentSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\dmwappushservice]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Dnscache]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DoSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\dot3svc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DPS]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DsmSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DsSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DusmSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EapHost]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\edgeupdatem]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\edgeupdate]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EFS]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\embeddedmode]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EntAppSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EventLog]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EventSystem]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Fax]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\fdPHost]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FDResPub]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\fhsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FontCache]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FontCache3.0.0.0]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FrameServerMonitor]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FrameServer]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\GameInputSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\gpsvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\GraphicsPerfSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\hidserv]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\HvHost]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\icssvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\IKEEXT]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\InstallService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\InventorySvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\iphlpsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\IpxlatCfgSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\KeyIso]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\KtmRm]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LanmanServer]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LanmanWorkstation]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\lfsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LicenseManager]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\lltdsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\lmhosts]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\logi_lamparray_service]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LSM]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LxpSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MapsBroker]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\McpManagementService]
-"Start"=dword:00000004
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\MDCoreSvc]
-; "Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MessagingService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MicrosoftEdgeElevationService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MixedRealityOpenXRSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\mpssvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MSDTC]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MSiSCSI]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\msiserver]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MsKeyboardFilter]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NaturalAuthentication]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NcaSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NcbService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NcdAutoSetup]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Netlogon]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Netman]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\netprofm]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NetSetupSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NetTcpPortSharing]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NgcCtnrSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NgcSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NlaSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NPSMSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\nsi]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\OneSyncSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\p2pimsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\p2psvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\P9RdrService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PcaSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PeerDistSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PenService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\perceptionsimulation]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PerfHost]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PhoneSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PimIndexMaintenanceSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\pla]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PlugPlay]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PNRPAutoReg]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PNRPsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PolicyAgent]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Power]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PrintNotify]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PrintWorkflowUserSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ProfSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PushToInstall]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\QWAVE]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RasAuto]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RasMan]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RemoteAccess]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RemoteRegistry]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RetailDemo]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RmSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RpcEptMapper]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RpcLocator]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RpcSs]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SamSs]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SCardSvr]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ScDeviceEnum]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Schedule]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SCPolicySvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SDRSVC]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\seclogon]
-"Start"=dword:00000003
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SecurityHealthService]
-; "Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SEMgrSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SensorDataService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SensorService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SensrSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SENS]
-"Start"=dword:00000002
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Sense]
-; "Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SessionEnv]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SgrmBroker]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SharedAccess]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SharedRealitySvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ShellHWDetection]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\shpamsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\smphost]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SmsRouter]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SNMPTrap]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\spectrum]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Spooler]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\sppsvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SSDPSRV]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ssh-agent]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SstpSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\StateRepository]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\stisvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\StiSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\StorSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\svsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\swprv]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SysMain]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SystemEventsBroker]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TabletInputService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TapiSrv]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TermService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TextInputManagementService]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Themes]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TieringEngineService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TimeBrokerSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TokenBroker]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TrkWks]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TroubleshootingSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TrustedInstaller]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\tzautoupdate]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UdkUserSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UevAgentService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\uhssvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UmRdpService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UnistoreSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\upnphost]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UserDataSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UserManager]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UsoSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\VacSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\VaultSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vds]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicguestinterface]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicheartbeat]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmickvpexchange]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicrdv]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicshutdown]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmictimesync]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicvmsession]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicvss]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\VSS]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\W32Time]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WaaSMedicSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WalletService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WarpJITSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wbengine]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WbioSrvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Wcmsvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wcncsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WdiServiceHost]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WdiSystemHost]
-"Start"=dword:00000004
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdNisSvc]
-; "Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WebClient]
-"Start"=dword:00000004
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\webthreatdefsvc]
-; "Start"=dword:00000004
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\webthreatdefusersvc]
-; "Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Wecsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WEPHOSTSVC]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wercplsupport]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WerSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WFDSConMgrSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WiaRpc]
-"Start"=dword:00000004
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WinDefend]
-; "Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WinHttpAutoProxySvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Winmgmt]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WinRM]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wisvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WlanSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wlidsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wlpasvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WManSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wmiApSrv]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WMPNetworkSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\workfolderssvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WpcMonSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WPDBusEnum]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WpnService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WpnUserService]
-"Start"=dword:00000004
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\wscsvc]
-; "Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WSearch]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wuauserv]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WwanSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\XblAuthManager]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\XblGameSave]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\XboxGipSvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\XboxNetApiSvc]
-"Start"=dword:00000004
-"@
-Set-Content -Path "$env:TEMP\ServicesOff.reg" -Value $MultilineComment -Force
-# disable services RunAsTI
-$ServicesOff = @'
-Regedit.exe /S "$env:TEMP\ServicesOff.reg"
-'@
-RunAsTI powershell "-nologo -windowstyle hidden -command $ServicesOff"
-Timeout /T 5 | Out-Null
-Clear-Host
-Write-Host "Press any key to restart . . ."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# toggle normal boot
-cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
-# restart
-shutdown -r -t 00
-exit
-
-  }
-2 {
-
-Clear-Host
-Write-Host "Services: Default . . ."
-# create reg file
-$MultilineComment = @"
-Windows Registry Editor Version 5.00
-
-; W10 & W11 SERVICES ON
-; graphic driver & defender services left out.
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AarSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AJRouter]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ALG]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppIDSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Appinfo]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppMgmt]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppReadiness]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppVClient]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AppXSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AssignedAccessManagerSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AudioEndpointBuilder]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Audiosrv]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\autotimesvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\AxInstSV]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BcastDVRUserService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BDESVC]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BFE]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BITS]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BluetoothUserService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Browser]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BrokerInfrastructure]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BTAGService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\BthAvctpSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\bthserv]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\camsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CaptureService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\cbdhsvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CDPSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CDPUserSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CertPropSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ClipSVC]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CloudBackupRestoreSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\cloudidsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\COMSysApp]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ConsentUxUserSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CoreMessagingRegistrar]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CredentialEnrollmentManagerUserSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CryptSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\CscService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DcomLaunch]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\dcsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\defragsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DeviceAssociationBrokerSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DeviceAssociationService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DeviceInstall]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DevicePickerUserSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DevicesFlowUserSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DevQueryBroker]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Dhcp]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\diagnosticshub.standardcollector.service]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\diagsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DiagTrack]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DialogBlockingService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DispBrokerDesktopSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DisplayEnhancementService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DmEnrollmentSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\dmwappushservice]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Dnscache]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DoSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\dot3svc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DPS]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DsmSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DsSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\DusmSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EapHost]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\edgeupdatem]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\edgeupdate]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EFS]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\embeddedmode]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EntAppSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EventLog]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\EventSystem]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Fax]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\fdPHost]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FDResPub]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\fhsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FontCache]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FontCache3.0.0.0]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FrameServerMonitor]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\FrameServer]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\GameInputSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\gpsvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\GraphicsPerfSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\hidserv]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\HvHost]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\icssvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\IKEEXT]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\InstallService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\InventorySvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\iphlpsvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\IpxlatCfgSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\KeyIso]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\KtmRm]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LanmanServer]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LanmanWorkstation]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\lfsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LicenseManager]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\lltdsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\lmhosts]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\logi_lamparray_service]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LSM]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\LxpSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MapsBroker]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\McpManagementService]
-"Start"=dword:00000003
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\MDCoreSvc]
-; "Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MessagingService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MicrosoftEdgeElevationService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MixedRealityOpenXRSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\mpssvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MSDTC]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MSiSCSI]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\msiserver]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\MsKeyboardFilter]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NaturalAuthentication]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NcaSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NcbService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NcdAutoSetup]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Netlogon]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Netman]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\netprofm]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NetSetupSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NetTcpPortSharing]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NgcCtnrSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NgcSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NlaSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\NPSMSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\nsi]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\OneSyncSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\p2pimsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\p2psvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\P9RdrService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PcaSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PeerDistSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PenService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\perceptionsimulation]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PerfHost]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PhoneSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PimIndexMaintenanceSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\pla]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PlugPlay]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PNRPAutoReg]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PNRPsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PolicyAgent]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Power]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PrintNotify]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PrintWorkflowUserSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ProfSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\PushToInstall]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\QWAVE]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RasAuto]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RasMan]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RemoteAccess]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RemoteRegistry]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RetailDemo]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RmSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RpcEptMapper]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RpcLocator]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\RpcSs]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SamSs]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SCardSvr]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ScDeviceEnum]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Schedule]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SCPolicySvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SDRSVC]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\seclogon]
-"Start"=dword:00000003
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SecurityHealthService]
-; "Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SEMgrSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SensorDataService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SensorService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SensrSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SENS]
-"Start"=dword:00000002
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Sense]
-; "Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SessionEnv]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SgrmBroker]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SharedAccess]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SharedRealitySvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ShellHWDetection]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\shpamsvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\smphost]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SmsRouter]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SNMPTrap]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\spectrum]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Spooler]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\sppsvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SSDPSRV]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\ssh-agent]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SstpSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\StateRepository]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\stisvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\StiSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\StorSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\svsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\swprv]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SysMain]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\SystemEventsBroker]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TabletInputService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TapiSrv]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TermService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TextInputManagementService]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Themes]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TieringEngineService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TimeBrokerSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TokenBroker]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TrkWks]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TroubleshootingSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\TrustedInstaller]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\tzautoupdate]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UdkUserSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UevAgentService]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\uhssvc]
-"Start"=dword:00000004
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UmRdpService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UnistoreSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\upnphost]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UserDataSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UserManager]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\UsoSvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\VacSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\VaultSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vds]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicguestinterface]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicheartbeat]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmickvpexchange]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicrdv]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicshutdown]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmictimesync]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicvmsession]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\vmicvss]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\VSS]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\W32Time]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WaaSMedicSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WalletService]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WarpJITSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wbengine]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WbioSrvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Wcmsvc]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wcncsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WdiServiceHost]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WdiSystemHost]
-"Start"=dword:00000003
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WdNisSvc]
-; "Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WebClient]
-"Start"=dword:00000003
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\webthreatdefsvc]
-; "Start"=dword:00000003
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\webthreatdefusersvc]
-; "Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Wecsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WEPHOSTSVC]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wercplsupport]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WerSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WFDSConMgrSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WiaRpc]
-"Start"=dword:00000003
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\WinDefend]
-; "Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WinHttpAutoProxySvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\Winmgmt]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WinRM]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wisvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WlanSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wlidsvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wlpasvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WManSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wmiApSrv]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WMPNetworkSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\workfolderssvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WpcMonSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WPDBusEnum]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WpnService]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WpnUserService]
-"Start"=dword:00000002
-
-; [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\wscsvc]
-; "Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WSearch]
-"Start"=dword:00000002
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\wuauserv]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\WwanSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\XblAuthManager]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\XblGameSave]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\XboxGipSvc]
-"Start"=dword:00000003
-
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Services\XboxNetApiSvc]
-"Start"=dword:00000003
-"@
-Set-Content -Path "$env:TEMP\ServicesOn.reg" -Value $MultilineComment -Force
-# enable services RunAsTI
-$ServicesOn = @'
-Regedit.exe /S "$env:TEMP\ServicesOn.reg"
-'@
-RunAsTI powershell "-nologo -windowstyle hidden -command $ServicesOn"
-Timeout /T 5 | Out-Null
-Clear-Host
-Write-Host "Press any key to restart . . ."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# toggle normal boot
-cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
-# restart
-shutdown -r -t 00
-exit
-
-  }
-} } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
-
-
+Write-Host -ForegroundColor Green "--> Updating Winget`n"
+Install-WinGet
 
 
 }
-  
+
+
 9 {
   Clear-Host
   Write-Host "Exiting..."
-  Start-Sleep -Seconds 3
+  Start-Sleep -Seconds 2
 exit
 }
 default {
