@@ -2510,7 +2510,7 @@ $progresspreference = 'silentlycontinue'
 Write-Host "Uninstalling UWP Apps..."
 # uninstall all uwp apps keep nvidia & cbs
 # cbs needed for w11 explorer
-Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*SMB*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
+Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*SMB 1.0*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
 Timeout /T 2 | Out-Null
 # install hevc video extension needed for amd recording
 Get-AppXPackage -AllUsers *Microsoft.HEVCVideoExtension* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
@@ -2955,6 +2955,7 @@ Write-Host 'Removing Scheduled Tasks...'
 # Set all services to manual (that are allowed)
 Write-Host "Services to Manual ..."
 Start-Sleep -Seconds 3
+Clear-Host
   $services = Get-Service
   $servicesKeep = 'AudioEndpointBuilder
   Audiosrv
@@ -2973,6 +2974,7 @@ Start-Sleep -Seconds 3
       }         
     }
   }
+  Clear-Host
   Write-Host 'Services Set to Manual...'
   Start-Sleep -Seconds 3
 
