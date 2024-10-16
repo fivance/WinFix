@@ -2885,50 +2885,50 @@ Remove-Item $regFilePath
 }
 
 # adds take ownership context menu
-$regContent = @"
-Windows Registry Editor Version 5.00
+# Define the URL of the .reg file in the GitHub repository
+$regFileUrl = "https://raw.githubusercontent.com/fivance/files/main/TakeOwnership.reg"
 
-[-HKEY_CLASSES_ROOT\*\shell\TakeOwnership]
-[-HKEY_CLASSES_ROOT\*\shell\runas]
+# Define the temporary path to save the .reg file
+$tempRegFilePath = "$env:TEMP\tempfile.reg"
 
-[HKEY_CLASSES_ROOT\*\shell\TakeOwnership]
-@="Take Ownership"
-"Extended"=-
-"HasLUAShield"=""
-"NoWorkingDirectory"=""
-"NeverDefault"=""
+# Define the log file path
+$logFilePath = "$env:TEMP\reg_script_log.txt"
 
-[HKEY_CLASSES_ROOT\*\shell\TakeOwnership\command]
-@="powershell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l' -Verb runAs\""
-"IsolatedCommand"= "powershell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l' -Verb runAs\""
+# Function to log messages
+function Log-Message {
+    param (
+        [string]$message
+    )
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    Add-Content -Path $logFilePath -Value "$timestamp - $message"
+}
 
+# Download the .reg file
+try {
+    Invoke-WebRequest -Uri $regFileUrl -OutFile $tempRegFilePath
+    Log-Message "Successfully downloaded the .reg file from $regFileUrl."
+    
+    # Check if the download was successful
+    if (Test-Path $tempRegFilePath) {
+        # Execute the .reg file
+        Start-Process regedit.exe -ArgumentList "/s `"$tempRegFilePath`"" -Wait
+        
+        # Check for successful execution
+        if ($LASTEXITCODE -eq 0) {
+            Log-Message "Successfully executed the .reg file."
+        } else {
+            Log-Message "Failed to execute the .reg file. Exit code: $LASTEXITCODE."
+        }
 
-[HKEY_CLASSES_ROOT\Directory\shell\TakeOwnership]
-@="Take Ownership"
-"AppliesTo"="NOT (System.ItemPathDisplay:=\"C:\\Users\" OR System.ItemPathDisplay:=\"C:\\ProgramData\" OR System.ItemPathDisplay:=\"C:\\Windows\" OR System.ItemPathDisplay:=\"C:\\Windows\\System32\" OR System.ItemPathDisplay:=\"C:\\Program Files\" OR System.ItemPathDisplay:=\"C:\\Program Files (x86)\")"
-"Extended"=-
-"HasLUAShield"=""
-"NoWorkingDirectory"=""
-"Position"="middle"
-
-[HKEY_CLASSES_ROOT\Directory\shell\TakeOwnership\command]
-@="powershell -windowstyle hidden -command \"$Y = ($null | choice).Substring(1,1); Start-Process cmd -ArgumentList ('/c takeown /f \\\"%1\\\" /r /d ' + $Y + ' && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l /q') -Verb runAs\""
-"IsolatedCommand"="powershell -windowstyle hidden -command \"$Y = ($null | choice).Substring(1,1); Start-Process cmd -ArgumentList ('/c takeown /f \\\"%1\\\" /r /d ' + $Y + ' && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l /q') -Verb runAs\""
-
-
-
-[HKEY_CLASSES_ROOT\Drive\shell\runas]
-@="Take Ownership"
-"Extended"=-
-"HasLUAShield"=""
-"NoWorkingDirectory"=""
-"Position"="middle"
-"AppliesTo"="NOT (System.ItemPathDisplay:=\"C:\\\")"
-
-[HKEY_CLASSES_ROOT\Drive\shell\runas\command]
-@="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c"
-"IsolatedCommand"="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c"
-"@
+        # Optionally, delete the temporary .reg file
+        Remove-Item -Path $tempRegFilePath -Force
+        Log-Message "Deleted temporary .reg file."
+    } else {
+        Log-Message "Download failed: .reg file not found."
+    }
+} catch {
+    Log-Message "Error occurred: $_"
+}
 
 Write-Host 'Removing Scheduled Tasks...'
   # Removes all scheduled tasks 
