@@ -73,7 +73,7 @@ Write-Host $fullTitle -BackgroundColor White -ForegroundColor Black
   [void]$Win32Type::SetLayeredWindowAttributes($WindowHandle, 0, $OpacityValue, $LwaAlpha)
 }
 
-Set-ConsoleOpacity -Opacity 95
+Set-ConsoleOpacity -Opacity 90
 
 function Get-FileFromWeb {
 param ([Parameter(Mandatory)][string]$URL, [Parameter(Mandatory)][string]$File)
