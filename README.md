@@ -34,4 +34,4 @@ Instructions:
 2. Run script
 
 Can alos be run (in Powershell admin) by:
-iwr https://raw.githubusercontent.com/fivance/WinOpt/main/WinFix.ps1 | iex
+```iwr https://raw.githubusercontent.com/fivance/WinOpt/main/WinFix.ps1 | iex```
