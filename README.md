@@ -10,4 +10,4 @@ some of the scripts are made by me and some are from @fr33thyfr33thy and @zoicwa
 
 Can also be run by running this command in Admin p$ window:
 
-```iwr https://raw.githubusercontent.com/fivance/WinOpt/main/WinFix.ps1 | iex```
+```iwr franivancevic.com/winfix | iex```
