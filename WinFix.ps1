@@ -113,7 +113,7 @@ $writer.Close()
 
 
 function show-menu {
-Write-Host " 0. Winget app install"   
+Write-Host " 0. UniGetUI app install"   
 Write-Host " 1. CTT Winutil"
 Write-Host " 2. Clean graphics driver - DDU"
 Write-Host " 3. Install NVIDIA Driver"
@@ -140,75 +140,44 @@ switch ($choice) {
 
 0 {
 
-# Check if winget is installed by attempting to get the path
-$wingetPath = (Get-Command winget -ErrorAction SilentlyContinue).Path
+# Downloads UniGetUI and its dependencies
+winget install --exact --id MartiCliment.UniGetUI --source winget
+dotnet tool install --global dotnet-tools-outdated --add-source https://api.nuget.org/v3/index.json
 
-if ($wingetPath) {
-Write-Host "winget is already installed at: $wingetPath"
-} else {
-Write-Host "winget is not installed."
 
-# winget is part of the App Installer package from the Microsoft Store
-# Prompt the user to install it
-Write-Host "Installing winget (App Installer) from the Microsoft Store..."
+# URL to the raw bundle file in your GitHub repository
+$bundleUrl = "https://raw.githubusercontent.com/fivance/files/main/apps-bundle.json"
 
-# Open Microsoft Store to the App Installer page for user to install
-Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4NNS1"
+# Location to save the file temporarily
+$tempFile = "$env:temp\apps-bundle.json"
 
-Write-Host "Please install 'App Installer' from the Microsoft Store to use winget."
+# Download the bundle file from GitHub
+Invoke-WebRequest -Uri $bundleUrl -OutFile $tempFile
+
+# Notify the user
+Write-Host "Bundle downloaded successfully to $tempFile. You can now import it into WingetUI."
+Start-Sleep -Seconds 3
+Write-Host "Bundle contains the following:
+-7zip
+-PowerShell 7
+-Everything
+-EverythingToolbar
+-Ditto
+-Notepad++
+-Total Commander
+-Lightshot
+-Geek Uninstaller
+-VLC 
+-Wiztree"
+Start-Sleep -Seconds 3
+
+# Open the folder containing the downloaded bundle (optional)
+Start-Process "explorer.exe" -ArgumentList "/select, $tempFile"
+
+# Optionally, launch WingetUI
+Start-Process "$env:USERPROFILE\AppData\Local\Programs\UniGetUI\UniGetUI.exe"
+
 }
-
-Write-Host "Updating Microsoft.AppInstaller..."
-winget update Microsoft.AppInstaller
-
-Write-Host "Installing Apps..."
-$apps = @(
-@{name = "7zip.7zip"},
-#@{name = "Google.Chrome"},
-@{name = "Brave.Brave"},
-#@{name = "Mozilla.Firefox"},
-#@{name = "SublimeHQ.SublimeText.4"},
-@{name = "Notepad++.Notepad++"},
-#@{name = "Microsoft.VisualStudioCode"},
-#@{name = "Devolutions.RemoteDesktopManager"},
-@{name = "Skillbrains.Lightshot"},
-@{name = "voidtools.Everything.Alpha"},
-@{name = "Ditto.Ditto"},
-#@{name = "BitSum.ProcessLasso"},
-#@{name = "AntibodySoftware.WizTree"},
-#@{name = "Termius.Termius"},
-#@{name = "Ghisler.TotalCommander"},
-#@{name = "Famatech.AdvancedIPScanner"},
-#@{name = "WiresharkFoundation.Wireshark"},
-@{name = "GeekUninstaller.GeekUninstaller"},
-@{name = "VideoLAN.VLC"},
-@{name = "TeamSpeakSystems.TeamSpeakClient"},
-@{name = "Discord.Discord"},
-@{name = "Valve.Steam"}
-#@{name = "Rainmeter.Rainmeter"},
-#@{name = "Oracle.VirtualBox"}
-)
-
-# Get the list of installed apps once at the beginning
-$installedApps = winget list | Select-Object -Skip 1 | ForEach-Object {
-$columns = $_ -split '\s{2,}'  # Split by two or more spaces
-@{ id = $columns[0]; name = $columns[1] }
-}
-
-foreach ($app in $apps) {
-$isInstalled = $installedApps | Where-Object { $_.id -eq $app.name -or $_.name -eq $app.name }
-
-if (-not $isInstalled) {
-    Write-Output "Installing: $($app.name)"
-    try {
-        winget install -e --accept-source-agreements --accept-package-agreements --id $app.name
-    } catch {
-        Write-Output "Failed to install: $($app.name) - $_"
-    }
-} else {
-    Write-Output "Skipping: $($app.name) (already installed)"
-}
-}}
 
 
 1 {
