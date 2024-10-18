@@ -113,6 +113,7 @@ $writer.Close()
 
 
 function show-menu {
+Set-ConsoleOpacity -Opacity 90  # Ensure opacity is set when returning to menu
 Write-Host " 0. UniGetUI app install"   
 Write-Host " 1. CTT Winutil"
 Write-Host " 2. Clean graphics driver - DDU"
@@ -180,12 +181,13 @@ Start-Process "$env:USERPROFILE\AppData\Local\Programs\UniGetUI\UniGetUI.exe"
 }
 
 
-1 {
+1 {Set-ConsoleOpacity
   start powershell {irm christitus.com/win | iex}
 
 }
 
 2 { 
+  Set-ConsoleOpacity
   Write-Host "Installing: DDU..."
 # download DDU
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
@@ -249,6 +251,7 @@ shutdown -r -t 00
 
 3 {
   Clear-Host
+  Set-ConsoleOpacity
 # clean old files
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver" -ErrorAction SilentlyContinue | Out-Null
@@ -280,6 +283,7 @@ Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
 
 4 {
   Clear-Host
+  Set-ConsoleOpacity
 Write-Host "Installing: NvidiaProfileInspector..."
 # download inspector
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
@@ -490,6 +494,7 @@ Start-Process -wait "$env:TEMP\Inspector\nvidiaProfileInspector.exe" -ArgumentLi
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 }  
 5 {
+  Set-ConsoleOpacity
   Write-Host "Installing: Direct X..."
 # download direct x
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
@@ -3116,7 +3121,7 @@ New-Item -Path "$env:SystemDrive\Windows" -Name "Temp" -ItemType Directory -Erro
 Start-Process cleanmgr.exe
 }  
 
-6 {
+6 { Set-ConsoleOpacity
   Write-Host "Enabling advanced stuff..."
   Start-Sleep -Seconds 3
 Start-Process cmd.exe /c
@@ -3437,7 +3442,7 @@ schtasks /change /tn "Microsoft\Windows\WwanSvc\OobeDiscovery" /disable
 exit
 }
 
-7 {
+7 { Set-ConsoleOpacity
   #Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NoNewWindow -Wait
    function RunAsTI($cmd, $arg) {
 $id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
@@ -4485,7 +4490,7 @@ exit
 
 } 
 
-8 {
+8 { Set-ConsoleOpacity
 function Install-WinGet {
     $tempFolderName = "WinGetInstall"
     $tempFolder = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath $tempFolderName
@@ -4561,7 +4566,7 @@ Install-WinGet
 }
 
 
-9 {
+9 { Set-ConsoleOpacity
   function Run-Trusted([String]$command) {
 
   Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
@@ -4718,7 +4723,7 @@ $input = Read-Host 'Done! Press Any Key to Exit'
 if ($input) { exit }}
 
 
-10 {
+10 { Set-ConsoleOpacity
   Clear-Host
   Write-Host "Exiting..."
   Start-Sleep -Seconds 2
