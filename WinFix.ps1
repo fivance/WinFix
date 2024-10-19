@@ -181,7 +181,8 @@ Write-Host " 6. Extra tweaks"
 Write-Host " 7. Disable MS Defender"
 Write-Host " 8. Winget fix"
 Write-Host " 9. Disable Recall and AI features"
-Write-Host " 10. Exit script"
+Write-Host " 10. Install StartAllBack and apply settings"
+Write-Host " 11. Exit script"
               }
 
 while ($true) {
@@ -4736,8 +4737,61 @@ Remove-Item -Path "$env:LOCALAPPDATA\CoreAIPlatform*" -Force -Recurse -ErrorActi
 $input = Read-Host 'Done! Press Any Key to Exit'
 if ($input) { exit }}
 
+10 {
+  Write-Host "Installing StartAllBack..."
+  Start-Sleep -Seconds 3
+  winget install -e -h --accept-source-agreements --accept-package-agreements --id StartIsBack.StartAllBack
 
-10 { 
+# Define the URL of the .reg file in the GitHub repository
+Write-Host "Applying settings..."
+Start-Sleep -Seconds 2
+$regFileUrl = "https://raw.githubusercontent.com/fivance/files/main/StartAllBack.reg"
+
+# Define the temporary path to save the .reg file
+$tempRegFilePath = "$env:TEMP\tempfile.reg"
+
+# Define the log file path
+$logFilePath = "$env:TEMP\reg_script_log.txt"
+
+# Function to log messages
+function Log-Message {
+    param (
+        [string]$message
+    )
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    Add-Content -Path $logFilePath -Value "$timestamp - $message"
+}
+
+# Download the .reg file
+try {
+    Invoke-WebRequest -Uri $regFileUrl -OutFile $tempRegFilePath
+    Log-Message "Successfully downloaded the .reg file from $regFileUrl."
+    
+    # Check if the download was successful
+    if (Test-Path $tempRegFilePath) {
+        # Execute the .reg file
+        Start-Process regedit.exe -ArgumentList "/s `"$tempRegFilePath`"" -Wait
+        
+        # Check for successful execution
+        if ($LASTEXITCODE -eq 0) {
+            Log-Message "Successfully executed the .reg file."
+        } else {
+            Log-Message "Failed to execute the .reg file. Exit code: $LASTEXITCODE."
+        }
+
+        # Optionally, delete the temporary .reg file
+        Remove-Item -Path $tempRegFilePath -Force
+        Log-Message "Deleted temporary .reg file."
+    } else {
+        Log-Message "Download failed: .reg file not found."
+    }
+} catch {
+    Log-Message "Error occurred: $_"
+}
+}
+
+
+11 { 
 
   Clear-Host
   Write-Host "Exiting..."
