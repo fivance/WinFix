@@ -3032,7 +3032,6 @@ Clear-Host
     }
   }
   Clear-Host
-  Write-Host 'Services Set to Manual...'
   Start-Sleep -Seconds 3
 
   Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Security' /V 'DisableSecuritySettingsCheck' /T 'REG_DWORD' /D '00000001' /F
@@ -3455,7 +3454,6 @@ schtasks /change /tn "Microsoft\Windows\WwanSvc\OobeDiscovery" /disable
 #
 # MsCtfMonitor Task (keylogger) je potreban da biste mogli tipkati unutar postavki itd.
 # schtasks /change /tn "Microsoft\Windows\TextServicesFramework\MsCtfMonitor" /disable
-exit
 }
 
 7 { 
