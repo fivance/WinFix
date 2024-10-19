@@ -84,7 +84,7 @@ function Set-ConsoleOpacity {
 }
 
 
-Set-ConsoleOpacity -Opacity 94
+Set-ConsoleOpacity -Opacity 93
 
 function Show-Progress {
   param (
@@ -163,7 +163,7 @@ function Get-FileFromWeb {
 (Invoke-WebRequest "https://raw.githubusercontent.com/lptstr/winfetch/master/winfetch.ps1" -UseBasicParsing).Content.Remove(0,1) | Invoke-Expression
 
 
-Set-ConsoleOpacity -Opacity 94
+Set-ConsoleOpacity -Opacity 93
 function show-menu {
 Write-Host " 0. UniGetUI app install"   
 Write-Host " 1. CTT Winutil"
