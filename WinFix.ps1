@@ -84,7 +84,7 @@ function Set-ConsoleOpacity {
 }
 
 
-Set-ConsoleOpacity -Opacity 90
+Set-ConsoleOpacity -Opacity 94
 
 function Get-FileFromWeb {
 param ([Parameter(Mandatory)][string]$URL, [Parameter(Mandatory)][string]$File)
