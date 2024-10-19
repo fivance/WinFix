@@ -113,7 +113,7 @@ $writer.Close()
 
 
 function show-menu {
-Set-ConsoleOpacity -Opacity 90  # Ensure opacity is set when returning to menu
+Set-ConsoleOpacity -Opacity 90
 Write-Host " 0. UniGetUI app install"   
 Write-Host " 1. CTT Winutil"
 Write-Host " 2. Clean graphics driver - DDU"
@@ -141,39 +141,8 @@ switch ($choice) {
 
 0 {
 
-# Downloads UniGetUI and its dependencies
+# Downloads UniGetUI
 winget install --exact --id MartiCliment.UniGetUI --source winget
-dotnet tool install --global dotnet-tools-outdated --add-source https://api.nuget.org/v3/index.json
-
-
-# URL to the raw bundle file in your GitHub repository
-$bundleUrl = "https://raw.githubusercontent.com/fivance/files/main/apps-bundle.json"
-
-# Location to save the file temporarily
-$tempFile = "$env:temp\apps-bundle.json"
-
-# Download the bundle file from GitHub
-Invoke-WebRequest -Uri $bundleUrl -OutFile $tempFile
-
-# Notify the user
-Write-Host "Bundle downloaded successfully to $tempFile. You can now import it into WingetUI."
-Start-Sleep -Seconds 3
-Write-Host "Bundle contains the following:
--7zip
--PowerShell 7
--Everything
--EverythingToolbar
--Ditto
--Notepad++
--Total Commander
--Lightshot
--Geek Uninstaller
--VLC 
--Wiztree"
-Start-Sleep -Seconds 3
-
-# Open the folder containing the downloaded bundle (optional)
-Start-Process "explorer.exe" -ArgumentList "/select, $tempFile"
 
 # Optionally, launch WingetUI
 Start-Process "$env:USERPROFILE\AppData\Local\Programs\UniGetUI\UniGetUI.exe"
@@ -181,13 +150,12 @@ Start-Process "$env:USERPROFILE\AppData\Local\Programs\UniGetUI\UniGetUI.exe"
 }
 
 
-1 {Set-ConsoleOpacity
+1 {
   start powershell {irm christitus.com/win | iex}
 
 }
 
 2 { 
-  Set-ConsoleOpacity
   Write-Host "Installing: DDU..."
 # download DDU
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
@@ -251,7 +219,6 @@ shutdown -r -t 00
 
 3 {
   Clear-Host
-  Set-ConsoleOpacity
 # clean old files
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver" -ErrorAction SilentlyContinue | Out-Null
@@ -283,7 +250,6 @@ Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
 
 4 {
   Clear-Host
-  Set-ConsoleOpacity
 Write-Host "Installing: NvidiaProfileInspector..."
 # download inspector
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
@@ -494,7 +460,6 @@ Start-Process -wait "$env:TEMP\Inspector\nvidiaProfileInspector.exe" -ArgumentLi
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 }  
 5 {
-  Set-ConsoleOpacity
   Write-Host "Installing: Direct X..."
 # download direct x
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
@@ -3121,7 +3086,7 @@ New-Item -Path "$env:SystemDrive\Windows" -Name "Temp" -ItemType Directory -Erro
 Start-Process cleanmgr.exe
 }  
 
-6 { Set-ConsoleOpacity
+6 { 
   Write-Host "Enabling advanced stuff..."
   Start-Sleep -Seconds 3
 Start-Process cmd.exe /c
@@ -3442,7 +3407,7 @@ schtasks /change /tn "Microsoft\Windows\WwanSvc\OobeDiscovery" /disable
 exit
 }
 
-7 { Set-ConsoleOpacity
+7 { 
   #Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NoNewWindow -Wait
    function RunAsTI($cmd, $arg) {
 $id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
@@ -4490,7 +4455,7 @@ exit
 
 } 
 
-8 { Set-ConsoleOpacity
+8 { 
 function Install-WinGet {
     $tempFolderName = "WinGetInstall"
     $tempFolder = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath $tempFolderName
@@ -4566,7 +4531,7 @@ Install-WinGet
 }
 
 
-9 { Set-ConsoleOpacity
+9 { 
   function Run-Trusted([String]$command) {
 
   Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
@@ -4723,7 +4688,8 @@ $input = Read-Host 'Done! Press Any Key to Exit'
 if ($input) { exit }}
 
 
-10 { Set-ConsoleOpacity
+10 { 
+  
   Clear-Host
   Write-Host "Exiting..."
   Start-Sleep -Seconds 2
