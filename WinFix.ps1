@@ -123,8 +123,7 @@ $writer.Close()
 (Invoke-WebRequest "https://raw.githubusercontent.com/lptstr/winfetch/master/winfetch.ps1" -UseBasicParsing).Content.Remove(0,1) | Invoke-Expression
 
 
-function show-menu {
-Set-ConsoleOpacity -Opacity 90
+Set-ConsoleOpacity -Opacity 90function show-menu {
 Write-Host " 0. UniGetUI app install"   
 Write-Host " 1. CTT Winutil"
 Write-Host " 2. Clean graphics driver - DDU"
