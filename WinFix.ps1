@@ -182,7 +182,8 @@ Write-Host " 7. Disable MS Defender"
 Write-Host " 8. Winget fix"
 Write-Host " 9. Disable Recall and AI features"
 Write-Host " 10. Install StartAllBack and apply settings"
-Write-Host " 11. Exit script"
+Write-Host " 11. Set SystemLocale"
+Write-Host " 12. Exit script"
               }
 
 while ($true) {
@@ -4791,7 +4792,35 @@ try {
 }
 
 
-11 { 
+11 {
+
+# Prompt user for language input
+$language = Read-Host "Enter the language code (e.g., en-US for English, hr-HR for Croatian)"
+
+# Set keyboard layout
+Set-WinUILanguageOverride -Language $language
+Set-WinUserLanguageList -Language $language -Force
+
+# Set region format
+Set-Culture -CultureInfo $language
+
+# Set system locale
+Set-WinSystemLocale -SystemLocale $language
+
+# Update Windows region settings using registry
+$languageRegion = $language -replace '-', '_'
+Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name "LocaleName" -Value $languageRegion
+
+# Restart system to apply changes
+Write-Host "System needs to restart to apply changes."
+Start-Sleep -Seconds 3
+
+}
+
+
+
+
+12 { 
 
   Clear-Host
   Write-Host "Exiting..."
