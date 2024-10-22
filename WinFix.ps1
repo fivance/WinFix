@@ -197,10 +197,10 @@ switch ($choice) {
 
 0 {
 
-# Downloads UniGetUI
+# Download UniGetUI
 winget install --exact --id MartiCliment.UniGetUI --source winget
 
-# Optionally, launch WingetUI
+# launch WingetUI
 Start-Process "$env:USERPROFILE\AppData\Local\Programs\UniGetUI\UniGetUI.exe"
 
 }
@@ -217,7 +217,7 @@ Start-Process "$env:USERPROFILE\AppData\Local\Programs\UniGetUI\UniGetUI.exe"
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
 # extract files
 Expand-Archive "$env:TEMP\DDU.zip" -DestinationPath "$env:TEMP\DDU" -ErrorAction SilentlyContinue
-# create config for ddu
+# Create config for DDU
 $MultilineComment = @"
 <?xml version="1.0" encoding="utf-8"?>
 <DisplayDriverUninstaller Version="18.0.7.8">
@@ -250,11 +250,11 @@ $MultilineComment = @"
 </DisplayDriverUninstaller>
 "@
 Set-Content -Path "$env:TEMP\DDU\Settings\Settings.xml" -Value $MultilineComment -Force
-# set config to read only
+# Set config to read only
 Set-ItemProperty -Path "$env:TEMP\DDU\Settings\Settings.xml" -Name IsReadOnly -Value $true
-# prevent downloads of drivers from windows update
+# Prevent downloads of drivers from windows update
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\DriverSearching" /v "SearchOrderConfig" /t REG_DWORD /d "0" /f | Out-Null
-# create msconfig shortcut
+# Create msconfig shortcut
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$Home\Desktop\Safe Mode Toggle.lnk")
 $Shortcut.TargetPath = "$env:SystemDrive\Windows\System32\msconfig.exe"
@@ -267,15 +267,15 @@ $Shortcut.Save()
 Clear-Host
 Write-Host "Restarting To Safe Mode: Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# toggle safe mode
+# Toggle safe mode
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
-# restart
+# Restart
 shutdown -r -t 00
 }
 
 3 {
   Clear-Host
-# clean old files
+# Clean old files
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver" -ErrorAction SilentlyContinue | Out-Null
 Remove-Item -Recurse -Force "$env:TEMP\7-Zip.exe" -ErrorAction SilentlyContinue | Out-Null
@@ -284,32 +284,32 @@ $uri = 'https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/
 $response = Invoke-WebRequest -Uri $uri -Method GET -UseBasicParsing
 $payload = $response.Content | ConvertFrom-Json
 $version =  $payload.IDS[0].downloadInfo.Version
-# check windows version & bits
+# Check windows version & bits
 $windowsVersion = if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {"win10-win11"} else {"win8-win7"}
 $windowsArchitecture = if ([Environment]::Is64BitOperatingSystem) {"64bit"} else {"32bit"}
-# create download link
+# Create download link
 $url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-dch-whql.exe"
 Write-Output "Downloading: Nvidia Driver $version..."
-# download nvidia driver
+# Download NVIDIA driver
 Get-FileFromWeb -URL $url -File "$env:TEMP\NvidiaDriver.exe"
 Clear-Host
 Write-Host "Installing: Nvidia Driver..."
-# download 7zip
+# Download 7zip
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/7-Zip.exe" -File "$env:TEMP\7-Zip.exe"
-# install 7zip
+# Install 7zip
 Start-Process -wait "$env:TEMP\7-Zip.exe" /S
-# extract files with 7zip
+# Extract files with 7zip
 cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\NvidiaDriver.exe" -o"$env:TEMP\NvidiaDriver" -y | Out-Null
-# install nvidia driver
+# Install nvidia driver
 Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
 }
 
 4 {
   Clear-Host
 Write-Host "Installing: NvidiaProfileInspector..."
-# download inspector
+# Download inspector
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
-# extract files
+# Extract files
 Expand-Archive "$env:TEMP\Inspector.zip" -DestinationPath "$env:TEMP\Inspector" -ErrorAction SilentlyContinue
 # create config for inspector
 $MultilineComment = @"
@@ -517,23 +517,22 @@ Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVID
 }  
 5 {
   Write-Host "Installing: Direct X..."
-# download direct x
+# Download direct x
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
-# download 7zip
+# Download 7zip
 Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2301-x64.exe" -File "$env:TEMP\7-Zip.exe"
-# install 7zip
+# Install 7zip
 Start-Process -wait "$env:TEMP\7-Zip.exe" /S
-# extract files with 7zip
+# Extract files with 7zip
 cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\DirectX.exe" -o"$env:TEMP\DirectX" -y | Out-Null
-# install direct x
+# Install direct x
 Start-Process "$env:TEMP\DirectX\DXSETUP.exe"
-# Pause for 5 seconds
 Start-Sleep -Seconds 5
 Clear-Host
 
-#install c++
+# Install c++
 Write-Host "Installing: C++..."
-# download c++ installers
+# Download c++ installers
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x86.EXE" -File "$env:TEMP\vcredist2005_x86.exe"
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x64.EXE" -File "$env:TEMP\vcredist2005_x64.exe"
 Get-FileFromWeb -URL "https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x86.exe" -File "$env:TEMP\vcredist2008_x86.exe"
@@ -546,7 +545,7 @@ Get-FileFromWeb -URL "https://aka.ms/highdpimfc2013x86enu" -File "$env:TEMP\vcre
 Get-FileFromWeb -URL "https://aka.ms/highdpimfc2013x64enu" -File "$env:TEMP\vcredist2013_x64.exe"
 Get-FileFromWeb -URL "https://aka.ms/vs/17/release/vc_redist.x86.exe" -File "$env:TEMP\vcredist2015_2017_2019_2022_x86.exe"
 Get-FileFromWeb -URL "https://aka.ms/vs/17/release/vc_redist.x64.exe" -File "$env:TEMP\vcredist2015_2017_2019_2022_x64.exe"
-# start c++ installers
+# Start C++ installers
 Start-Process -wait "$env:TEMP\vcredist2005_x86.exe" -ArgumentList "/q"
 Start-Process -wait "$env:TEMP\vcredist2005_x64.exe" -ArgumentList "/q"
 Start-Process -wait "$env:TEMP\vcredist2008_x86.exe" -ArgumentList "/qb"
@@ -562,21 +561,21 @@ Start-Process -wait "$env:TEMP\vcredist2015_2017_2019_2022_x64.exe" -ArgumentLis
 
 
 
-# disable background apps regedit
+# Disable background apps regedit
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v "LetAppsRunInBackground" /t REG_DWORD /d "2" /f | Out-Null
 Clear-Host
 
 Write-Host "Enabling MSI mode..."
 Start-Sleep -Seconds 3
 Clear-Host
-# get all gpu driver ids
+# Get all gpu driver ids
 $gpuDevices = Get-PnpDevice -Class Display
 foreach ($gpu in $gpuDevices) {
 $instanceID = $gpu.InstanceId
-# enable msi mode for all gpus regedit
+# Enable msi mode for all gpus regedit
 reg add "HKLM\SYSTEM\ControlSet001\Enum\$instanceID\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties" /v "MSISupported" /t REG_DWORD /d "1" /f | Out-Null
 }
-# display msi mode for all gpus
+# Display msi mode for all gpus
 foreach ($gpu in $gpuDevices) {
 $instanceID = $gpu.InstanceId
 $regPath = "Registry::HKLM\SYSTEM\ControlSet001\Enum\$instanceID\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties"
@@ -590,17 +589,15 @@ Write-Output "MSISupported: Not found or error accessing the registry."
 }
 }
 
-Write-Host "Cleaning start menu and taskbar..."
 # Clean taskbar
-# Unpin all taskbar icons
-
+Write-Host "Cleaning start menu and taskbar..."
 cmd /c "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband /f >nul 2>&1"
 Remove-Item -Recurse -Force "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch" -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer" -Name "Quick Launch" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch" -Name "User Pinned" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\User Pinned" -Name "TaskBar" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch\User Pinned" -Name "ImplicitAppShortcuts" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-# pin file explorer to taskbar
+# Pin file explorer to taskbar
 $WshShell = New-Object -comObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut("$env:AppData\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\File Explorer.lnk")
 $Shortcut.TargetPath = "explorer"
@@ -821,10 +818,12 @@ TSz1QZdkum5Y3uC7wc7paXh1rm11nwluCC7jiA==
 New-Item "$env:TEMP\start2.txt" -Value $certContent -Force | Out-Null
 certutil.exe -decode "$env:TEMP\start2.txt" "$env:TEMP\start2.bin" >$null
 Copy-Item "$env:TEMP\start2.bin" -Destination "$env:USERPROFILE\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState" -Force | Out-Null
-# CLEAN START MENU W10
-# delete startmenulayout.xml
+
+# Clean Start menu W10
+# Delete startmenulayout.xml
 Remove-Item -Recurse -Force "$env:SystemDrive\Windows\StartMenuLayout.xml" -ErrorAction SilentlyContinue | Out-Null
-# create startmenulayout.xml
+
+# Create startmenulayout.xml
 $MultilineComment = @"
 <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
 <LayoutOptions StartTileGroupCellWidth="6" />
@@ -836,7 +835,8 @@ $MultilineComment = @"
 </LayoutModificationTemplate>
 "@
 Set-Content -Path "C:\Windows\StartMenuLayout.xml" -Value $MultilineComment -Force -Encoding ASCII
-# assign startmenulayout.xml registry
+
+# Assign startmenulayout.xml registry
 $layoutFile="C:\Windows\StartMenuLayout.xml"
 $regAliases = @("HKLM", "HKCU")
 foreach ($regAlias in $regAliases){
@@ -848,22 +848,23 @@ New-Item -Path $basePath -Name "Explorer" | Out-Null
 Set-ItemProperty -Path $keyPath -Name "LockedStartLayout" -Value 1 | Out-Null
 Set-ItemProperty -Path $keyPath -Name "StartLayoutFile" -Value $layoutFile | Out-Null
 }
-# restart explorer
+# Restart explorer
 Stop-Process -Force -Name explorer -ErrorAction SilentlyContinue | Out-Null
 Timeout /T 5 | Out-Null
-# disable lockedstartlayout registry
+
+# Disable lockedstartlayout registry
 foreach ($regAlias in $regAliases){
 $basePath = $regAlias + ":\SOFTWARE\Policies\Microsoft\Windows"
 $keyPath = $basePath + "\Explorer"
 Set-ItemProperty -Path $keyPath -Name "LockedStartLayout" -Value 0
 }
-# restart explorer
+# Restart explorer
 Stop-Process -Force -Name explorer -ErrorAction SilentlyContinue | Out-Null
-# delete startmenulayout.xml
+# Delete startmenulayout.xml
 Remove-Item -Recurse -Force "$env:SystemDrive\Windows\StartMenuLayout.xml" -ErrorAction SilentlyContinue | Out-Null
 Clear-Host
 
-# stop edge running
+# Stop edge running
 $stop = "MicrosoftEdgeUpdate", "OneDrive", "WidgetService", "Widgets", "msedge", "msedgewebview2"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 # uninstall copilot
@@ -872,37 +873,37 @@ Get-AppxPackage -allusers *Microsoft.Windows.Ai.Copilot.Provider* | Remove-AppxP
 reg add "HKCU\Software\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "1" /f | Out-Null
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v "TurnOffWindowsCopilot" /t REG_DWORD /d "1" /f | Out-Null
 Clear-Host
-# disable widgets regedit
+# Disable widgets regedit
 reg add "HKLM\SOFTWARE\Microsoft\PolicyManager\default\NewsAndInterests\AllowNewsAndInterests" /v "value" /t REG_DWORD /d "0" /f | Out-Null
-# remove windows widgets from taskbar regedit
+# Remove windows widgets from taskbar regedit
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Dsh" /v "AllowNewsAndInterests" /t REG_DWORD /d "0" /f | Out-Null
-# stop widgets running
+# Stop widgets running
 Stop-Process -Force -Name Widgets -ErrorAction SilentlyContinue | Out-Null
 Stop-Process -Force -Name WidgetService -ErrorAction SilentlyContinue | Out-Null
 Clear-Host
 Write-Host "Disabling Xbox Gamebar..."
 Start-Sleep -Seconds 3
 $progresspreference = 'silentlycontinue'
-# disable gamebar regedit
+# Disable gamebar regedit
 reg add "HKCU\System\GameConfigStore" /v "GameDVR_Enabled" /t REG_DWORD /d "0" /f | Out-Null
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\GameDVR" /v "AppCaptureEnabled" /t REG_DWORD /d "0" /f | Out-Null
-# disable open xbox game bar using game controller regedit
+# Disable open xbox game bar using game controller regedit
 reg add "HKCU\Software\Microsoft\GameBar" /v "UseNexusForGameBarEnabled" /t REG_DWORD /d "0" /f | Out-Null
-# disable gameinput service regedit
+# Disable gameinput service regedit
 reg add "HKLM\SYSTEM\ControlSet001\Services\GameInputSvc" /v "Start" /t REG_DWORD /d "4" /f | Out-Null
-# disable gamedvr and broadcast user service regedit
+# Disable gamedvr and broadcast user service regedit
 reg add "HKLM\SYSTEM\ControlSet001\Services\BcastDVRUserService" /v "Start" /t REG_DWORD /d "4" /f | Out-Null
-# disable xbox accessory management service regedit
+# Disable xbox accessory management service regedit
 reg add "HKLM\SYSTEM\ControlSet001\Services\XboxGipSvc" /v "Start" /t REG_DWORD /d "4" /f | Out-Null
-# disable xbox live auth manager service regedit
+# Disable xbox live auth manager service regedit
 reg add "HKLM\SYSTEM\ControlSet001\Services\XblAuthManager" /v "Start" /t REG_DWORD /d "4" /f | Out-Null
-# disable xbox live game save service regedit
+# Disable xbox live game save service regedit
 reg add "HKLM\SYSTEM\ControlSet001\Services\XblGameSave" /v "Start" /t REG_DWORD /d "4" /f | Out-Null
-# disable xbox live networking service regedit
+# Disable xbox live networking service regedit
 reg add "HKLM\SYSTEM\ControlSet001\Services\XboxNetApiSvc" /v "Start" /t REG_DWORD /d "4" /f | Out-Null
-# stop gamebar running
+# Stop gamebar running
 Stop-Process -Force -Name GameBar -ErrorAction SilentlyContinue | Out-Null
-# uninstall gamebar & xbox apps
+# Uninstall gamebar & xbox apps
 Get-AppxPackage -allusers *Microsoft.GamingApp* | Remove-AppxPackage
 Get-AppxPackage -allusers *Microsoft.Xbox.TCUI* | Remove-AppxPackage
 Get-AppxPackage -allusers *Microsoft.XboxApp* | Remove-AppxPackage
@@ -914,15 +915,15 @@ Clear-Host
 
 Write-Host "Installing powerplan..."
 Start-Sleep -Seconds 3
-# import ultimate power plan
+# Import ultimate power plan
 cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 99999999-9999-9999-9999-999999999999 >nul 2>&1"
-# set ultimate power plan active
+# Set ultimate power plan active
 cmd /c "powercfg /SETACTIVE 99999999-9999-9999-9999-999999999999 >nul 2>&1"
-# get all powerplans
+# Get all powerplans
 $output = powercfg /L
 $powerPlans = @()
 foreach ($line in $output) {
-# extract guid manually to avoid lang issues
+# Extract guid manually to avoid lang issues
 if ($line -match ':') {
 $parse = $line -split ':'
 $index = $parse[1].Trim().indexof('(')
@@ -930,155 +931,155 @@ $guid = $parse[1].Trim().Substring(0, $index)
 $powerPlans += $guid
 }
 }
-# delete all powerplans
+# Delete all powerplans
 foreach ($plan in $powerPlans) {
 cmd /c "powercfg /delete $plan" | Out-Null
 }
 Clear-Host
-# disable hibernate
+# Disable hibernate
 powercfg /hibernate off
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Power`" /v `"HibernateEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Power`" /v `"HibernateEnabledDefault`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-# disable lock
+# Disable lock
 cmd /c "reg add `"HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings`" /v `"ShowLockOption`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-# disable sleep
+# Disable sleep
 cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings`" /v `"ShowSleepOption`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-# disable fast boot
+# Disable fast boot
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power`" /v `"HiberbootEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-# unpark cpu cores
+# Unpark cpu cores
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583`" /v `"ValueMax`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-# disable power throttling
+# Disable power throttling
 cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling`" /v `"PowerThrottlingOff`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
-# unhide hub selective suspend timeout
+# Unhide hub selective suspend timeout
 cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\0853a681-27c8-4100-a2fd-82013e970683`" /v `"Attributes`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
-# unhide usb 3 link power management
+# Unhide usb 3 link power management
 cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\d4e98f31-5ffe-4ce1-be31-1b38b384c009`" /v `"Attributes`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
 # MODIFY DESKTOP & LAPTOP SETTINGS
-# hard disk turn off hard disk after 0%
+# Hard disk turn off hard disk after 0%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 0012ee47-9041-4b5d-9b77-535fba8b1442 6738e2c4-e8a5-4a42-b16a-e040e769756e 0x00000000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 0012ee47-9041-4b5d-9b77-535fba8b1442 6738e2c4-e8a5-4a42-b16a-e040e769756e 0x00000000
-# desktop background settings slide show paused
+# Desktop background settings slide show paused
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 0d7dbae2-4294-402a-ba8e-26777e8488cd 309dce9b-bef4-4119-9921-a851fb12f0f4 001
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 0d7dbae2-4294-402a-ba8e-26777e8488cd 309dce9b-bef4-4119-9921-a851fb12f0f4 001
-# wireless adapter settings power saving mode maximum performance
+# Wireless adapter settings power saving mode maximum performance
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1 12bbebe6-58d6-4636-95bb-3217ef867c1a 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 19cbb8fa-5279-450e-9fac-8a3d5fedd0c1 12bbebe6-58d6-4636-95bb-3217ef867c1a 000
-# sleep
-# sleep after 0%
+# Sleep
+# Sleep after 0%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 238c9fa8-0aad-41ed-83f4-97be242c8f20 29f6c1db-86da-48c5-9fdb-f2b67b1f44da 0x00000000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 238c9fa8-0aad-41ed-83f4-97be242c8f20 29f6c1db-86da-48c5-9fdb-f2b67b1f44da 0x00000000
-# allow hybrid sleep off
+# Allow hybrid sleep off
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 238c9fa8-0aad-41ed-83f4-97be242c8f20 94ac6d29-73ce-41a6-809f-6363ba21b47e 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 238c9fa8-0aad-41ed-83f4-97be242c8f20 94ac6d29-73ce-41a6-809f-6363ba21b47e 000
-# hibernate after
+# Hibernate after
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 238c9fa8-0aad-41ed-83f4-97be242c8f20 9d7815a6-7ee4-497e-8888-515a05f02364 0x00000000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 238c9fa8-0aad-41ed-83f4-97be242c8f20 9d7815a6-7ee4-497e-8888-515a05f02364 0x00000000
-# allow wake timers disable
+# Allow wake timers disable
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 238c9fa8-0aad-41ed-83f4-97be242c8f20 bd3b718a-0680-4d9d-8ab2-e1d2b4ac806d 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 238c9fa8-0aad-41ed-83f4-97be242c8f20 bd3b718a-0680-4d9d-8ab2-e1d2b4ac806d 000
-# usb settings
-# hub selective suspend timeout 0
+# USB settings
+# Hub selective suspend timeout 0
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 2a737441-1930-4402-8d77-b2bebba308a3 0853a681-27c8-4100-a2fd-82013e970683 0x00000000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 2a737441-1930-4402-8d77-b2bebba308a3 0853a681-27c8-4100-a2fd-82013e970683 0x00000000
-# usb selective suspend setting disabled
+# USB selective suspend setting disabled
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 000
-# usb 3 link power management - off
+# USB 3 link power management - off
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 2a737441-1930-4402-8d77-b2bebba308a3 d4e98f31-5ffe-4ce1-be31-1b38b384c009 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 2a737441-1930-4402-8d77-b2bebba308a3 d4e98f31-5ffe-4ce1-be31-1b38b384c009 000
-# power buttons and lid start menu power button shut down
+# Power buttons and lid start menu power button shut down
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 4f971e89-eebd-4455-a8de-9e59040e7347 a7066653-8d6c-40a8-910e-a1f54b84c7e5 002
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 4f971e89-eebd-4455-a8de-9e59040e7347 a7066653-8d6c-40a8-910e-a1f54b84c7e5 002
-# pci express link state power management off
+# PCI express link state power management off
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 501a4d13-42af-4429-9fd1-a8218c268e20 ee12f906-d277-404b-b6da-e5fa1a576df5 000
-# processor power management
-# minimum processor state 100%
+# Processor power management
+# Minimum processor state 100%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 893dee8e-2bef-41e0-89c6-b55d0929964c 0x00000064
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 893dee8e-2bef-41e0-89c6-b55d0929964c 0x00000064
-# system cooling policy active
+# System cooling policy active
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 94d3a615-a899-4ac5-ae2b-e4d8f634367f 001
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 94d3a615-a899-4ac5-ae2b-e4d8f634367f 001
-# maximum processor state 100%
+# Maximum processor state 100%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 bc5038f7-23e0-4960-96da-33abaf5935ec 0x00000064
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 bc5038f7-23e0-4960-96da-33abaf5935ec 0x00000064
-# display
-# turn off display after 0%
+# Display
+# Turn off display after 0%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e 0x00000000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e 0x00000000
-# display brightness 100%
+# Display brightness 100%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 aded5e82-b909-4619-9949-f5d71dac0bcb 0x00000064
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 aded5e82-b909-4619-9949-f5d71dac0bcb 0x00000064
-# dimmed display brightness 100%
+# Dimmed display brightness 100%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 f1fbfde2-a960-4165-9f88-50667911ce96 0x00000064
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 f1fbfde2-a960-4165-9f88-50667911ce96 0x00000064
-# enable adaptive brightness off
+# Enable adaptive brightness off
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 fbd9aa66-9553-4097-ba44-ed6e9d65eab8 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 7516b95f-f776-4464-8c53-06167f40cc99 fbd9aa66-9553-4097-ba44-ed6e9d65eab8 000
-# video playback quality bias video playback performance bias
+# Video playback quality bias video playback performance bias
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 9596fb26-9850-41fd-ac3e-f7c3c00afd4b 10778347-1370-4ee0-8bbd-33bdacaade49 001
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 9596fb26-9850-41fd-ac3e-f7c3c00afd4b 10778347-1370-4ee0-8bbd-33bdacaade49 001
-# when playing video optimize video quality
+# When playing video optimize video quality
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 9596fb26-9850-41fd-ac3e-f7c3c00afd4b 34c7b99f-9a6d-4b3c-8dc7-b6693b78cef4 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 9596fb26-9850-41fd-ac3e-f7c3c00afd4b 34c7b99f-9a6d-4b3c-8dc7-b6693b78cef4 000
 # MODIFY LAPTOP SETTINGS
-# intel(r) graphics settings intel(r) graphics power plan maximum performance
+# Intel(r) graphics settings Intel(r) graphics power plan maximum performance
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 44f3beca-a7c0-460e-9df2-bb8b99e0cba6 3619c3f2-afb2-4afc-b0e9-e7fef372de36 002
 Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 44f3beca-a7c0-460e-9df2-bb8b99e0cba6 3619c3f2-afb2-4afc-b0e9-e7fef372de36 002
 Clear-Host
-# amd power slider overlay best performance
+# AMD power slider overlay best performance
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 c763b4ec-0e50-4b6b-9bed-2b92a6ee884e 7ec1751b-60ed-4588-afb5-9819d3d77d90 003
 Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 c763b4ec-0e50-4b6b-9bed-2b92a6ee884e 7ec1751b-60ed-4588-afb5-9819d3d77d90 003
 Clear-Host
-# ati graphics power settings ati powerplay settings maximize performance
+# ATI graphics power settings ati powerplay settings maximize performance
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 f693fb01-e858-4f00-b20f-f30e12ac06d6 191f65b5-d45c-4a4f-8aae-1ab8bfd980e6 001
 Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 f693fb01-e858-4f00-b20f-f30e12ac06d6 191f65b5-d45c-4a4f-8aae-1ab8bfd980e6 001
 Clear-Host
-# switchable dynamic graphics global settings maximize performance
+# Switchable dynamic graphics global settings maximize performance
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 e276e160-7cb0-43c6-b20b-73f5dce39954 a1662ab2-9d34-4e53-ba8b-2639b9e20857 003
 Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 e276e160-7cb0-43c6-b20b-73f5dce39954 a1662ab2-9d34-4e53-ba8b-2639b9e20857 003
 Clear-Host
-# battery
-# critical battery notification off
+# Battery
+# Critical battery notification off
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f 5dbb7c9f-38e9-40d2-9749-4f8a0e9f640f 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f 5dbb7c9f-38e9-40d2-9749-4f8a0e9f640f 000
-# critical battery action do nothing
+# Critical battery action do nothing
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f 637ea02f-bbcb-4015-8e2c-a1c7b9c0b546 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f 637ea02f-bbcb-4015-8e2c-a1c7b9c0b546 000
-# low battery level 0%
+# Low battery level 0%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f 8183ba9a-e910-48da-8769-14ae6dc1170a 0x00000000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f 8183ba9a-e910-48da-8769-14ae6dc1170a 0x00000000
-# critical battery level 0%
+# Critical battery level 0%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f 9a66d8d7-4ff7-4ef9-b5a2-5a326ca2a469 0x00000000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f 9a66d8d7-4ff7-4ef9-b5a2-5a326ca2a469 0x00000000
-# low battery notification off
+# Low battery notification off
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f bcded951-187b-4d05-bccc-f7e51960c258 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f bcded951-187b-4d05-bccc-f7e51960c258 000
-# low battery action do nothing
+# Low battery action do nothing
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f d8742dcb-3e6a-4b3c-b3fe-374623cdcf06 000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f d8742dcb-3e6a-4b3c-b3fe-374623cdcf06 000
-# reserve battery level 0%
+# Reserve battery level 0%
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f f3c5027d-cd16-4930-aa6b-90db844a8f00 0x00000000
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 e73a048d-bf27-4f12-9731-8b2076e8891f f3c5027d-cd16-4930-aa6b-90db844a8f00 0x00000000
-# immersive control panel
-# low screen brightness when using battery saver disable
+# Immersive control panel
+# Low screen brightness when using battery saver disable
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da 13d09884-f74e-474a-a852-b6bde8ad03a8 0x00000064
 Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da 13d09884-f74e-474a-a852-b6bde8ad03a8 0x00000064
 Clear-Host
-# immersive control panel
-# turn battery saver on automatically at never
+# Immersive control panel
+# Turn battery saver on automatically at never
 powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da e69653ca-cf7f-4f05-aa73-cb833fa90ad4 0x00000000
 Clear-Host
 powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da e69653ca-cf7f-4f05-aa73-cb833fa90ad4 0x00000000
 Clear-Host
 Write-Host "Installing: Set Timer Resolution Service..."
 Start-Sleep -Seconds 3
-# create .cs file
+# Create .cs file
 $MultilineComment = @"
 using System;
 using System.Runtime.InteropServices;
@@ -1277,26 +1278,21 @@ public class WindowsServiceInstaller : Installer
 }
 "@
 Set-Content -Path "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -Value $MultilineComment -Force
-# compile and create service
+# Compile and create service
 Start-Process -Wait "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" -ArgumentList "-out:C:\Windows\SetTimerResolutionService.exe C:\Windows\SetTimerResolutionService.cs" -WindowStyle Hidden
-# delete file
+# Delete file
 Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -ErrorAction SilentlyContinue | Out-Null
-# install and start service
+# Install and start service
 New-Service -Name "Set Timer Resolution Service" -BinaryPathName "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -ErrorAction SilentlyContinue | Out-Null
 Set-Service -Name "Set Timer Resolution Service" -StartupType Auto -ErrorAction SilentlyContinue | Out-Null
 Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction SilentlyContinue | Out-Null
-
-
-
-
-
 
 
 Clear-Host
 Write-Host "Registry: Optimize..."
 Start-Sleep -Seconds 3
 
-# create reg file
+# Create reg file
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
 
@@ -2466,18 +2462,19 @@ C0,CC,0C,00,00,00,00,00,\
 "MouseThreshold2"="0"
 "@
 Set-Content -Path "$env:TEMP\Registry Optimize.reg" -Value $MultilineComment -Force
-# edit reg file
+# Edit reg file
 $path = "$env:TEMP\Registry Optimize.reg"
 (Get-Content $path) -replace "\?","$" | Out-File $path
-# import reg file
+# Import reg file
 Regedit.exe /S "$env:TEMP\Registry Optimize.reg"
 Clear-Host
 
 Clear-Host
 Write-Host "Applying black lockscreen..."
 Start-Sleep -Seconds 3
-# black lockscreen
-# create new image
+
+# Black lockscreen
+# Create new image
 Add-Type -AssemblyName System.Windows.Forms
 $screenWidth = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Width
 $screenHeight = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Height
@@ -2490,7 +2487,7 @@ $graphics.FillRectangle($color, 0, 0, $edit.Width, $edit.Height)
 $graphics.Dispose()
 $edit.Save($file)
 $edit.Dispose()
-# set image settings
+# Set image settings
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImagePath" /t REG_SZ /d "C:\Windows\Black.jpg" /f | Out-Null
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImageStatus" /t REG_DWORD /d "1" /f | Out-Null
 Clear-Host
@@ -2518,7 +2515,7 @@ Start-Process explorer
 Clear-Host
 
 Write-Host "Removing OneDrive..."
-# This script will remove and disable OneDrive integration.
+# Remove and disable OneDrive integration.
 Write-Output "Kill OneDrive process"
 taskkill.exe /F /IM "OneDrive.exe"
 taskkill.exe /F /IM "explorer.exe"
@@ -2570,37 +2567,38 @@ Start-Sleep 3
 Clear-Host
 $progresspreference = 'silentlycontinue'
 Write-Host "Uninstalling UWP Apps..."
-# uninstall all uwp apps keep nvidia & cbs
-# cbs needed for w11 explorer
+# Uninstall all uwp apps keep nvidia & cbs
+# CBS needed for w11 explorer
 Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*SMB 1.0*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
 Timeout /T 2 | Out-Null
-# install hevc video extension needed for amd recording
+# Install hevc video extension needed for amd recording
 Get-AppXPackage -AllUsers *Microsoft.HEVCVideoExtension* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
-# install heif image extension needed for some files
+# Install heif image extension needed for some files
 Get-AppXPackage -AllUsers *Microsoft.HEIFImageExtension* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
-# install paint w11
+# Install paint w11
 Get-AppXPackage -AllUsers *Microsoft.Paint* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
-# install photos
+# Install photos
 Get-AppXPackage -AllUsers *Microsoft.Windows.Photos* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
-# install notepad w11
+# Install notepad w11
 Get-AppXPackage -AllUsers *Microsoft.WindowsNotepad* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
-# install store
+# Install store
 Get-AppXPackage -AllUsers *Microsoft.WindowsStore* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
 Get-AppXPackage -AllUsers *Microsoft.Microsoft.StorePurchaseApp * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
-#install calculator
+#Install calculator
 Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator * | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Timeout /T 2 | Out-Null
 Clear-Host
+
 Write-Host "Uninstalling UWP Features..."
-# uninstall all uwp features
-# network drivers, paint & notepad left out
+# Uninstall all UWP features
+# Network drivers, Paint & Notepad left out
 Remove-WindowsCapability -Online -Name "App.StepsRecorder~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "App.Support.QuickAssist~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "Browser.InternetExplorer~~~~0.0.11.0" | Out-Null
@@ -2676,7 +2674,7 @@ Remove-WindowsCapability -Online -Name "Print.Fax.Scan~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "Print.Management.Console~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "VBSCRIPT~~~~" | Out-Null
 Remove-WindowsCapability -Online -Name "WMIC~~~~" | Out-Null
-# breaks uwp snippingtool w10
+# Breaks uwp snippingtool w10
 # Remove-WindowsCapability -Online -Name "Windows.Client.ShellComponents~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "Windows.Kernel.LA57~~~~0.0.1.0" | Out-Null
 Clear-Host
@@ -2703,31 +2701,32 @@ Dism /Online /NoRestart /Disable-Feature /FeatureName:MicrosoftWindowsPowerShell
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MicrosoftWindowsPowerShellV2 | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:WorkFolders-Client | Out-Null
 Clear-Host
+
 Write-Host "Uninstalling Legacy Apps..."
-# uninstall microsoft update health tools w11
+# Uninstall microsoft update health tools w11
 cmd /c "MsiExec.exe /X{C6FD611E-7EFE-488C-A0E0-974C09EF6473} /qn >nul 2>&1"
-# uninstall microsoft update health tools w10
+# Uninstall microsoft update health tools w10
 cmd /c "MsiExec.exe /X{1FC1A6C2-576E-489A-9B4A-92D21F542136} /qn >nul 2>&1"
-# clean microsoft update health tools w10
+# Clean microsoft update health tools w10
 cmd /c "reg delete `"HKLM\SYSTEM\ControlSet001\Services\uhssvc`" /f >nul 2>&1"
 Unregister-ScheduledTask -TaskName PLUGScheduler -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
-# uninstall update for windows 10 for x64-based systems
+# Uninstall update for windows 10 for x64-based systems
 cmd /c "MsiExec.exe /X{B9A7A138-BFD5-4C73-A269-F78CCA28150E} /qn >nul 2>&1"
 cmd /c "MsiExec.exe /X{85C69797-7336-4E83-8D97-32A7C8465A3B} /qn >nul 2>&1"
-# stop onedrive running
+# Stop onedrive running
 Stop-Process -Force -Name OneDrive -ErrorAction SilentlyContinue | Out-Null
-# uninstall onedrive w10
+# Uninstall onedrive w10
 cmd /c "C:\Windows\SysWOW64\OneDriveSetup.exe -uninstall >nul 2>&1"
-# clean onedrive w10 
+# Clean onedrive w10 
 Get-ScheduledTask | Where-Object {$_.Taskname -match 'OneDrive'} | Unregister-ScheduledTask -Confirm:$false
-# uninstall onedrive w11
+# Uninstall onedrive w11
 cmd /c "C:\Windows\System32\OneDriveSetup.exe -uninstall >nul 2>&1"
-# clean adobe type manager w10
+# Clean adobe type manager w10
 cmd /c "reg delete `"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`" /f >nul 2>&1"
-# uninstall old snippingtool w10
+# Uninstall old snippingtool w10
 Start-Process "C:\Windows\System32\SnippingTool.exe" -ArgumentList "/Uninstall"
 Clear-Host
-# silent window for old snippingtool w10
+# Silent window for old snippingtool w10
 $processExists = Get-Process -Name SnippingTool -ErrorAction SilentlyContinue
 if ($processExists) {
 $running = $true
@@ -2747,7 +2746,7 @@ Timeout /T 1 | Out-Null
 Clear-Host
 Write-Host "Network Adapter: Only Allow IPv4..."
 $progresspreference = 'silentlycontinue'
-# disable all adapter settings keep ipv4
+# Disable all adapter settings keep ipv4
 Disable-NetAdapterBinding -Name "*" -ComponentID ms_lldp -ErrorAction SilentlyContinue
 Disable-NetAdapterBinding -Name "*" -ComponentID ms_lltdio -ErrorAction SilentlyContinue
 Disable-NetAdapterBinding -Name "*" -ComponentID ms_implat -ErrorAction SilentlyContinue
@@ -2931,7 +2930,7 @@ Add-Content -Path $hostsFile -Value "`n$hostEntries" -Force
 
 Write-Host "Hosts file updated successfully."
 
-#Adds additional ContextMenu entries
+# Adds additional ContextMenu entries
 Write-Host "Installing ContextMenu entries..."
 $regFiles = @(
 "https://raw.githubusercontent.com/fivance/ContextMenu/main/CommandStore.reg",
@@ -2946,8 +2945,7 @@ Start-Process -FilePath "regedit.exe" -ArgumentList "/s $regFilePath" -Wait
 Remove-Item $regFilePath
 }
 
-# adds take ownership context menu
-# Define the URL of the .reg file in the GitHub repository
+# Take ownership context menu
 $regFileUrl = "https://raw.githubusercontent.com/fivance/files/main/TakeOwnership.reg"
 
 # Define the temporary path to save the .reg file
@@ -2982,7 +2980,7 @@ try {
             Log-Message "Failed to execute the .reg file. Exit code: $LASTEXITCODE."
         }
 
-        # Optionally, delete the temporary .reg file
+        # Delete the temporary .reg file
         Remove-Item -Path $tempRegFilePath -Force
         Log-Message "Deleted temporary .reg file."
     } else {
@@ -3044,7 +3042,7 @@ Clear-Host
   Reg.exe add 'HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
 
 
-#show all current tray icons
+# Show all current tray icons
   Write-Host 'Showing All Apps on Taskbar'
   Start-Sleep -Seconds 3
   Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'EnableAutoTray' /t REG_DWORD /d '0' /f
@@ -3053,9 +3051,9 @@ Clear-Host
     Set-ItemProperty -Path "registry::$key" -Name 'IsPromoted' -Value 1 -Force
 
   }
-  #create task to update task tray on log on
+  # Create task to update task tray on log on
 
-  #create updater script
+  # Create updater script
   $scriptContent = @"
 `$keys = Get-ChildItem -Path 'registry::HKEY_CURRENT_USER\Control Panel\NotifyIconSettings' -Recurse -Force
 
@@ -3073,7 +3071,7 @@ else {
   $scriptPath = "$env:ProgramData\UpdateTaskTrayIcons.ps1"
   Set-Content -Path $scriptPath -Value $scriptContent -Force
 
-  #get username and sid
+  # Get username and sid
   $currentUserName = $env:COMPUTERNAME + '\' + $env:USERNAME
   $username = Get-LocalUser -Name $env:USERNAME | Select-Object -ExpandProperty sid
 
@@ -3131,13 +3129,13 @@ else {
   Remove-Item -Path "$env:TEMP\UpdateTaskTray" -Force -ErrorAction SilentlyContinue
   Write-Host 'Update Task Tray Created...New Apps Will Be Shown Upon Restarting'
 
-# clear %temp% folder
+# Clear %temp% folder
 Remove-Item -Path "$env:USERPROFILE\AppData\Local\Temp" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:USERPROFILE\AppData\Local" -Name "Temp" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-# clear temp folder
+# Clear temp folder
 Remove-Item -Path "$env:SystemDrive\Windows\Temp" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:SystemDrive\Windows" -Name "Temp" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-# open disk cleanup
+# Open disk cleanup
 Start-Process cleanmgr.exe
 }  
 
@@ -3145,15 +3143,15 @@ Start-Process cleanmgr.exe
   Write-Host "Enabling advanced stuff..."
   Start-Sleep -Seconds 3
 Start-Process cmd.exe /c
-#registry numlock enabled everywhere
+# Registry numlock enabled everywhere
 reg add "HKU\S-1-5-19\Control Panel\Keyboard" /v "InitialKeyboardIndicators" /t REG_SZ /d "2147483650" /f $nul
 reg add "HKU\S-1-5-20\Control Panel\Keyboard" /v "InitialKeyboardIndicators" /t REG_SZ /d "2147483650" /f $nul
 
-# automatic discovery IE11 proxy
+# Automatic discovery IE11 proxy
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" /v "DefaultConnectionSettings" /t REG_BINARY /d "3c0000000f0000000100000000000000090000003132372e302e302e3100000000010000000000000010d75bde6f11c50101000000c23f806f0000000000000000" /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections" /v "SavedLegacySettings" /t REG_BINARY /d "3c000000040000000100000000000000090000003132372e302e302e3100000000010000000000000010d75bde6f11c50101000000c23f806f0000000000000000" /f
 
-# background apps
+# Background apps
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" /v "GlobalUserDisabled" /t REG_DWORD /d 0 /f $nul
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications\1527c705-839a-4832-9118-54d4Bd6a0c89_cw5n1h2txyewy" /v "Disabled" /t REG_DWORD /d 1 /f $nul
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications\1527c705-839a-4832-9118-54d4Bd6a0c89_cw5n1h2txyewy" /v "DisabledByUser" /t REG_DWORD /d 1 /f $nul
@@ -3255,22 +3253,21 @@ reg add "HKCU\Control Panel\International\User Profile" /v "HttpAcceptLanguageOp
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v "SearchboxTaskbarMode" /t REG_DWORD /d 0 /f $nul
 # Set solid color wallpaper
 REG DELETE "HKCU\Control Panel\Desktop" /V Wallpaper /F
-# change currency "kn" u "EUR"  HR & EN (Croatia)
+# Change currency "kn" u "EUR"  HR & EN (Croatia)
 reg add "HKCU\Control Panel\International" /v "sCurrency" /t REG_SZ /d "EUR" /f $nul
-# disable automatic folder type discovery
+# Disable automatic folder type discovery
 reg add "HKCU\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\Bags\AllFolders\Shell" /v "FolderType" /t REG_SZ /d NotSpecified /f $nul
-# registered owner & organization
+# Registered owner & organization
 #reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "RegisteredOrganization" /t REG_SZ /d "(-_-)" /f $nul
 #reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v "RegisteredOwner" /t REG_SZ /d "Gazda" /f $nul
-# enable DNS over HTTPS (DoH)
+# Enable DNS over HTTPS (DoH)
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters" /v "EnableAutoDoh" /t REG_DWORD /d 2 /f $nul
-# remove Auto run Defender
+# Remove Auto run Defender
 reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /v "SecurityHealth" /f $nul
 reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run" /v "SecurityHealth" /f $nul
-# disable autologger telemetry: CloudExperienceHostOobe.etl, Cellcore.etl, WinPhoneCritical.etl
+# Disable autologger telemetry: CloudExperienceHostOobe.etl, Cellcore.etl, WinPhoneCritical.etl
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\WMI\Autologger\CloudExperienceHostOobe" /v "Start" /t REG_DWORD /d 0 /f $nul
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudExperienceHost" /v "ETWLoggingEnabled" /t REG_DWORD /d 0 /f $nul
-#
 # Clean Windows from OneDrive (comes with Office installations)
 reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\ OneDrive1" /f $nul
 reg delete "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\ OneDrive2" /f $nul
@@ -3286,43 +3283,39 @@ reg delete "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\
 reg delete "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\ OneDrive5" /f $nul
 reg delete "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\ OneDrive6" /f $nul
 reg delete "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\ OneDrive7" /f $nul
-# disable updates for microsoft office
+# Disable updates for microsoft office
 schtasks /change /tn "Microsoft\Office\Office ClickToRun Service Monitor" /disable
 schtasks /change /tn "Microsoft\Office\Office Feature Updates Logon" /disable
 schtasks /change /tn "Microsoft\Office\Office Feature Updates" /disable
 schtasks /change /tn "Microsoft\Office\Office Automatic Updates 2.0" /disable
-# firefox
+# Firefox
 schtasks /change /tn "Mozilla\Firefox Background Update 308046B0AF4A39CB" /disable
-# obriši tasks "Cleaning Retail Demo content" (radi se tek za vrijeme setupa)
-# \Microsoft\Windows\RetailDemo\CleanupOfflineContent
 schtasks /delete /tn "Microsoft\Windows\RetailDemo\CleanupOfflineContent" /f
-# schtasks /delete /tn "Microsoft\Windows\RetailDemo" /f
 
-
-# disable activity log and clipboard
+# Disable activity log and clipboard
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowCrossDeviceClipboard" /t REG_DWORD /d 0 /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableActivityFeed" /t REG_DWORD /d 0 /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "UploadUserActivities" /t REG_DWORD /d 0 /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserActivities" /t REG_DWORD /d 0 /f
 
-# disable cliboard history
+# Disable cliboard history
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 0 /f
 
-# disable windows event logging
-# check all policies: auditpol /get /Category:*
+# Disable windows event logging
+# Check all policies: auditpol /get /Category:*
 auditpol /set /subcategory:"Special Logon" /success:disable
 auditpol /set /subcategory:"Audit Policy Change" /success:disable
 auditpol /set /subcategory:"User Account Management" /success:disable
-# password never expires
+# Password never expires
 net.exe accounts /maxpwage:unlimited
-# disable telemetry. UnifedTelemetryClient
+# Disable telemetry. UnifedTelemetryClient
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" /v "AllowTelemetry" /t REG_DWORD /d 0 /f
 # Defender auto run disabled
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\AutorunsDisabled" /v "SecurityHealth" /t REG_EXPAND_SZ /d "%%SystemRoot%%\system32\SecurityHealthSystray.exe" /f
 #
 reg add "HKLM\SYSTEM\CurrentControlSet\Services\IKEEXT" /v "Start" /t REG_DWORD /d 3 /f
 
-# tasks
+# Tasks
 schtasks /Create /F /RU "SYSTEM" /RL HIGHEST /SC HOURLY /TN PrilagodeniTasks /TR "cmd /c %windir%\PrilagodeniTasks.cmd"
 schtasks /Run /I /TN PrilagodeniTasks
 timeout /T 5
@@ -3332,32 +3325,32 @@ schtasks /delete /F /TN PrilagodeniTasks
                                          
 # Register DNS
 ipconfig /registerdns
-# disable DNS Functions (LLMNR, Resolution, Devolution, ParallelAandAAAA)
+# Disable DNS Functions (LLMNR, Resolution, Devolution, ParallelAandAAAA)
  netsh.exe winhttp reset proxy
-# disable NetBIOS over TCP/IP
+# Disable NetBIOS over TCP/IP
 #Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 0 } | ForEach-Object { $_.SetTcpipNetbios(2) }
 #Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 1 } | ForEach-Object { $_.SetTcpipNetbios(2) }
-# bootloader
+# Bootloader
 bcdedit /timeout 4
-# force install uncertified drivers
+# Force install uncertified drivers
 bcdedit /set nointegritychecks off
-# disable hibernation
+# Disable hibernation
 powercfg -h off
-# disable 8dot3
+# Disable 8dot3
 fsutil behavior set disable8dot3 1
-# disable Bitlocker and encryption
+# Disable Bitlocker and encryption
 fsutil behavior set disableencryption 1
 # Update NTFS "Last Access" (User Managed, Last Access Updates Disabled)
 fsutil behavior set disablelastaccess 1
 # Increase memory for access NTFS files
 fsutil behavior set memoryusage 2
-# disable NET Core CLI telemetry
+# Disable NET Core CLI telemetry
 setx DOTNET_CLI_TELEMETRY_OPTOUT 1
-# disable automatic repair
+# Disable automatic repair
 fsutil repair set c: 0
-# disable tracking IPsec filtera firewall (wfpdiag.etl, Process Hacker omogućuje ovo praćenje)
+# Disable tracking IPsec filtera firewall (wfpdiag.etl, Process Hacker omogućuje ovo praćenje)
 netsh.exe wfp set options netevents = off
-# passwords never expire
+# Passwords never expire
 net.exe accounts /maxpwage:unlimited
 # regsvr32 /s %SystemRoot%\System32\DolbyDecMFT.dll
 # regsvr32 /s %SystemRoot%\SysWOW64\DolbyDecMFT.dll
@@ -3367,11 +3360,11 @@ net.exe accounts /maxpwage:unlimited
 # schtasks /delete /tn "MicrosoftEdgeUpdateTaskMachineCore" /f
 # schtasks /change /tn "Microsoft\Windows\SoftwareProtectionPlatform\SvcRestartTaskNetwork" /disable
 #
-# disable telemtry and diagnostics
+# Disable telemtry and diagnostics
 schtasks /change /tn "Microsoft\Windows\WDI\ResolutionHost" /disable
 schtasks /change /tn "Microsoft\Windows\UNP\RunUpdateNotificationMgr" /disable
 schtasks /change /tn "Microsoft\Windows\DUSM\dusmtask" /disable
-# disable tasks extra
+# Disable tasks extra
 schtasks /change /tn "Microsoft\Windows\SettingSync\BackgroundUpLoadTask" /disable
 schtasks /change /tn "Microsoft\Windows\SettingSync\NetworkStateChangeTask" /disable
 schtasks /change /tn "Microsoft\Windows\Device Setup\Metadata Refresh" /disable
@@ -3396,38 +3389,38 @@ schtasks /change /tn "Microsoft\Windows\Sysmain\ResPriStaticDbSync" /disable
 schtasks /change /tn "Microsoft\Windows\Sysmain\WsSwapAssessmentTask" /disable
 schtasks /change /tn "Microsoft\Windows\Sysmain\HybridDriveCachePrepopulate" /disable
 schtasks /change /tn "Microsoft\Windows\Sysmain\HybridDriveCacheRebalance" /disable
-# disable task "Cleaning the system drive during idle time"
+# Disable task "Cleaning the system drive during idle time"
 schtasks /change /tn "Microsoft\Windows\DiskCleanup\SilentCleanup" /disable
-# disable task "Cleaning language parameters"
+# Disable task "Cleaning language parameters"
 schtasks /change /tn "Microsoft\Windows\MUI\LPRemove" /disable
-# disable tasks "Maintenance drive spaces (analogue RAID, virtual disks)"
+# Disable tasks "Maintenance drive spaces (analogue RAID, virtual disks)"
 schtasks /change /tn "Microsoft\Windows\SpacePort\SpaceAgentTask" /disable
 schtasks /change /tn "Microsoft\Windows\SpacePort\SpaceManagerTask" /disable
-# disable task "Loading voice models"
+# Disable task "Loading voice models"
 schtasks /change /tn "Microsoft\Windows\Speech\SpeechModelDownloadTask" /disable
-# disable tasks "Active Directory"
+# Disable tasks "Active Directory"
 schtasks /change /tn "Microsoft\Windows\Active Directory Rights Management Services Client\AD RMS Rights Policy Template Management (Manual)" /disable
 schtasks /change /tn "Microsoft\Windows\File Classification Infrastructure\Property Definition Sync" /disable
-# disable ProvTool.exe tasks (for SYSPREP and change Windows edition)
-# tasks to reconcile packages during SYSPREP and others via "ProvTool.exe":
+# Disable ProvTool.exe tasks (for SYSPREP and change Windows edition)
+# Tasks to reconcile packages during SYSPREP and others via "ProvTool.exe":
 schtasks /change /tn "Microsoft\Windows\Management\Provisioning\Logon" /disable
 schtasks /change /tn "Microsoft\Windows\Management\Provisioning\Cellular" /disable
-# disalbe task for archiving (works only in auto maintenance)
+# Disalbe task for archiving (works only in auto maintenance)
 schtasks /change /tn "Microsoft\Windows\FileHistory\File History (maintenance mode)" /disable
 
-# disable telemetry for Microsoft Office 2016/2019+
+# Disable telemetry for Microsoft Office 2016/2019+
 schtasks /change /tn "Microsoft\Office\OfficeTelemetryAgentFallBack" /disable
 schtasks /change /tn "Microsoft\Office\OfficeTelemetryAgentLogOn" /disable
 schtasks /change /tn "Microsoft\Office\OfficeTelemetryAgentFallBack2016" /disable
 schtasks /change /tn "Microsoft\Office\OfficeTelemetryAgentLogOn2016" /disable
 schtasks /change /tn "Microsoft\Office\Office ClickToRun Service Monitor" /disable
 
-# disable default browser agent reporting services (firefox)
+# Disable default browser agent reporting services (firefox)
 schtasks /change /tn "Mozilla\Firefox Default Browser Agent 308046B0AF4A39CB" /disable
 schtasks /change /tn "Mozilla\Firefox Background Update 308046B0AF4A39CB" /disable
 schtasks /change /tn "Mozilla\Firefox Default Browser Agent D2CEEC440E2074BD" /disable
 
-# deactivate nepotrebne tasks
+# Deactivate nepotrebne tasks
 schtasks /change /tn "Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 64 Critical" /disable
 schtasks /change /tn "Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 64" /disable
 schtasks /change /tn "Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 Critical" /disable
@@ -3454,10 +3447,10 @@ schtasks /change /tn "Microsoft\Windows\WOF\WIM-Hash-Management" /disable
 schtasks /change /tn "Microsoft\Windows\WOF\WIM-Hash-Validation" /disable
 schtasks /change /tn "Microsoft\Windows\WwanSvc\NotificationTask" /disable
 schtasks /change /tn "Microsoft\Windows\WwanSvc\OobeDiscovery" /disable
-# disable task "CloudExperienceHost"
+# Disable task "CloudExperienceHost"
 # schtasks /change /tn "Microsoft\Windows\CloudExperienceHost\CreateObjectTask" /disable
 #
-# MsCtfMonitor Task (keylogger) je potreban da biste mogli tipkati unutar postavki itd.
+
 # schtasks /change /tn "Microsoft\Windows\TextServicesFramework\MsCtfMonitor" /disable
 }
 
@@ -3532,10 +3525,10 @@ Write-Host ""
 Pause
 Clear-Host
 Write-Host "Step: One. Please wait..."
-# disable exploit protection, leaving control flow guard cfg on for vanguard anticheat
+# Disable exploit protection, leaving control flow guard cfg on for vanguard anticheat
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Control\Session Manager\kernel`" /v `"MitigationOptions`" /t REG_BINARY /d `"222222000001000000000000000000000000000000000000`" /f >nul 2>&1"
 Timeout /T 2 | Out-Null
-# create reg file
+# Create reg file
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
 
@@ -3949,7 +3942,7 @@ Windows Registry Editor Version 5.00
 "ExecutionPolicy"="Unrestricted"
 "@
 Set-Content -Path "$env:TEMP\SecurityOff.reg" -Value $MultilineComment -Force
-# disable scheduled tasks
+# Disable scheduled tasks
 schtasks /Change /TN "Microsoft\Windows\ExploitGuard\ExploitGuard MDM policy Refresh" /Disable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cache Maintenance" /Disable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cleanup" /Disable | Out-Null
@@ -3958,9 +3951,9 @@ schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Verifi
 Clear-Host
 Write-Host "Restarting To Safe Mode: Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# toggle safe boot
+# Toggle safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
-# restart
+# Restart
 shutdown -r -t 00
 exit
 
@@ -3988,35 +3981,35 @@ Write-Host ""
 Pause
 Clear-Host
 Write-Host "Step: Two. Please wait..."
-# import reg file
+# Import reg file
 Regedit.exe /S "$env:TEMP\SecurityOff.reg"
 Timeout /T 5 | Out-Null
-# import reg file RunAsTI
+# Import reg file RunAsTI
 $SecurityOff = @'
 Regedit.exe /S "$env:TEMP\SecurityOff.reg"
 '@
 RunAsTI powershell "-nologo -windowstyle hidden -command $SecurityOff"
 Timeout /T 5 | Out-Null
-# stop smartscreen running
+# Stop smartscreen running
 Stop-Process -Force -Name smartscreen -ErrorAction SilentlyContinue | Out-Null
-# move smartscreen
+# Move smartscreen
 $SmartScreen = @'
 cmd.exe /c move /y "C:\Windows\System32\smartscreen.exe" "C:\Windows\smartscreen.exe"
 '@
 RunAsTI powershell "-nologo -windowstyle hidden -command $SmartScreen"
 Timeout /T 5 | Out-Null
-# disable windows-defender-default-definitions
+# Disable windows-defender-default-definitions
 Dism /Online /NoRestart /Disable-Feature /FeatureName:Windows-Defender-Default-Definitions | Out-Null
-# disable windows-defender-applicationguard
+# Disable windows-defender-applicationguard
 Dism /Online /NoRestart /Disable-Feature /FeatureName:Windows-Defender-ApplicationGuard | Out-Null
-# disable data execution prevention
+# Disable data execution prevention
 cmd /c "bcdedit /set nx AlwaysOff >nul 2>&1"
 Clear-Host
 Write-Host "Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# toggle normal boot
+# Toggle normal boot
 cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
-# restart
+# Restart
 shutdown -r -t 00
 exit
 
@@ -4036,7 +4029,7 @@ switch ($choice) {
 
 Clear-Host
 Write-Host "Step: One. Please wait..."
-# create reg file
+# Create reg file
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
 
@@ -4451,7 +4444,7 @@ Windows Registry Editor Version 5.00
 "ExecutionPolicy"="Restricted"
 "@
 Set-Content -Path "$env:TEMP\SecurityOn.reg" -Value $MultilineComment -Force
-# enable scheduled tasks
+# Enable scheduled tasks
 schtasks /Change /TN "Microsoft\Windows\ExploitGuard\ExploitGuard MDM policy Refresh" /Enable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cache Maintenance" /Enable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cleanup" /Enable | Out-Null
@@ -4460,9 +4453,9 @@ schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Verifi
 Clear-Host
 Write-Host "Restarting To Safe Mode: Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# toggle safe boot
+# Toggle safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
-# restart
+# Restart
 shutdown -r -t 00
 exit
 
@@ -4471,33 +4464,33 @@ exit
 
 Clear-Host
 Write-Host "Step: Two. Please wait..."
-# import reg file
+# Import reg file
 Regedit.exe /S "$env:TEMP\SecurityOn.reg"
 Timeout /T 5 | Out-Null
-# import reg file RunAsTI
+# Import reg file RunAsTI
 $SecurityOn = @'
 Regedit.exe /S "$env:TEMP\SecurityOn.reg"
 '@
 RunAsTI powershell "-nologo -windowstyle hidden -command $SecurityOn"
 Timeout /T 5 | Out-Null
-# move smartscreen
+# Move smartscreen
 $SmartScreen = @'
 cmd.exe /c move /y "C:\Windows\smartscreen.exe" "C:\Windows\System32\smartscreen.exe"
 '@
 RunAsTI powershell "-nologo -windowstyle hidden -command $SmartScreen"
 Timeout /T 5 | Out-Null
-# enable windows-defender-default-definitions (can't turn back on)
+# Enable windows-defender-default-definitions (can't turn back on)
 # Dism /Online /NoRestart /Enable-Feature /FeatureName:Windows-Defender-Default-Definitions | Out-Null
-# enable windows-defender-applicationguard
+# Enable windows-defender-applicationguard
 # Dism /Online /NoRestart /Enable-Feature /FeatureName:Windows-Defender-ApplicationGuard | Out-Null
-# enable data execution prevention
+# Enable data execution prevention
 cmd /c "bcdedit /deletevalue nx >nul 2>&1"
 Clear-Host
 Write-Host "Press any key to restart..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-# toggle normal boot
+# Toggle normal boot
 cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
-# restart
+# Restart
 shutdown -r -t 00
 exit
 
@@ -4589,25 +4582,25 @@ Install-WinGet
   function Run-Trusted([String]$command) {
 
   Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
-  #get bin path to revert later
+  # Get bin path to revert later
   $service = Get-WmiObject -Class Win32_Service -Filter "Name='TrustedInstaller'"
   $DefaultBinPath = $service.PathName
-  #convert command to base64 to avoid errors with spaces
+  # Convert command to base64 to avoid errors with spaces
   $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
   $base64Command = [Convert]::ToBase64String($bytes)
-  #change bin to command
+  # Change bin to command
   sc.exe config TrustedInstaller binPath= "cmd.exe /c powershell.exe -encodedcommand $base64Command" | Out-Null
-  #run the command
+  # Run the command
   sc.exe start TrustedInstaller | Out-Null
-  #set bin back to default
+  # Set bin back to default
   sc.exe config TrustedInstaller binpath= "`"$DefaultBinPath`"" | Out-Null
   Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
 
 }
 
-#disable ai registry keys
+# Disable AI registry keys
 Write-Host 'Applying Registry Keys...'
-#set for local machine and current user to be sure
+# Set for local machine and current user to be sure
 $hives = @('HKLM', 'HKCU')
 foreach ($hive in $hives) {
   Reg.exe add "$hive\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v 'TurnOffWindowsCopilot' /t REG_DWORD /d '1' /f *>$null
@@ -4615,12 +4608,12 @@ foreach ($hive in $hives) {
 }
 Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v 'ShowCopilotButton' /t REG_DWORD /d '0' /f *>$null
 Reg.exe add 'HKCU\Software\Microsoft\input\Settings' /v 'InsightsEnabled' /t REG_DWORD /d '0' /f *>$null
-#disable copilot in edge
+# Disable copilot in edge
 Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'CopilotCDPPageContext' /t REG_DWORD /d '0' /f *>$null
 Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'CopilotPageContext' /t REG_DWORD /d '0' /f *>$null
 Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'DiscoverPageContextEnabled' /t REG_DWORD /d '0' /f *>$null
 Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'HubsSidebarEnabled' /t REG_DWORD /d '0' /f *>$null
-#force policy changes
+# Force policy changes
 gpupdate /force >$null
 
 
@@ -4638,9 +4631,9 @@ $eol = @()
 $store = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore'
 $users = @('S-1-5-18'); if (test-path $store) { $users += $((Get-ChildItem $store -ea 0 | Where-Object { $_ -like '*S-1-5-21*' }).PSChildName) }
 
-#uninstall packages
+# Uninstall packages
 
-#use eol trick to uninstall some locked packages
+# Use eol trick to uninstall some locked packages
 foreach ($choice in $aipackages) {
   Write-Host "Removing $choice"
   if ('' -eq $choice.Trim()) { continue }
@@ -4662,16 +4655,16 @@ foreach ($choice in $aipackages) {
   }
 }
 
-## undo eol unblock trick to prevent latest cumulative update (LCU) failing 
+# Undo EOL unblock trick to prevent latest cumulative update (LCU) failing 
 foreach ($sid in $users) { foreach ($PackageName in $eol) { Remove-Item "$store\EndOfLife\$sid\$PackageName" -force -ErrorAction SilentlyContinue >'' } }
 
-#remove recall optional feature 
+# Remove recall optional feature 
 $ProgressPreference = 'SilentlyContinue'
 try {
   Disable-WindowsOptionalFeature -Online -FeatureName 'Recall' -Remove -ErrorAction Stop *>$null
 }
 catch {
-  #hide error
+  # Hide error
 }
 
 
@@ -4702,7 +4695,7 @@ foreach ($package in $aipackages) {
 
 
 foreach ($Path in $packagesPath) {
-  #only remove dlls from photon to prevent startmenu from breaking
+  # Only remove dlls from photon to prevent startmenu from breaking
   if ($path -like '*Photon*') {
       $command = "`$dlls = (Get-ChildItem -Path $Path -Filter *.dll).FullName; foreach(`$dll in `$dlls){Remove-item ""`$dll"" -force}"
       Run-Trusted -command $command
@@ -4713,8 +4706,8 @@ foreach ($Path in $packagesPath) {
   }
 }
 
-#remove package installers in edge dir
-#installs Microsoft.Windows.Ai.Copilot.Provider
+# Remove package installers in edge dir
+# Installs Microsoft.Windows.Ai.Copilot.Provider
 $dir = "${env:ProgramFiles(x86)}\Microsoft"
 $folders = @(
   'Edge',
@@ -4723,7 +4716,7 @@ $folders = @(
 )
 foreach ($folder in $folders) {
   if ($folder -eq 'EdgeCore') {
-      #edge core doesnt have application folder
+      # Edge core doesnt have application folder
       $fullPath = (Get-ChildItem -Path "$dir\$folder\*.*.*.*\copilot_provider_msix" -ErrorAction SilentlyContinue).FullName
       
   }
@@ -4733,7 +4726,7 @@ foreach ($folder in $folders) {
   if ($fullPath -ne $null) { Remove-Item -Path $fullPath -Recurse -Force -ErrorAction SilentlyContinue }
 }
 
-#remove any screenshots from recall
+# Remove any screenshots from recall
 Write-Host 'Removing Any Screenshots...'
 Remove-Item -Path "$env:LOCALAPPDATA\CoreAIPlatform*" -Force -Recurse -ErrorAction SilentlyContinue
 
@@ -4815,7 +4808,7 @@ $languageRegion = $language -replace '-', '_'
 Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name "LocaleName" -Value $languageRegion
 
 # Restart system to apply changes
-Write-Host "System needs to restart to apply changes."
+Write-Host "System needs to restart to apply changes..."
 Start-Sleep -Seconds 3
 
 }
