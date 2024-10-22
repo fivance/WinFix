@@ -183,7 +183,7 @@ Write-Host " 8. Winget fix"
 Write-Host " 9. Disable Recall and AI features"
 Write-Host " 10. Install StartAllBack and apply settings"
 Write-Host " 11. Set SystemLocale"
-Write-Host " 12. Always show extensions script"
+Write-Host " 12. Always show all extensions script"
 Write-Host " 13. Apply Titlebar accent color"
 Write-Host " 14. Exit script"
               }
