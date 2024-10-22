@@ -185,7 +185,8 @@ Write-Host " 10. Install StartAllBack and apply settings"
 Write-Host " 11. Set SystemLocale"
 Write-Host " 12. Always show extensions script"
 Write-Host " 13. Apply Titlebar accent color"
-Write-Host " 14. Exit script"
+Write-Host " 14. Apply custom SublimeText settings"
+Write-Host " 15. Exit script"
               }
 
 while ($true) {
@@ -4899,7 +4900,40 @@ Stop-Process -Name explorer -Force
 Start-Process explorer
 }
 
-14 { 
+14 {
+      Write-Host "Applying SublimeText settings..."
+      Start-Sleep -Seconds 2
+      $repositoryUrl = "https://github.com/fivance/SublimeTextConfig/archive/refs/heads/main.zip"
+      $tempDir = [System.IO.Path]::GetTempPath()
+      $zipPath = Join-Path -Path $tempDir -ChildPath "SublimeTextConfig.zip"
+      $extractPath = Join-Path -Path $tempDir -ChildPath "SublimeTextConfig"
+      
+      # Download the main zip file
+      Invoke-WebRequest -Uri $repositoryUrl -OutFile $zipPath
+      
+      # Extract the main zip file
+      Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
+      
+      # Extract the Sublime Text zip file inside the repository
+      $innerZipPath = Join-Path -Path $extractPath -ChildPath "Sublime Text_24072024.zip"
+      $innerExtractPath = Join-Path -Path $extractPath -ChildPath "SublimeTextExtracted"
+      Expand-Archive -Path $innerZipPath -DestinationPath $innerExtractPath -Force
+      
+      # Get the username of the logged-in user
+      $userName = $env:USERNAME
+      $targetDir = "C:\Users\$userName\AppData\Roaming\Sublime Text"
+      
+      # Copy extracted files to the target directory
+      Copy-Item -Path "$innerExtractPath\*" -Destination $targetDir -Recurse -Force
+      
+      # Clean up
+      Remove-Item -Path $zipPath -Force
+      Remove-Item -Path $extractPath -Recurse -Force
+
+}
+
+
+15 { 
 
   Clear-Host
   Write-Host "Exiting..."
