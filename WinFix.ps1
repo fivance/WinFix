@@ -4907,7 +4907,7 @@ Start-Process explorer
 exit
 }
 default {
-        Write-Host "Invalid selection. Please choose a number between 0 and 9."
+        Write-Host "Invalid selection. Please choose a number between 0 and 14."
 
      }
 }
