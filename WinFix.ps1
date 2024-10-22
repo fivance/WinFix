@@ -191,7 +191,7 @@ Write-Host " 15. Exit script"
 
 while ($true) {
 show-menu
-$choice = Read-Host "Please select an option:"
+$choice = Read-Host "Please select an option"
 
 switch ($choice) {
 
