@@ -184,7 +184,8 @@ Write-Host " 9. Disable Recall and AI features"
 Write-Host " 10. Install StartAllBack and apply settings"
 Write-Host " 11. Set SystemLocale"
 Write-Host " 12. Always show extensions script"
-Write-Host " 13. Exit script"
+Write-Host " 13. Apply Titlebar accent color"
+Write-Host " 14. Exit script"
               }
 
 while ($true) {
@@ -4880,8 +4881,25 @@ else {
 
 }
 
+13 {
+      # Define the color (light blue atm)
+$Color = 0xFF7700
 
-13 { 
+# Enable custom colors
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name ColorPrevalence -Value 1 -PropertyType DWord -Force
+
+# Set the color for active titlebars
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name AccentColor -Value $Color -PropertyType DWord -Force
+
+# Set the color for inactive titlebars
+New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name AccentColorInactive -Value $Color -PropertyType DWord -Force
+
+# Apply the changes
+Stop-Process -Name explorer -Force
+Start-Process explorer
+}
+
+14 { 
 
   Clear-Host
   Write-Host "Exiting..."
