@@ -2571,7 +2571,7 @@ $progresspreference = 'silentlycontinue'
 Write-Host "Uninstalling UWP Apps..."
 # Uninstall all uwp apps keep nvidia & cbs
 # CBS needed for w11 explorer
-Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*SMB 1.0*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
+Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
 Timeout /T 2 | Out-Null
 # Install hevc video extension needed for amd recording
 Get-AppXPackage -AllUsers *Microsoft.HEVCVideoExtension* | Foreach {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
@@ -2694,14 +2694,17 @@ Dism /Online /NoRestart /Disable-Feature /FeatureName:Printing-Foundation-Intern
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MSRDC-Infrastructure | Out-Null
 # breaks search
 # Dism /Online /NoRestart /Disable-Feature /FeatureName:SearchEngine-Client-Package | Out-Null
-#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol | Out-Null
-#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Client | Out-Null
-#Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Deprecation | Out-Null
-#Dism /Online /NoRestart /Disable-Feature /FeatureName:SmbDirect | Out-Null
+Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol | Out-Null
+Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Client | Out-Null
+Dism /Online /NoRestart /Disable-Feature /FeatureName:SMB1Protocol-Deprecation | Out-Null
+Dism /Online /NoRestart /Disable-Feature /FeatureName:SmbDirect | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:Windows-Identity-Foundation | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MicrosoftWindowsPowerShellV2Root | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:MicrosoftWindowsPowerShellV2 | Out-Null
 Dism /Online /NoRestart /Disable-Feature /FeatureName:WorkFolders-Client | Out-Null
+Enable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart
+Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol-Deprecation -NoRestart
+Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol-Server -NoRestart
 Clear-Host
 
 Write-Host "Uninstalling Legacy Apps..."
