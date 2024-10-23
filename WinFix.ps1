@@ -164,6 +164,7 @@ function Get-FileFromWeb {
 
 
 Set-ConsoleOpacity -Opacity 93
+Start-Sleep -Seconds 3
 function show-menu {
 Clear-Host
 Write-Host " 0. UniGetUI app install"   
