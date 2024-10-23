@@ -47,7 +47,7 @@ Every option is self-explanatory except Optimization script and Advanced tweaks 
 
 
 
-   **ADVANCED TWEAKS**
+**ADVANCED TWEAKS**
 
 -  Enabled Numlock everywhere
 -  Automatic discovery IE11 proxy
