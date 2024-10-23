@@ -165,6 +165,7 @@ function Get-FileFromWeb {
 
 Set-ConsoleOpacity -Opacity 93
 function show-menu {
+Clear-Host
 Write-Host " 0. UniGetUI app install"   
 Write-Host " 1. CTT Winutil"
 Write-Host " 2. Clean graphics driver - DDU"
