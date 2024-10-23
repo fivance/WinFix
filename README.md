@@ -18,7 +18,7 @@ Can also be run by running this command in Admin p$ window:
 Every option is self-explanatory except Optimization script and Advanced tweaks which contains:
 
 
-     ::OPTIMIZATION SCRIPT::
+    ::OPTIMIZATION SCRIPT::
 
 -  Installs dependencis -> C++, DirectX
 -  Disables bacground apps
