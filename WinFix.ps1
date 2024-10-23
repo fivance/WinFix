@@ -4905,9 +4905,12 @@ $currentValue = Get-ItemProperty -Path "REGISTRY::HKEY_LOCAL_MACHINE\Software\Mi
 # If the value is 0, it was done correctly
 if ($currentValue.ConsentPromptBehaviorAdmin -eq 0) {
     Write-Output "The registry value was set successfully."
+    Start-Sleep -Seconds 2
 } else {
     Write-Output "The registry value was not set correctly."
+    Start-Sleep -Seconds 2
 }
+Clear-Host
 }
 
 
