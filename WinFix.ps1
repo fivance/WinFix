@@ -3422,7 +3422,7 @@ schtasks /change /tn "Mozilla\Firefox Default Browser Agent 308046B0AF4A39CB" /d
 schtasks /change /tn "Mozilla\Firefox Background Update 308046B0AF4A39CB" /disable
 schtasks /change /tn "Mozilla\Firefox Default Browser Agent D2CEEC440E2074BD" /disable
 
-# Deactivate nepotrebne tasks
+# Deactivate not needed tasks
 schtasks /change /tn "Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 64 Critical" /disable
 schtasks /change /tn "Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 64" /disable
 schtasks /change /tn "Microsoft\Windows\.NET Framework\.NET Framework NGEN v4.0.30319 Critical" /disable
