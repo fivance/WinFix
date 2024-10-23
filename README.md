@@ -16,6 +16,8 @@ Can also be run by running this command in Admin p$ window:
 
 -------------------------------------------
 Every option is self-explanatory except Optimization script and Advanced tweaks which contains:
+
+
 ::OPTIMIZATION SCRIPT::
 
 -  Installs dependencis -> C++, DirectX
@@ -42,6 +44,8 @@ Every option is self-explanatory except Optimization script and Advanced tweaks 
 -  Removes useless Scheduled Tasks
 -  Sets all Services to Manual where applicable
 -  Cleans temporary files at the end of the script
+
+
 
 ::ADVANCED TWEAKS::
 
