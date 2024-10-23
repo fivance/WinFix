@@ -185,7 +185,8 @@ Write-Host " 10. Install StartAllBack and apply settings"
 Write-Host " 11. Set SystemLocale"
 Write-Host " 12. Always show all extensions script"
 Write-Host " 13. Apply Titlebar accent color"
-Write-Host " 14. Exit script"
+Write-Host " 14. Disable UAC"
+Write-Host " 15. Exit script"
               }
 
 while ($true) {
@@ -4874,8 +4875,11 @@ else {
 
 }
 
-13 {
-      # Define the color (light blue atm)
+13 { 
+Write-Host "Enabling custom titlebar color..."
+Start-Sleep -Seconds 2
+
+# Define the color (light blue atm)
 $Color = 0xFF7700
 
 # Enable custom colors
@@ -4892,7 +4896,22 @@ Stop-Process -Name explorer -Force
 Start-Process explorer
 }
 
-14 { 
+14 {
+Write-Host "Disabling UAC..."
+Start-Sleep -2
+Set-ItemProperty -Path REGISTRY::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System -Name ConsentPromptBehaviorAdmin -Value 0
+$currentValue = Get-ItemProperty -Path "REGISTRY::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin"
+
+# If the value is 0, it was done correctly
+if ($currentValue.ConsentPromptBehaviorAdmin -eq 0) {
+    Write-Output "The registry value was set successfully."
+} else {
+    Write-Output "The registry value was not set correctly."
+}
+}
+
+
+15 { 
 
   Clear-Host
   Write-Host "Exiting..."
