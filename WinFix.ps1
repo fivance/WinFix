@@ -4940,6 +4940,9 @@ if (-not $isInstalled) {
     exit
 }
 
+# Correctly get the temporary directory path
+$tempDir = [System.IO.Path]::GetTempPath()
+
 # Create the batch file content
 $batFileContent = @"
 @echo off
@@ -5008,6 +5011,7 @@ Start-Process -FilePath "cmd.exe" -ArgumentList "/c $batFilePath" -NoNewWindow -
 
 # Clean up the batch file
 Remove-Item -Path $batFilePath -Force
+
 
 }
 
