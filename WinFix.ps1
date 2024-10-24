@@ -4920,6 +4920,9 @@ Clear-Host
 }
 
 15 {
+  Write-Host "Installing SublimeText Context Menus..."
+  Start-Sleep -Seconds 2
+  
 # Define the paths where Sublime Text might be installed
 $sublimePaths = @(
     "C:\Program Files\Sublime Text\sublime_text.exe",
