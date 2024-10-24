@@ -4920,27 +4920,27 @@ Clear-Host
 }
 
 15 {
-      # Define the paths where Sublime Text might be installed
+# Define the paths where Sublime Text might be installed
 $sublimePaths = @(
-  "C:\Program Files\Sublime Text\sublime_text.exe",
-  "C:\Program Files (x86)\Sublime Text\sublime_text.exe"
+    "C:\Program Files\Sublime Text\sublime_text.exe",
+    "C:\Program Files (x86)\Sublime Text\sublime_text.exe"
 )
 
 # Check if Sublime Text is installed
 $isInstalled = $false
 foreach ($path in $sublimePaths) {
-  if (Test-Path $path) {
-      $isInstalled = $true
-      break
-  }
+    if (Test-Path $path) {
+        $isInstalled = $true
+        break
+    }
 }
 
 if (-not $isInstalled) {
-  Write-Output "Sublime Text is not installed. Exiting script."
-  exit
+    Write-Output "Sublime Text is not installed. Exiting script."
+    exit
 }
 
-# Apply the batch file
+# Create the batch file content
 $batFileContent = @"
 @echo off
 title Sublime Text Context Menu Manager
@@ -4964,7 +4964,7 @@ goto menu
 :add
 cls
 echo Adding Sublime Text to Context Menu...
-SET sublimePath=C:\Program Files\Sublime Text\sublime_text.exe
+SET sublimePath="C:\Program Files\Sublime Text\sublime_text.exe"
 :: Add context menu entry for all file types
 reg add "HKEY_CLASSES_ROOT\*\shell\Open with Sublime Text" /v "" /t REG_SZ /d "Open with Sublime Text" /f
 reg add "HKEY_CLASSES_ROOT\*\shell\Open with Sublime Text" /v "Icon" /t REG_EXPAND_SZ /d "%sublimePath%,0" /f
@@ -4999,12 +4999,16 @@ goto menu
 :exit
 "@
 
+# Write the batch file content to a temporary file
 $batFilePath = Join-Path -Path $tempDir -ChildPath "SublimeTextContextMenuManager.bat"
 Set-Content -Path $batFilePath -Value $batFileContent
+
+# Run the batch file
 Start-Process -FilePath "cmd.exe" -ArgumentList "/c $batFilePath" -NoNewWindow -Wait
 
 # Clean up the batch file
 Remove-Item -Path $batFilePath -Force
+
 }
 
 16 { 
