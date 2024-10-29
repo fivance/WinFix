@@ -40,6 +40,7 @@ Every option is self-explanatory except Optimization script and Advanced tweaks 
 -  Sets DNS servers to Cloudflare
 -  Updates hosts file (blocks some microsoft sites not working properly and Store installs!) -> workaround is to rename hosts file, download/install what you need and rename hosts file back
 -  Added custom Context Menu entries -> adds SystemShortcuts and SystemTools to right click on the Desktop
+-  Added custom Context Menu entries -> Open Powershell 5/7 here as admin, copy as path to right click
 -  Added Take Ownership ContextMenu to take control of your own files
 -  Removes useless Scheduled Tasks
 -  Sets all Services to Manual where applicable
