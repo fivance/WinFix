@@ -188,7 +188,7 @@ Write-Host " 11. Set SystemLocale"
 Write-Host " 12. Always show all extensions script"
 Write-Host " 13. Apply Titlebar accent color"
 Write-Host " 14. Disable UAC"
-Write-Host " 16. Exit script"
+Write-Host " 15. Exit script"
               }
 
 while ($true) {
