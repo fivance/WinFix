@@ -188,7 +188,6 @@ Write-Host " 11. Set SystemLocale"
 Write-Host " 12. Always show all extensions script"
 Write-Host " 13. Apply Titlebar accent color"
 Write-Host " 14. Disable UAC"
-Write-Host " 15. SublimeText Context Menus"
 Write-Host " 16. Exit script"
               }
 
@@ -5014,106 +5013,7 @@ if ($currentValue.ConsentPromptBehaviorAdmin -eq 0) {
 Clear-Host
 }
 
-15 {
-  Write-Host "Installing SublimeText Context Menus..."
-  Start-Sleep -Seconds 2
-  
-# Define the paths where Sublime Text might be installed
-$sublimePaths = @(
-    "C:\Program Files\Sublime Text\sublime_text.exe",
-    "C:\Program Files (x86)\Sublime Text\sublime_text.exe"
-)
-
-# Check if Sublime Text is installed
-$isInstalled = $false
-foreach ($path in $sublimePaths) {
-    if (Test-Path $path) {
-        $isInstalled = $true
-        break
-    }
-}
-
-if (-not $isInstalled) {
-    Write-Output "Sublime Text is not installed. Exiting script."
-    exit
-}
-
-# Correctly get the temporary directory path
-$tempDir = [System.IO.Path]::GetTempPath()
-
-# Create the batch file content
-$batFileContent = @"
-@echo off
-title Sublime Text Context Menu Manager
-:menu
-cls
-echo.
-echo Sublime Text Context Menu Manager
-echo.
-echo 1. Add Sublime Text to Context Menu
-echo 2. Remove Sublime Text from Context Menu
-echo 3. Exit
-echo.
-set /p choice="Choose an option (1-3): "
-if "%choice%"=="1" goto add
-if "%choice%"=="2" goto remove
-if "%choice%"=="3" goto exit
-echo Invalid choice. Please try again.
-timeout /t 2 /nobreak >nul
-goto menu
-
-:add
-cls
-echo Adding Sublime Text to Context Menu...
-SET sublimePath="C:\Program Files\Sublime Text\sublime_text.exe"
-:: Add context menu entry for all file types
-reg add "HKEY_CLASSES_ROOT\*\shell\Open with Sublime Text" /v "" /t REG_SZ /d "Open with Sublime Text" /f
-reg add "HKEY_CLASSES_ROOT\*\shell\Open with Sublime Text" /v "Icon" /t REG_EXPAND_SZ /d "%sublimePath%,0" /f
-reg add "HKEY_CLASSES_ROOT\*\shell\Open with Sublime Text\command" /v "" /t REG_SZ /d "%sublimePath% \"%%1\"" /f
-:: Add context menu entry for directories
-reg add "HKEY_CLASSES_ROOT\Directory\shell\Open with Sublime Text" /v "" /t REG_SZ /d "Open with Sublime Text" /f
-reg add "HKEY_CLASSES_ROOT\Directory\shell\Open with Sublime Text" /v "Icon" /t REG_EXPAND_SZ /d "%sublimePath%,0" /f
-reg add "HKEY_CLASSES_ROOT\Directory\shell\Open with Sublime Text\command" /v "" /t REG_SZ /d "%sublimePath% \"%%1\"" /f
-:: Add context menu entry for directory background in Explorer
-reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\Open with Sublime Text" /v "" /t REG_SZ /d "Open with Sublime Text" /f
-reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\Open with Sublime Text" /v "Icon" /t REG_EXPAND_SZ /d "%sublimePath%,0" /f
-reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\Open with Sublime Text\command" /v "" /t REG_SZ /d "%sublimePath% \"%%V\"" /f
-echo.
-echo Sublime Text has been added to the context menu.
-pause
-goto menu
-
-:remove
-cls
-echo Removing Sublime Text from Context Menu...
-:: Remove context menu entry for all file types
-reg delete "HKEY_CLASSES_ROOT\*\shell\Open with Sublime Text" /f
-:: Remove context menu entry for directories
-reg delete "HKEY_CLASSES_ROOT\Directory\shell\Open with Sublime Text" /f
-:: Remove context menu entry for directory background in Explorer
-reg delete "HKEY_CLASSES_ROOT\Directory\Background\shell\Open with Sublime Text" /f
-echo.
-echo Sublime Text has been removed from the context menu.
-pause
-goto menu
-
-:exit
-"@
-
-# Write the batch file content to a temporary file
-$batFilePath = Join-Path -Path $tempDir -ChildPath "SublimeTextContextMenuManager.bat"
-Set-Content -Path $batFilePath -Value $batFileContent
-
-# Run the batch file
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c $batFilePath" -NoNewWindow -Wait
-
-# Clean up the batch file
-Remove-Item -Path $batFilePath -Force
-
-
-}
-
-16 { 
+15 { 
 
   Clear-Host
   Write-Host "Exiting..."
