@@ -1,5 +1,7 @@
 The idea is to collect good optimization scripts and combine them in a single ps1 script.
 
+It's mostly optimized for gaming, not  for Security (imo, one excludes the other in most cases)
+
 Use at your own risk, if anything breaks it's on you.
 
 Must be run in powershell as admin and with Set-ExecutionPolicy Unrestricted
