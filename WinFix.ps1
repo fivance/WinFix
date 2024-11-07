@@ -3430,6 +3430,8 @@ ipconfig /registerdns
 # Disable NetBIOS over TCP/IP
 #Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 0 } | ForEach-Object { $_.SetTcpipNetbios(2) }
 #Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object { $_.TcpipNetbiosOptions -eq 1 } | ForEach-Object { $_.SetTcpipNetbios(2) }
+# Disable Teredo
+netsh interface teredo set state disabled
 # Bootloader
 bcdedit /timeout 4
 # Force install uncertified drivers
