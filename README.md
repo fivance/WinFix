@@ -54,6 +54,7 @@ Every option is self-explanatory except Optimization script and Advanced tweaks 
 
 -  Enabled Numlock everywhere
 -  Automatic discovery IE11 proxy
+-  Disable Teredo
 -  Removes any leftover background apps
 -  Cleans Onedrive leftover files and telemetry after Office install
 -  Set solid wallpaper color
