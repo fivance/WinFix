@@ -4912,7 +4912,6 @@ Write-Host "System needs to restart to apply changes..."
 Start-Sleep -Seconds 3
 
 }
-}
 
 12 {
 Write-Host "Disabling UAC..."
