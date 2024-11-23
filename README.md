@@ -15,6 +15,12 @@ Can also be run by running this command in Admin p$ window:
 ```iwr franivancevic.com/winfix | iex```
 
 
+![Example Image](images/ss.png)
+
+
+
+
+
 
 -------------------------------------------
 Every option is self-explanatory except Optimization script and Advanced tweaks which contains:
