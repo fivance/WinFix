@@ -4947,7 +4947,7 @@ switch ($choice) {
 1 {
     Clear-Host
     Write-Host 'Applying Network Settings to Limit Upload Bandwidth and Improve Latency Under Load...'
-    Get-Sleep -Seconds 3
+    Start-Sleep -Seconds 3
     #Get all network adapters
     $NIC = @()
     foreach ($a in Get-NetAdapter -Physical | Select-Object DeviceID, Name) { 
@@ -5113,7 +5113,7 @@ switch ($choice) {
     
 2 {
         Write-Host 'Reverting Network Tweaks...'
-        Get-Sleep -Seconds 3
+        Start-Sleep -Seconds 3
     #Get all network adapters
     $NIC = @()
     foreach ($a in Get-NetAdapter -Physical | Select-Object DeviceID, Name) { 
