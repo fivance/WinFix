@@ -28,7 +28,7 @@ Every option is self-explanatory except Optimization script and Advanced tweaks 
 
    **OPTIMIZATION SCRIPT**
 
--  Installs dependencis -> C++, DirectX
+-  Installs dependencies -> C++, DirectX
 -  Disables bacground apps
 -  Enables MSI Mode for GPU
 -  Cleans Taskbar and Start Menu
