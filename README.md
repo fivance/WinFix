@@ -12,7 +12,7 @@ some of the scripts are made by me and some are from @fr33thyfr33thy and @zoicwa
 
 Can also be run by running this command in Admin p$ window:
 
-```iwr franivancevic.com/winfix | iex```
+```iwr winfix.franivancevic.com | iex```
 
 
 ![Example Image](images/ss.png)
