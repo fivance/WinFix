@@ -188,7 +188,8 @@ Write-Host " 10. Install StartAllBack and apply settings"
 Write-Host " 11. Set SystemLocale"
 Write-Host " 12. Disable UAC"
 Write-Host " 13. Latency QOS tweaks"
-Write-Host " 14. Exit script"
+Write-Host " 14. Brave configuration"
+Write-Host " 15. Exit script"
               }
 
 while ($true) {
@@ -5381,8 +5382,14 @@ switch ($choice) {
   
 }
 
+14 
+  {
+    iwr "https://raw.githubusercontent.com/ltx0101/SlimBrave/main/SlimBrave.ps1" -OutFile "SlimBrave.ps1"; .\SlimBrave.ps1
+    
+    
+  }
 
-14 { 
+15 { 
 
   Clear-Host
   Write-Host "Exiting..."
