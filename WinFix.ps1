@@ -513,9 +513,6 @@ $MultilineComment = @"
 Set-Content -Path "$env:TEMP\Inspector\Inspector.nip" -Value $MultilineComment -Force
 # import config
 Start-Process -wait "$env:TEMP\Inspector\nvidiaProfileInspector.exe" -ArgumentList "$env:TEMP\Inspector\Inspector.nip"
-# open nvidiacontrolpanel
-Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
-}  
 
 (Get-ChildItem -Path "$env:windir\System32\DriverStore\FileRepository\nv_dispi*" -Directory).FullName | ForEach-Object { 
   takeown /f "$_\NvTelemetry64.dll" *>$null
@@ -533,6 +530,14 @@ Get-ScheduledTask -TaskName '*NvTmRep_CrashReport3*' | Disable-ScheduledTask
 Get-ScheduledTask -TaskName '*NvTmRep_CrashReport4*' | Disable-ScheduledTask
 #disables frame view service
 Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\FvSvc' /v 'Start' /t REG_DWORD /d '4' /f
+
+
+# open nvidiacontrolpanel
+Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
+}
+
+
+
 
 5 {
   Write-Host "Installing: Direct X..."
@@ -5013,6 +5018,7 @@ Remove-Item -Path "$env:LOCALAPPDATA\CoreAIPlatform*" -Force -Recurse -ErrorActi
 
 $input = Read-Host 'Done! Press Any Key to Exit'
 if ($input) { exit }
+}
 
 10 {
   Write-Host "Installing StartAllBack..."
