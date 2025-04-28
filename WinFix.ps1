@@ -161,6 +161,7 @@ function Get-FileFromWeb {
 
 
 (Invoke-WebRequest "https://raw.githubusercontent.com/lptstr/winfetch/master/winfetch.ps1" -UseBasicParsing).Content.Remove(0,1) | Invoke-Expression
+Read-Host 'Press any key to continue'
 
 
 Set-ConsoleOpacity -Opacity 93
