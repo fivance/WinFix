@@ -2512,28 +2512,28 @@ $path = "$env:TEMP\Registry Optimize.reg"
 Regedit.exe /S "$env:TEMP\Registry Optimize.reg"
 Clear-Host
 
-Clear-Host
-Write-Host "Applying black lockscreen..."
-Start-Sleep -Seconds 3
+#Clear-Host
+#Write-Host "Applying black lockscreen..."
+#Start-Sleep -Seconds 3
 
 # Black lockscreen
 # Create new image
-Add-Type -AssemblyName System.Windows.Forms
-$screenWidth = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Width
-$screenHeight = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Height
-Add-Type -AssemblyName System.Drawing
-$file = "C:\Windows\Black.jpg"
-$edit = New-Object System.Drawing.Bitmap $screenWidth, $screenHeight
-$color = [System.Drawing.Brushes]::Black
-$graphics = [System.Drawing.Graphics]::FromImage($edit)
-$graphics.FillRectangle($color, 0, 0, $edit.Width, $edit.Height)
-$graphics.Dispose()
-$edit.Save($file)
-$edit.Dispose()
+#Add-Type -AssemblyName System.Windows.Forms
+#$screenWidth = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Width
+#$screenHeight = [System.Windows.Forms.SystemInformation]::PrimaryMonitorSize.Height
+#Add-Type -AssemblyName System.Drawing
+#$file = "C:\Windows\Black.jpg"
+#$edit = New-Object System.Drawing.Bitmap $screenWidth, $screenHeight
+#$color = [System.Drawing.Brushes]::Black
+#$graphics = [System.Drawing.Graphics]::FromImage($edit)
+#$graphics.FillRectangle($color, 0, 0, $edit.Width, $edit.Height)
+#$graphics.Dispose()
+#$edit.Save($file)
+#$edit.Dispose()
 # Set image settings
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImagePath" /t REG_SZ /d "C:\Windows\Black.jpg" /f | Out-Null
-reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImageStatus" /t REG_DWORD /d "1" /f | Out-Null
-Clear-Host
+#reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImagePath" /t REG_SZ /d "C:\Windows\Black.jpg" /f | Out-Null
+#reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImageStatus" /t REG_DWORD /d "1" /f | Out-Null
+#Clear-Host
 Write-Host "Applying compact mode for explorer and small icons for desktop..."
 Start-Sleep -Seconds 3
 #Set compact mode in file explorer

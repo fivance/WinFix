@@ -38,7 +38,6 @@ Every option is self-explanatory except Optimization script and Advanced tweaks 
 -  Disables hibernate
 -  Installs Set Timer Resolution Service
 -  Registry optimizations
--  Sets black lockscreen
 -  Enables compact mode in Windows explorer
 -  Sets small icons on Desktop
 -  Removes OneDrive and cleans File Explorer sidebar from Onedrive and Gallery entries
