@@ -189,7 +189,8 @@ Write-Host " 11. Set SystemLocale"
 Write-Host " 12. Disable UAC"
 Write-Host " 13. Latency QOS tweaks"
 Write-Host " 14. Brave configuration"
-Write-Host " 15. Exit script"
+Write-Host " 15. Basic app installer"
+Write-Host " 16. Exit script"
               }
 
 while ($true) {
@@ -5389,7 +5390,90 @@ switch ($choice) {
     
   }
 
-15 { 
+15 {
+    Write-Host "This script will do winget install for following apps:"
+    Write-Host "
+     -7Zip
+     -Brave
+     -Notepad++
+     -Lightshot
+     -Everything Alpha (because of dark mode)
+     -Ditto
+     -Process Lasso
+     -WizTree
+     -Geek Uninstaller
+     -VLC
+     -Teamspeak
+     -Discord
+     -Steam
+     -Spotify"
+     
+Read-Host 'Press any key to continue' 
+  
+  # Check if winget is installed by attempting to get the path
+  $wingetPath = (Get-Command winget -ErrorAction SilentlyContinue).Path
+
+  if ($wingetPath) {
+    Write-Host "winget is already installed at: $wingetPath"
+  } else {
+    Write-Host "winget is not installed."
+
+    # winget is part of the App Installer package from the Microsoft Store
+    # Prompt the user to install it
+    Write-Host "Installing winget (App Installer) from the Microsoft Store..."
+
+    # Open Microsoft Store to the App Installer page for user to install
+    Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4NNS1"
+    
+    Write-Host "Please install 'App Installer' from the Microsoft Store to use winget."
+}
+
+Write-Output "Installing Apps..."
+$apps = @(
+    @{name = "7zip.7zip"},
+    @{name = "Brave.Brave"},
+    @{name = "Notepad++.Notepad++"},
+    @{name = "Skillbrains.Lightshot"},
+    @{name = "voidtools.Everything.Alpha"},
+    @{name = "Ditto.Ditto"},
+    @{name = "BitSum.ProcessLasso"},
+    @{name = "AntibodySoftware.WizTree"},
+    @{name = "GeekUninstaller.GeekUninstaller"},
+    @{name = "VideoLAN.VLC"},
+    @{name = "TeamSpeakSystems.TeamSpeakClient"},
+    @{name = "Discord.Discord"},
+    @{name = "Valve.Steam"},
+    @{name = "Spotify.Spotify"}
+)
+
+# Get the list of installed apps once at the beginning
+$installedApps = winget list | Select-Object -Skip 1 | ForEach-Object {
+    $columns = $_ -split '\s{2,}'  # Split by two or more spaces
+    @{ id = $columns[0]; name = $columns[1] }
+}
+
+foreach ($app in $apps) {
+    $isInstalled = $installedApps | Where-Object { $_.id -eq $app.name -or $_.name -eq $app.name }
+
+    if (-not $isInstalled) {
+        Write-Output "Installing: $($app.name)"
+        try {
+            winget install -e -h --accept-source-agreements --accept-package-agreements --id $app.name
+        } catch {
+            Write-Output "Failed to install: $($app.name) - $_"
+        }
+    } else {
+        Write-Output "Skipping: $($app.name) (already installed)"
+    }
+}
+  
+  
+  
+  
+  
+}
+
+16 { 
 
   Clear-Host
   Write-Host "Exiting..."
