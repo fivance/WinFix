@@ -1643,12 +1643,12 @@ Windows Registry Editor Version 5.00
 "UserPreferencesMask"=hex(2):90,12,03,80,10,00,00,00
 
 ; disable animate windows when minimizing and maximizing
-[HKEY_CURRENT_USER\Control Panel\Desktop\WindowMetrics]
-"MinAnimate"="0"
+;[HKEY_CURRENT_USER\Control Panel\Desktop\WindowMetrics]
+;"MinAnimate"="0"
 
 ; disable animations in the taskbar
-[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
-"TaskbarAnimations"=dword:0
+;[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+;"TaskbarAnimations"=dword:0
 
 ; disable enable peek
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM]
