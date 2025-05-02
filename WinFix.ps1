@@ -5118,21 +5118,29 @@ Clear-Host
 }
 
 13 {
-  
-  #Latency tweaks Menu
-
-Write-Host "1. Latency QOS tweaks: On"
-Write-Host "2. Latency QOS tweaks: Off"
+  function show-menu {
+    param (
+        [string]$title = 'Network Tweaks',
+        [string]$prompt = 'Select an option:'
+    )
+    cls
+    Write-Host $title -ForegroundColor Green
+    Write-Host $prompt -ForegroundColor Yellow
+    Write-Host "1. Apply Network Tweaks"
+    Write-Host "2. Revert Network Tweaks"
+    Write-Host "3. Exit"
+}
 while ($true) {
-$choice = Read-Host " "
-if ($choice -match '^[1-2]$') {
-switch ($choice) {
-
-1 {
-    Clear-Host
+  show-menu
+  $choice = Read-Host "Please select an option"
+  
+  switch ($choice) {    
+    
+    1{
+    
     Write-Host 'Applying Network Settings to Limit Upload Bandwidth and Improve Latency Under Load...'
-    Start-Sleep -Seconds 3
-    #Get all network adapters
+   
+    #get all network adapters
     $NIC = @()
     foreach ($a in Get-NetAdapter -Physical | Select-Object DeviceID, Name) { 
       $NIC += @{ $($a | Select-Object Name -ExpandProperty Name) = $($a | Select-Object DeviceID -ExpandProperty DeviceID) }
@@ -5179,37 +5187,37 @@ switch ($choice) {
     &$tcpTweaks *>$null
 
 
-    #Disable adapters while applying 
+    #disable adapters while applying 
     $NIC.Keys | ForEach-Object { Disable-NetAdapter -InterfaceAlias "$_" -Confirm:$False }
 
     $netAdaptTweaks = {
       foreach ($key in $NIC.Keys) {
-        #Reset advanced 
+        # reset advanced 
         $netProperty = Get-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword 'NetworkAddress' -ErrorAction SilentlyContinue
         if ($null -ne $netProperty.RegistryValue -and $netProperty.RegistryValue -ne ' ') {
           $mac = $netProperty.RegistryValue 
         }
         Get-NetAdapter -Name "$key" | Reset-NetAdapterAdvancedProperty -DisplayName '*'
-        #Restore custom mac
+        # restore custom mac
         if ($null -ne $mac) { 
           Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword 'NetworkAddress' -RegistryValue $mac 
         }
-        #Set receive and transmit buffers - less is better for latency, worst for throughput; too less and packet loss increases
+        # set receive and transmit buffers - less is better for latency, worst for throughput; too less and packet loss increases
         $rx = (Get-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*ReceiveBuffers').NumericParameterMaxValue  
         $tx = (Get-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*TransmitBuffers').NumericParameterMaxValue
         if ($null -ne $rx -and $null -ne $tx) {
           Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*ReceiveBuffers' -RegistryValue $rx # $rx 1024 320
           Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*TransmitBuffers' -RegistryValue $tx # $tx 2048 160
         }
-        #PCI-e adapters in msi-x mode from intel are generally fine with ITR Adaptive - others? not so much
+        # pci-e adapters in msi-x mode from intel are generally fine with ITR Adaptive - others? not so much
         Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*InterruptModeration' -RegistryValue 0 # Off 0 On 1
         Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword 'ITR' -RegistryValue 0 # Off 0 Adaptive 65535
-        #Recieve side scaling is always worth it, some adapters feature more queues = cpu threads; not available for wireless   
+        # recieve side scaling is always worth it, some adapters feature more queues = cpu threads; not available for wireless   
         Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*RSS' -RegistryValue 1
         Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*NumRssQueues' -RegistryValue 2
-        #Priority tag
+        # priority tag
         Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*PriorityVLANTag' -RegistryValue 1
-        #Undesirable stuff 
+        # undesirable stuff 
         Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*FlowControl' -RegistryValue 0
         Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*JumboPacket' -RegistryValue 1514
         Set-NetAdapterAdvancedProperty -Name "$key" -RegistryKeyword '*HeaderDataSplit' -RegistryValue 0
@@ -5249,7 +5257,7 @@ switch ($choice) {
     }
     &$netAdaptTweaks2 *>$null
 
-    #Enable adapters
+    #enable adapters
     $NIC.Keys | ForEach-Object { Enable-NetAdapter -InterfaceAlias "$_" -Confirm:$False }
 
     $netShTweaks = {
@@ -5291,14 +5299,19 @@ switch ($choice) {
       netsh int ip set dynamicport udp start=32769 num=32766  # DynamicPortRange udp
     }
     &$netShTweaks *>$null
-
-  }
+    Write-Host "Successfully applied network tweaks." -ForegroundColor Green
+    Start-Sleep -Seconds 3
   
+  }
     
-2 {
-        Write-Host 'Reverting Network Tweaks...'
-        Start-Sleep -Seconds 3
-    #Get all network adapters
+    
+    
+    
+    2{
+  
+    Write-Host 'Reverting Network Tweaks...' 
+   
+    #get all network adapters
     $NIC = @()
     foreach ($a in Get-NetAdapter -Physical | Select-Object DeviceID, Name) { 
       $NIC += @{ $($a | Select-Object Name -ExpandProperty Name) = $($a | Select-Object DeviceID -ExpandProperty DeviceID) }
@@ -5374,13 +5387,21 @@ switch ($choice) {
       Get-NetQosPolicy | Remove-NetQosPolicy -Confirm:$False -ea 0
     }
     &$resetQos *>$null
-    
-}    
+    Write-Host "Successfully reverted tweaks." -ForegroundColor Green
+    Start-Sleep -Seconds 3
+  }
+
+  3{
+    Write-Host "Exiting..."
+    Start-Sleep -Seconds 2
+    exit
+
+  }
   
-}}}
-  
-  
-  
+
+}
+
+}
 }
 
 14 
