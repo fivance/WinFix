@@ -168,7 +168,6 @@ Set-ConsoleOpacity -Opacity 93
 Start-Sleep -Seconds 3
 function show-menu {
 Clear-Host
-Write-Host " 0. UniGetUI app install"   
 Write-Host " 1. CTT Winutil"
 Write-Host " 2. Clean graphics driver - DDU"
 Write-Host " 3. Install NVIDIA Driver"
@@ -188,9 +187,8 @@ Write-Host " 10. Install StartAllBack and apply settings"
 Write-Host " 11. Set SystemLocale"
 Write-Host " 12. Disable UAC"
 Write-Host " 13. Latency QOS tweaks"
-Write-Host " 14. Brave configuration"
-Write-Host " 15. Basic app installer"
-Write-Host " 16. Exit script"
+Write-Host " 14. Brave config"
+Write-Host " 15. Exit script"
               }
 
 while ($true) {
@@ -198,17 +196,6 @@ show-menu
 $choice = Read-Host "Please select an option"
 
 switch ($choice) {
-
-0 {
-
-# Download UniGetUI
-winget install --exact --id MartiCliment.UniGetUI --source winget
-
-# launch WingetUI
-Start-Process "$env:USERPROFILE\AppData\Local\Programs\UniGetUI\UniGetUI.exe"
-
-}
-
 
 1 {
   start powershell {irm christitus.com/win | iex}
@@ -2008,17 +1995,17 @@ Windows Registry Editor Version 5.00
 
 
 ; PERSONALIZATION
-; solid color personalize your background
-[HKEY_CURRENT_USER\Control Panel\Desktop]
-"Wallpaper"=""
+;solid color personalize your background
+;[HKEY_CURRENT_USER\Control Panel\Desktop]
+;"Wallpaper"=""
 
-[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers]
-"BackgroundType"=dword:00000001
+;[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers]
+;"BackgroundType"=dword:00000001
 
 ; dark theme 
-[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize]
-"AppsUseLightTheme"=dword:00000000
-"SystemUsesLightTheme"=dword:00000000
+;[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize]
+;"AppsUseLightTheme"=dword:00000000
+;"SystemUsesLightTheme"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize]
 "AppsUseLightTheme"=dword:00000000
@@ -3262,15 +3249,15 @@ if (Test-Path $registryPath) {
 }
 
 # Set wallpaper style to solid color (black)
-$registryPathDesktop = "HKCU:\Control Panel\Desktop"
-Set-ItemProperty -Path $registryPathDesktop -Name "Wallpaper" -Value ""
-Set-ItemProperty -Path $registryPathDesktop -Name "WallpaperStyle" -Value 0
-Set-ItemProperty -Path $registryPathDesktop -Name "BackgroundType" -Value 1
-Set-ItemProperty -Path $registryPathDesktop -Name "SingleColor" -Value "000000" # Black color in hex
+#$registryPathDesktop = "HKCU:\Control Panel\Desktop"
+#;Set-ItemProperty -Path $registryPathDesktop -Name "Wallpaper" -Value ""
+#;Set-ItemProperty -Path $registryPathDesktop -Name "WallpaperStyle" -Value 0
+#;Set-ItemProperty -Path $registryPathDesktop -Name "BackgroundType" -Value 1
+#;Set-ItemProperty -Path $registryPathDesktop -Name "SingleColor" -Value "000000" # Black color in hex
 
 # Update the system parameters to apply changes
-RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters ,1 ,True
-Write-Output "Wallpaper style has been set to solid black."
+#;RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters ,1 ,True
+#;Write-Output "Wallpaper style has been set to solid black."
 
 
 
@@ -5411,90 +5398,9 @@ while ($true) {
     
   }
 
-15 {
-    Write-Host "This script will do winget install for following apps:"
-    Write-Host "
-     -7Zip
-     -Brave
-     -Notepad++
-     -Lightshot
-     -Everything Alpha (because of dark mode)
-     -Ditto
-     -Process Lasso
-     -WizTree
-     -Geek Uninstaller
-     -VLC
-     -Teamspeak
-     -Discord
-     -Steam
-     -Spotify"
-     
-Read-Host 'Press any key to continue' 
-  
-  # Check if winget is installed by attempting to get the path
-  $wingetPath = (Get-Command winget -ErrorAction SilentlyContinue).Path
 
-  if ($wingetPath) {
-    Write-Host "winget is already installed at: $wingetPath"
-  } else {
-    Write-Host "winget is not installed."
 
-    # winget is part of the App Installer package from the Microsoft Store
-    # Prompt the user to install it
-    Write-Host "Installing winget (App Installer) from the Microsoft Store..."
-
-    # Open Microsoft Store to the App Installer page for user to install
-    Start-Process "ms-windows-store://pdp/?productid=9NBLGGH4NNS1"
-    
-    Write-Host "Please install 'App Installer' from the Microsoft Store to use winget."
-}
-
-Write-Output "Installing Apps..."
-$apps = @(
-    @{name = "7zip.7zip"},
-    @{name = "Brave.Brave"},
-    @{name = "Notepad++.Notepad++"},
-    @{name = "Skillbrains.Lightshot"},
-    @{name = "voidtools.Everything.Alpha"},
-    @{name = "Ditto.Ditto"},
-    @{name = "BitSum.ProcessLasso"},
-    @{name = "AntibodySoftware.WizTree"},
-    @{name = "GeekUninstaller.GeekUninstaller"},
-    @{name = "VideoLAN.VLC"},
-    @{name = "TeamSpeakSystems.TeamSpeakClient"},
-    @{name = "Discord.Discord"},
-    @{name = "Valve.Steam"},
-    @{name = "Spotify.Spotify"}
-)
-
-# Get the list of installed apps once at the beginning
-$installedApps = winget list | Select-Object -Skip 1 | ForEach-Object {
-    $columns = $_ -split '\s{2,}'  # Split by two or more spaces
-    @{ id = $columns[0]; name = $columns[1] }
-}
-
-foreach ($app in $apps) {
-    $isInstalled = $installedApps | Where-Object { $_.id -eq $app.name -or $_.name -eq $app.name }
-
-    if (-not $isInstalled) {
-        Write-Output "Installing: $($app.name)"
-        try {
-            winget install -e -h --accept-source-agreements --accept-package-agreements --id $app.name
-        } catch {
-            Write-Output "Failed to install: $($app.name) - $_"
-        }
-    } else {
-        Write-Output "Skipping: $($app.name) (already installed)"
-    }
-}
-  
-  
-  
-  
-  
-}
-
-16 { 
+15 { 
 
   Clear-Host
   Write-Host "Exiting..."
