@@ -168,7 +168,7 @@ Set-ConsoleOpacity -Opacity 93
 Start-Sleep -Seconds 3
 function show-menu {
 Clear-Host
-Write-Host " 1. CTT Winutil"
+Write-Host " 1. CTT winutil"
 Write-Host " 2. Clean graphics driver - DDU"
 Write-Host " 3. Install NVIDIA Driver"
 Write-Host " 4. Apply NVIDIA settings"
@@ -179,16 +179,9 @@ Write-Host `n "" ""   "[EXTRAS]"
 Write-Host "`n"
 
 
-Write-Host " 6. Extra tweaks"
-Write-Host " 7. Disable MS Defender"
-Write-Host " 8. Winget fix"
-Write-Host " 9. Disable Recall and AI features"
-Write-Host " 10. Install StartAllBack and apply settings"
-Write-Host " 11. Set SystemLocale"
-Write-Host " 12. Disable UAC"
-Write-Host " 13. Latency QOS tweaks"
-Write-Host " 14. Brave config"
-Write-Host " 15. Exit script"
+Write-Host " 6. Disable MS Defender"
+Write-Host " 7. Latency QOS tweaks"
+Write-Host " 8. Exit script"
               }
 
 while ($true) {
@@ -3269,12 +3262,297 @@ Remove-Item -Path "$env:SystemDrive\Windows\Temp" -Recurse -Force -ErrorAction S
 New-Item -Path "$env:SystemDrive\Windows" -Name "Temp" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 # Open disk cleanup
 
-Start-Process cleanmgr.exe
-}  
+function Run-Trusted([String]$command) {
 
-6 { 
-  Write-Host "Enabling advanced stuff..."
-  Start-Sleep -Seconds 3
+    Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
+    #get bin path to revert later
+    $service = Get-WmiObject -Class Win32_Service -Filter "Name='TrustedInstaller'"
+    $DefaultBinPath = $service.PathName
+    #convert command to base64 to avoid errors with spaces
+    $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
+    $base64Command = [Convert]::ToBase64String($bytes)
+    #change bin to command
+    sc.exe config TrustedInstaller binPath= "cmd.exe /c powershell.exe -encodedcommand $base64Command" | Out-Null
+    #run the command
+    sc.exe start TrustedInstaller | Out-Null
+    #set bin back to default
+    sc.exe config TrustedInstaller binpath= "`"$DefaultBinPath`"" | Out-Null
+    Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
+
+}
+
+#disable ai registry keys
+Write-Host 'Applying Registry Keys...'
+#set for local machine and current user to be sure
+$hives = @('HKLM', 'HKCU')
+foreach ($hive in $hives) {
+    Reg.exe add "$hive\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v 'TurnOffWindowsCopilot' /t REG_DWORD /d '1' /f *>$null
+    Reg.exe add "$hive\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" /v 'DisableAIDataAnalysis' /t REG_DWORD /d '1' /f *>$null
+    Reg.exe add "$hive\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" /v 'AllowRecallEnablement' /t REG_DWORD /d '0' /f *>$null
+}
+Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v 'ShowCopilotButton' /t REG_DWORD /d '0' /f *>$null
+Reg.exe add 'HKCU\Software\Microsoft\input\Settings' /v 'InsightsEnabled' /t REG_DWORD /d '0' /f *>$null
+#remove copilot from search
+Reg.exe add 'HKCU\SOFTWARE\Policies\Microsoft\Windows\Explorer' /v 'DisableSearchBoxSuggestions' /t REG_DWORD /d '1' /f *>$null
+#disable copilot in edge
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'CopilotCDPPageContext' /t REG_DWORD /d '0' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'CopilotPageContext' /t REG_DWORD /d '0' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'HubsSidebarEnabled' /t REG_DWORD /d '0' /f *>$null
+#disable additional keys
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\Shell\Copilot\BingChat' /v 'IsUserEligible' /t REG_DWORD /d '0' /f *>$null
+Reg.exe add 'HKCU\SOFTWARE\Microsoft\Windows\Shell\Copilot\BingChat' /v 'IsUserEligible' /t REG_DWORD /d '0' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Notifications\Settings' /v 'AutoOpenCopilotLargeScreens' /t REG_DWORD /d '0' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\generativeAI' /v 'Value' /t REG_SZ /d 'Deny' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy' /v 'LetAppsAccessGenerativeAI' /t REG_DWORD /d '2' /f *>$null
+#disable ai image creator in paint
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'Behavior' /t REG_DWORD /d '1056800' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'highrange' /t REG_DWORD /d '1' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'lowrange' /t REG_DWORD /d '0' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'mergealgorithm' /t REG_DWORD /d '1' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'policytype' /t REG_DWORD /d '4' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'RegKeyPathRedirect' /t REG_SZ /d 'Software\Microsoft\Windows\CurrentVersion\Policies\Paint' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'RegValueNameRedirect' /t REG_SZ /d 'DisableImageCreator' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'value' /t REG_DWORD /d '0' /f *>$null
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint' /v 'DisableImageCreator' /t REG_DWORD /d '1' /f *>$null
+#force policy changes
+gpupdate /force >$null
+
+
+#prefire copilot nudges package by deleting the registry keys 
+Write-Host 'Removing Copilot Nudges Registry Keys...'
+$keys = @(
+    'registry::HKCR\Extensions\ContractId\Windows.BackgroundTasks\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.AppX*.wwa',
+    'registry::HKCR\Extensions\ContractId\Windows.Launch\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.wwa',
+    'registry::HKCR\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\Applications\MicrosoftWindows.Client.Core_cw5n1h2txyewy!Global.CopilotNudges',
+    'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\Applications\MicrosoftWindows.Client.Core_cw5n1h2txyewy!Global.CopilotNudges',
+    'HKCU:\Software\Microsoft\Windows\CurrentVersion\PushNotifications\Backup\MicrosoftWindows.Client.Core_cw5n1h2txyewy!Global.CopilotNudges',
+    'HKLM:\SOFTWARE\Classes\Extensions\ContractId\Windows.BackgroundTasks\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.AppX*.wwa',
+    'HKLM:\SOFTWARE\Classes\Extensions\ContractId\Windows.BackgroundTasks\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.AppX*.mca',
+    'HKLM:\SOFTWARE\Classes\Extensions\ContractId\Windows.Launch\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.wwa'
+)
+#get full paths and remove
+$fullkey = @()
+foreach ($key in $keys) {
+    try {
+        $fullKey = Get-Item -Path $key -ErrorAction Stop
+        if ($null -eq $fullkey) { continue }
+        if ($fullkey.Length -gt 1) {
+            foreach ($multikey in $fullkey) {
+                $command = "Remove-Item -Path `"registry::$multikey`" -Force -Recurse"
+                Run-Trusted -command $command
+                Start-Sleep 1
+                #remove any regular admin that have trusted installer bug
+                Remove-Item -Path "registry::$multikey" -Force -Recurse -ErrorAction SilentlyContinue
+            }
+        }
+        else {
+            $command = "Remove-Item -Path `"registry::$fullKey`" -Force -Recurse"
+            Run-Trusted -command $command
+            Start-Sleep 1
+            #remove any regular admin that have trusted installer bug
+            Remove-Item -Path "registry::$fullKey" -Force -Recurse -ErrorAction SilentlyContinue
+        }
+        
+    }
+    catch {
+        continue
+    }
+}
+    
+    
+
+
+$aipackages = @(
+    'MicrosoftWindows.Client.Photon'
+    'MicrosoftWindows.Client.AIX'
+    'MicrosoftWindows.Client.CoPilot'
+    'Microsoft.Windows.Ai.Copilot.Provider'
+    'Microsoft.Copilot'
+    'Microsoft.MicrosoftOfficeHub'
+)
+
+$provisioned = get-appxprovisionedpackage -online 
+$appxpackage = get-appxpackage -allusers
+$eol = @()
+$store = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore'
+$packageState = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\PackageState'
+$users = @('S-1-5-18'); if (test-path $store) { $users += $((Get-ChildItem $packageState -ea 0 | Where-Object { $_ -like '*S-1-5-21*' }).PSChildName) }
+
+
+#disable copilot policies in region policy json
+$JSONPath = "$env:windir\System32\IntegratedServicesRegionPolicySet.json"
+if (Test-Path $JSONPath) {
+    Write-Host 'Disabling CoPilot Policies in ' -NoNewline
+    Write-Host "[$JSONPath]" -ForegroundColor Yellow
+
+    #takeownership
+    takeown /f $JSONPath *>$null
+    icacls $JSONPath /grant administrators:F /t *>$null
+
+    #edit the content
+    $jsonContent = Get-Content $JSONPath | ConvertFrom-Json
+    try {
+        $copilotPolicies = $jsonContent.policies | Where-Object { $_.'$comment' -like '*CoPilot*' }
+        foreach ($policies in $copilotPolicies) {
+            $policies.defaultState = 'disabled'
+        }
+        $newJSONContent = $jsonContent | ConvertTo-Json -Depth 100
+        Set-Content $JSONPath -Value $newJSONContent -Force
+        Write-Host "$($copilotPolicies.count) CoPilot Policies Disabled"
+    }
+    catch {
+        Write-Warning 'CoPilot Not Found in IntegratedServicesRegionPolicySet'
+    }
+
+    
+}
+
+
+
+#use eol trick to uninstall some locked packages
+foreach ($choice in $aipackages) {
+    Write-Host "Removing $choice"
+    if ('' -eq $choice.Trim()) { continue }
+    foreach ($appx in $($provisioned | Where-Object { $_.PackageName -like "*$choice*" })) {
+        $next = !1; foreach ($no in $skip) { if ($appx.PackageName -like "*$no*") { $next = !0 } } ; if ($next) { continue }
+        $PackageName = $appx.PackageName; $PackageFamilyName = ($appxpackage | Where-Object { $_.Name -eq $appx.DisplayName }).PackageFamilyName
+        New-Item "$store\Deprovisioned\$PackageFamilyName" -force >''; 
+        foreach ($sid in $users) { New-Item "$store\EndOfLife\$sid\$PackageName" -force >'' } ; $eol += $PackageName
+        dism /online /set-nonremovableapppolicy /packagefamily:$PackageFamilyName /nonremovable:0 >''
+        remove-appxprovisionedpackage -packagename $PackageName -online -allusers >''
+    }
+    foreach ($appx in $($appxpackage | Where-Object { $_.PackageFullName -like "*$choice*" })) {
+        $next = !1; foreach ($no in $skip) { if ($appx.PackageFullName -like "*$no*") { $next = !0 } } ; if ($next) { continue }
+        $PackageFullName = $appx.PackageFullName;
+        New-Item "$store\Deprovisioned\$appx.PackageFamilyName" -force >''; 
+        foreach ($sid in $users) { New-Item "$store\EndOfLife\$sid\$PackageFullName" -force >'' } ; $eol += $PackageFullName
+        dism /online /set-nonremovableapppolicy /packagefamily:$PackageFamilyName /nonremovable:0 >''
+        remove-appxpackage -package $PackageFullName -allusers >''
+    }
+}
+
+## undo eol unblock trick to prevent latest cumulative update (LCU) failing 
+foreach ($sid in $users) { foreach ($PackageName in $eol) { Remove-Item "$store\EndOfLife\$sid\$PackageName" -force -ErrorAction SilentlyContinue >'' } }
+
+#remove recall optional feature 
+$ProgressPreference = 'SilentlyContinue'
+try {
+    Disable-WindowsOptionalFeature -Online -FeatureName 'Recall' -Remove -NoRestart -ErrorAction Stop *>$null
+}
+catch {
+    #hide error
+}
+
+
+Write-Host 'Removing Package Files...'
+#-----------------------------------------------------------------------remove files
+$appsPath = 'C:\Windows\SystemApps'
+$appsPath2 = 'C:\Program Files\WindowsApps'
+$pathsSystemApps = (Get-ChildItem -Path $appsPath -Directory -Force).FullName 
+$pathsWindowsApps = (Get-ChildItem -Path $appsPath2 -Directory -Force).FullName 
+
+$packagesPath = @()
+#get full path
+foreach ($package in $aipackages) {
+
+    foreach ($path in $pathsSystemApps) {
+        if ($path -like "*$package*") {
+            $packagesPath += $path
+        }
+    }
+
+    foreach ($path in $pathsWindowsApps) {
+        if ($path -like "*$package*") {
+            $packagesPath += $path
+        }
+    }
+
+}
+
+
+foreach ($Path in $packagesPath) {
+    #only remove dlls from photon to prevent startmenu from breaking
+    if ($path -like '*Photon*') {
+        $command = "`$dlls = (Get-ChildItem -Path $Path -Filter *.dll).FullName; foreach(`$dll in `$dlls){Remove-item ""`$dll"" -force}"
+        Run-Trusted -command $command
+        Start-Sleep 1
+    }
+    else {
+        $command = "Remove-item ""$Path"" -force -recurse"
+        Run-Trusted -command $command
+        Start-Sleep 1
+    }
+}
+
+#remove package installers in edge dir
+#installs Microsoft.Windows.Ai.Copilot.Provider
+$dir = "${env:ProgramFiles(x86)}\Microsoft"
+$folders = @(
+    'Edge',
+    'EdgeCore',
+    'EdgeWebView'
+)
+foreach ($folder in $folders) {
+    if ($folder -eq 'EdgeCore') {
+        #edge core doesnt have application folder
+        $fullPath = (Get-ChildItem -Path "$dir\$folder\*.*.*.*\copilot_provider_msix" -ErrorAction SilentlyContinue).FullName
+        
+    }
+    else {
+        $fullPath = (Get-ChildItem -Path "$dir\$folder\Application\*.*.*.*\copilot_provider_msix" -ErrorAction SilentlyContinue).FullName
+    }
+    if ($fullPath -ne $null) { Remove-Item -Path $fullPath -Recurse -Force -ErrorAction SilentlyContinue }
+}
+
+
+#remove additional installers
+$inboxapps = 'C:\Windows\InboxApps'
+$installers = Get-ChildItem -Path $inboxapps -Filter '*Copilot*'
+foreach ($installer in $installers) {
+    takeown /f $installer.FullName *>$null
+    icacls $installer.FullName /grant administrators:F /t *>$null
+    try {
+        Remove-Item -Path $installer.FullName -Force -ErrorAction Stop
+    }
+    catch {
+        #takeown didnt work remove file with system priv
+        $command = "Remove-Item -Path $($installer.FullName) -Force"
+        Run-Trusted -command $command 
+    }
+    
+}
+
+
+#hide ai components in immersive settings
+Write-Host 'Hiding Ai Components in Settings...'
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' /v 'SettingsPageVisibility' /t REG_SZ /d 'hide:aicomponents;' /f >$null
+
+#disable rewrite for notepad
+Write-Host 'Disabling Rewrite Ai Feature for Notepad...'
+#load notepad settings
+reg load HKU\TEMP "$env:LOCALAPPDATA\Packages\Microsoft.WindowsNotepad_8wekyb3d8bbwe\Settings\settings.dat" >$null
+#add disable rewrite
+$regContent = @'
+Windows Registry Editor Version 5.00
+
+[HKEY_USERS\TEMP\LocalState]
+"RewriteEnabled"=hex(5f5e10b):00,e0,d1,c5,7f,ee,83,db,01
+'@
+New-Item "$env:TEMP\DisableRewrite.reg" -Value $regContent -Force | Out-Null
+regedit.exe /s "$env:TEMP\DisableRewrite.reg"
+Start-Sleep 1
+reg unload HKU\TEMP >$null
+Remove-Item "$env:TEMP\DisableRewrite.reg" -Force -ErrorAction SilentlyContinue
+
+#remove any screenshots from recall
+Write-Host 'Removing Any Screenshots...'
+Remove-Item -Path "$env:LOCALAPPDATA\CoreAIPlatform*" -Force -Recurse -ErrorAction SilentlyContinue
+
+
+$input = Read-Host 'Done! Press Any Key to Exit'
+if ($input) { exit }
+}
+
 Start-Process cmd.exe /c
 # Registry numlock enabled everywhere
 reg add "HKU\S-1-5-19\Control Panel\Keyboard" /v "InitialKeyboardIndicators" /t REG_SZ /d "2147483650" /f $nul
@@ -3587,7 +3865,10 @@ schtasks /change /tn "Microsoft\Windows\WwanSvc\OobeDiscovery" /disable
 # schtasks /change /tn "Microsoft\Windows\TextServicesFramework\MsCtfMonitor" /disable
 }
 
-7 { 
+Start-Process cleanmgr.exe
+}  
+
+6 { 
   #Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File C:/files/security.ps1" -NoNewWindow -Wait
    function RunAsTI($cmd, $arg) {
 $id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
@@ -4635,476 +4916,7 @@ exit
 
 } 
 
-8 { 
-function Install-WinGet {
-    $tempFolderName = "WinGetInstall"
-    $tempFolder = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath $tempFolderName
-    New-Item $tempFolder -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
-
-    $apiLatestUrl = if ($Prerelease) { "https://api.github.com/repos/microsoft/winget-cli/releases?per_page=1" } else { "https://api.github.com/repos/microsoft/winget-cli/releases/latest" }
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    $WebClient = New-Object System.Net.WebClient
-
-    function Get-LatestUrl {
-        # Properly quote the regular expression used with -match
-        ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match "^Microsoft\.DesktopAppInstaller_8wekyb3d8bbwe\.msixbundle$" }).browser_download_url
-    }
-
-    function Get-LatestHash {
-        # Properly quote the regular expression used with -match
-        $shaUrl = ((Invoke-WebRequest $apiLatestUrl -UseBasicParsing | ConvertFrom-Json).assets | Where-Object { $_.name -match "^Microsoft\.DesktopAppInstaller_8wekyb3d8bbwe\.txt$" }).browser_download_url
-        $shaFile = Join-Path -Path $tempFolder -ChildPath "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.txt"
-        $WebClient.DownloadFile($shaUrl, $shaFile)
-        Get-Content $shaFile
-    }
-
-    $desktopAppInstaller = @{
-        fileName = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-        url      = $(Get-LatestUrl)
-        hash     = $(Get-LatestHash)
-    }
-
-    $vcLibsUwp = @{
-        fileName = "Microsoft.VCLibs.x64.14.00.Desktop.appx"
-        url      = "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx"
-        hash     = "9BFDE6CFCC530EF073AB4BC9C4817575F63BE1251DD75AAA58CB89299697A569"
-    }
-
-    $uiLibsUwp = @{
-        fileName = "Microsoft.UI.Xaml.2.7.zip"
-        url      = "https://www.nuget.org/api/v2/package/Microsoft.UI.Xaml/2.7.0"
-        hash     = "422FD24B231E87A842C4DAEABC6A335112E0D35B86FAC91F5CE7CF327E36A591"
-    }
-
-    $dependencies = @($desktopAppInstaller, $vcLibsUwp, $uiLibsUwp)
-    Write-Host "--> Checking dependencies"
-    foreach ($dependency in $dependencies) {
-        $dependency.file = Join-Path -Path $tempFolder -ChildPath $dependency.fileName
-        if (-Not ((Test-Path -Path $dependency.file -PathType Leaf) -And $dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
-            # Fixed the formatting of Write-Host to correctly display the URL
-            Write-Host ("- Downloading: `n{0}" -f $dependency.url)
-            try {
-                $WebClient.DownloadFile($dependency.url, $dependency.file)
-            }
-            catch {
-                throw [System.Net.WebException]::new("Error downloading $($dependency.url).", $_.Exception)
-            }
-            if (-not ($dependency.hash -eq $(Get-FileHash $dependency.file).Hash)) {
-                throw [System.Activities.VersionMismatchException]::new("Dependency hash does not match the downloaded file")
-            }
-        }
-    }
-
-    if (-Not (Test-Path (Join-Path -Path $tempFolder -ChildPath "Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx"))) {
-        Expand-Archive -Path $uiLibsUwp.file -DestinationPath ($tempFolder + "\Microsoft.UI.Xaml.2.7") -Force
-    }
-
-    $uiLibsUwp.file = (Join-Path -Path $tempFolder -ChildPath "Microsoft.UI.Xaml.2.7\tools\AppX\x64\Release\Microsoft.UI.Xaml.2.7.appx")
-    Add-AppxPackage -Path $($desktopAppInstaller.file) -DependencyPath $($vcLibsUwp.file), $($uiLibsUwp.file)
-    Remove-Item $tempFolder -recurse -force
-}
-
-Write-Host -ForegroundColor Green "--> Updating Winget`n"
-Install-WinGet
-
-
-}
-
-
-9 { 
-  If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
-    Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
-    Exit	
-}
-
-function Run-Trusted([String]$command) {
-
-    Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
-    #get bin path to revert later
-    $service = Get-WmiObject -Class Win32_Service -Filter "Name='TrustedInstaller'"
-    $DefaultBinPath = $service.PathName
-    #convert command to base64 to avoid errors with spaces
-    $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
-    $base64Command = [Convert]::ToBase64String($bytes)
-    #change bin to command
-    sc.exe config TrustedInstaller binPath= "cmd.exe /c powershell.exe -encodedcommand $base64Command" | Out-Null
-    #run the command
-    sc.exe start TrustedInstaller | Out-Null
-    #set bin back to default
-    sc.exe config TrustedInstaller binpath= "`"$DefaultBinPath`"" | Out-Null
-    Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
-
-}
-
-#disable ai registry keys
-Write-Host 'Applying Registry Keys...'
-#set for local machine and current user to be sure
-$hives = @('HKLM', 'HKCU')
-foreach ($hive in $hives) {
-    Reg.exe add "$hive\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v 'TurnOffWindowsCopilot' /t REG_DWORD /d '1' /f *>$null
-    Reg.exe add "$hive\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" /v 'DisableAIDataAnalysis' /t REG_DWORD /d '1' /f *>$null
-    Reg.exe add "$hive\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" /v 'AllowRecallEnablement' /t REG_DWORD /d '0' /f *>$null
-}
-Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v 'ShowCopilotButton' /t REG_DWORD /d '0' /f *>$null
-Reg.exe add 'HKCU\Software\Microsoft\input\Settings' /v 'InsightsEnabled' /t REG_DWORD /d '0' /f *>$null
-#remove copilot from search
-Reg.exe add 'HKCU\SOFTWARE\Policies\Microsoft\Windows\Explorer' /v 'DisableSearchBoxSuggestions' /t REG_DWORD /d '1' /f *>$null
-#disable copilot in edge
-Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'CopilotCDPPageContext' /t REG_DWORD /d '0' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'CopilotPageContext' /t REG_DWORD /d '0' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Edge' /v 'HubsSidebarEnabled' /t REG_DWORD /d '0' /f *>$null
-#disable additional keys
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\Shell\Copilot\BingChat' /v 'IsUserEligible' /t REG_DWORD /d '0' /f *>$null
-Reg.exe add 'HKCU\SOFTWARE\Microsoft\Windows\Shell\Copilot\BingChat' /v 'IsUserEligible' /t REG_DWORD /d '0' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Notifications\Settings' /v 'AutoOpenCopilotLargeScreens' /t REG_DWORD /d '0' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\generativeAI' /v 'Value' /t REG_SZ /d 'Deny' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy' /v 'LetAppsAccessGenerativeAI' /t REG_DWORD /d '2' /f *>$null
-#disable ai image creator in paint
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'Behavior' /t REG_DWORD /d '1056800' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'highrange' /t REG_DWORD /d '1' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'lowrange' /t REG_DWORD /d '0' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'mergealgorithm' /t REG_DWORD /d '1' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'policytype' /t REG_DWORD /d '4' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'RegKeyPathRedirect' /t REG_SZ /d 'Software\Microsoft\Windows\CurrentVersion\Policies\Paint' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'RegValueNameRedirect' /t REG_SZ /d 'DisableImageCreator' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImageCreator' /v 'value' /t REG_DWORD /d '0' /f *>$null
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint' /v 'DisableImageCreator' /t REG_DWORD /d '1' /f *>$null
-#force policy changes
-gpupdate /force >$null
-
-
-#prefire copilot nudges package by deleting the registry keys 
-Write-Host 'Removing Copilot Nudges Registry Keys...'
-$keys = @(
-    'registry::HKCR\Extensions\ContractId\Windows.BackgroundTasks\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.AppX*.wwa',
-    'registry::HKCR\Extensions\ContractId\Windows.Launch\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.wwa',
-    'registry::HKCR\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\Applications\MicrosoftWindows.Client.Core_cw5n1h2txyewy!Global.CopilotNudges',
-    'HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\Applications\MicrosoftWindows.Client.Core_cw5n1h2txyewy!Global.CopilotNudges',
-    'HKCU:\Software\Microsoft\Windows\CurrentVersion\PushNotifications\Backup\MicrosoftWindows.Client.Core_cw5n1h2txyewy!Global.CopilotNudges',
-    'HKLM:\SOFTWARE\Classes\Extensions\ContractId\Windows.BackgroundTasks\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.AppX*.wwa',
-    'HKLM:\SOFTWARE\Classes\Extensions\ContractId\Windows.BackgroundTasks\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.AppX*.mca',
-    'HKLM:\SOFTWARE\Classes\Extensions\ContractId\Windows.Launch\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.wwa'
-)
-#get full paths and remove
-$fullkey = @()
-foreach ($key in $keys) {
-    try {
-        $fullKey = Get-Item -Path $key -ErrorAction Stop
-        if ($null -eq $fullkey) { continue }
-        if ($fullkey.Length -gt 1) {
-            foreach ($multikey in $fullkey) {
-                $command = "Remove-Item -Path `"registry::$multikey`" -Force -Recurse"
-                Run-Trusted -command $command
-                Start-Sleep 1
-                #remove any regular admin that have trusted installer bug
-                Remove-Item -Path "registry::$multikey" -Force -Recurse -ErrorAction SilentlyContinue
-            }
-        }
-        else {
-            $command = "Remove-Item -Path `"registry::$fullKey`" -Force -Recurse"
-            Run-Trusted -command $command
-            Start-Sleep 1
-            #remove any regular admin that have trusted installer bug
-            Remove-Item -Path "registry::$fullKey" -Force -Recurse -ErrorAction SilentlyContinue
-        }
-        
-    }
-    catch {
-        continue
-    }
-}
-    
-    
-
-
-$aipackages = @(
-    'MicrosoftWindows.Client.Photon'
-    'MicrosoftWindows.Client.AIX'
-    'MicrosoftWindows.Client.CoPilot'
-    'Microsoft.Windows.Ai.Copilot.Provider'
-    'Microsoft.Copilot'
-    'Microsoft.MicrosoftOfficeHub'
-)
-
-$provisioned = get-appxprovisionedpackage -online 
-$appxpackage = get-appxpackage -allusers
-$eol = @()
-$store = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore'
-$packageState = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Appx\PackageState'
-$users = @('S-1-5-18'); if (test-path $store) { $users += $((Get-ChildItem $packageState -ea 0 | Where-Object { $_ -like '*S-1-5-21*' }).PSChildName) }
-
-
-#disable copilot policies in region policy json
-$JSONPath = "$env:windir\System32\IntegratedServicesRegionPolicySet.json"
-if (Test-Path $JSONPath) {
-    Write-Host 'Disabling CoPilot Policies in ' -NoNewline
-    Write-Host "[$JSONPath]" -ForegroundColor Yellow
-
-    #takeownership
-    takeown /f $JSONPath *>$null
-    icacls $JSONPath /grant administrators:F /t *>$null
-
-    #edit the content
-    $jsonContent = Get-Content $JSONPath | ConvertFrom-Json
-    try {
-        $copilotPolicies = $jsonContent.policies | Where-Object { $_.'$comment' -like '*CoPilot*' }
-        foreach ($policies in $copilotPolicies) {
-            $policies.defaultState = 'disabled'
-        }
-        $newJSONContent = $jsonContent | ConvertTo-Json -Depth 100
-        Set-Content $JSONPath -Value $newJSONContent -Force
-        Write-Host "$($copilotPolicies.count) CoPilot Policies Disabled"
-    }
-    catch {
-        Write-Warning 'CoPilot Not Found in IntegratedServicesRegionPolicySet'
-    }
-
-    
-}
-
-
-
-#use eol trick to uninstall some locked packages
-foreach ($choice in $aipackages) {
-    Write-Host "Removing $choice"
-    if ('' -eq $choice.Trim()) { continue }
-    foreach ($appx in $($provisioned | Where-Object { $_.PackageName -like "*$choice*" })) {
-        $next = !1; foreach ($no in $skip) { if ($appx.PackageName -like "*$no*") { $next = !0 } } ; if ($next) { continue }
-        $PackageName = $appx.PackageName; $PackageFamilyName = ($appxpackage | Where-Object { $_.Name -eq $appx.DisplayName }).PackageFamilyName
-        New-Item "$store\Deprovisioned\$PackageFamilyName" -force >''; 
-        foreach ($sid in $users) { New-Item "$store\EndOfLife\$sid\$PackageName" -force >'' } ; $eol += $PackageName
-        dism /online /set-nonremovableapppolicy /packagefamily:$PackageFamilyName /nonremovable:0 >''
-        remove-appxprovisionedpackage -packagename $PackageName -online -allusers >''
-    }
-    foreach ($appx in $($appxpackage | Where-Object { $_.PackageFullName -like "*$choice*" })) {
-        $next = !1; foreach ($no in $skip) { if ($appx.PackageFullName -like "*$no*") { $next = !0 } } ; if ($next) { continue }
-        $PackageFullName = $appx.PackageFullName;
-        New-Item "$store\Deprovisioned\$appx.PackageFamilyName" -force >''; 
-        foreach ($sid in $users) { New-Item "$store\EndOfLife\$sid\$PackageFullName" -force >'' } ; $eol += $PackageFullName
-        dism /online /set-nonremovableapppolicy /packagefamily:$PackageFamilyName /nonremovable:0 >''
-        remove-appxpackage -package $PackageFullName -allusers >''
-    }
-}
-
-## undo eol unblock trick to prevent latest cumulative update (LCU) failing 
-foreach ($sid in $users) { foreach ($PackageName in $eol) { Remove-Item "$store\EndOfLife\$sid\$PackageName" -force -ErrorAction SilentlyContinue >'' } }
-
-#remove recall optional feature 
-$ProgressPreference = 'SilentlyContinue'
-try {
-    Disable-WindowsOptionalFeature -Online -FeatureName 'Recall' -Remove -NoRestart -ErrorAction Stop *>$null
-}
-catch {
-    #hide error
-}
-
-
-Write-Host 'Removing Package Files...'
-#-----------------------------------------------------------------------remove files
-$appsPath = 'C:\Windows\SystemApps'
-$appsPath2 = 'C:\Program Files\WindowsApps'
-$pathsSystemApps = (Get-ChildItem -Path $appsPath -Directory -Force).FullName 
-$pathsWindowsApps = (Get-ChildItem -Path $appsPath2 -Directory -Force).FullName 
-
-$packagesPath = @()
-#get full path
-foreach ($package in $aipackages) {
-
-    foreach ($path in $pathsSystemApps) {
-        if ($path -like "*$package*") {
-            $packagesPath += $path
-        }
-    }
-
-    foreach ($path in $pathsWindowsApps) {
-        if ($path -like "*$package*") {
-            $packagesPath += $path
-        }
-    }
-
-}
-
-
-foreach ($Path in $packagesPath) {
-    #only remove dlls from photon to prevent startmenu from breaking
-    if ($path -like '*Photon*') {
-        $command = "`$dlls = (Get-ChildItem -Path $Path -Filter *.dll).FullName; foreach(`$dll in `$dlls){Remove-item ""`$dll"" -force}"
-        Run-Trusted -command $command
-        Start-Sleep 1
-    }
-    else {
-        $command = "Remove-item ""$Path"" -force -recurse"
-        Run-Trusted -command $command
-        Start-Sleep 1
-    }
-}
-
-#remove package installers in edge dir
-#installs Microsoft.Windows.Ai.Copilot.Provider
-$dir = "${env:ProgramFiles(x86)}\Microsoft"
-$folders = @(
-    'Edge',
-    'EdgeCore',
-    'EdgeWebView'
-)
-foreach ($folder in $folders) {
-    if ($folder -eq 'EdgeCore') {
-        #edge core doesnt have application folder
-        $fullPath = (Get-ChildItem -Path "$dir\$folder\*.*.*.*\copilot_provider_msix" -ErrorAction SilentlyContinue).FullName
-        
-    }
-    else {
-        $fullPath = (Get-ChildItem -Path "$dir\$folder\Application\*.*.*.*\copilot_provider_msix" -ErrorAction SilentlyContinue).FullName
-    }
-    if ($fullPath -ne $null) { Remove-Item -Path $fullPath -Recurse -Force -ErrorAction SilentlyContinue }
-}
-
-
-#remove additional installers
-$inboxapps = 'C:\Windows\InboxApps'
-$installers = Get-ChildItem -Path $inboxapps -Filter '*Copilot*'
-foreach ($installer in $installers) {
-    takeown /f $installer.FullName *>$null
-    icacls $installer.FullName /grant administrators:F /t *>$null
-    try {
-        Remove-Item -Path $installer.FullName -Force -ErrorAction Stop
-    }
-    catch {
-        #takeown didnt work remove file with system priv
-        $command = "Remove-Item -Path $($installer.FullName) -Force"
-        Run-Trusted -command $command 
-    }
-    
-}
-
-
-#hide ai components in immersive settings
-Write-Host 'Hiding Ai Components in Settings...'
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' /v 'SettingsPageVisibility' /t REG_SZ /d 'hide:aicomponents;' /f >$null
-
-#disable rewrite for notepad
-Write-Host 'Disabling Rewrite Ai Feature for Notepad...'
-#load notepad settings
-reg load HKU\TEMP "$env:LOCALAPPDATA\Packages\Microsoft.WindowsNotepad_8wekyb3d8bbwe\Settings\settings.dat" >$null
-#add disable rewrite
-$regContent = @'
-Windows Registry Editor Version 5.00
-
-[HKEY_USERS\TEMP\LocalState]
-"RewriteEnabled"=hex(5f5e10b):00,e0,d1,c5,7f,ee,83,db,01
-'@
-New-Item "$env:TEMP\DisableRewrite.reg" -Value $regContent -Force | Out-Null
-regedit.exe /s "$env:TEMP\DisableRewrite.reg"
-Start-Sleep 1
-reg unload HKU\TEMP >$null
-Remove-Item "$env:TEMP\DisableRewrite.reg" -Force -ErrorAction SilentlyContinue
-
-#remove any screenshots from recall
-Write-Host 'Removing Any Screenshots...'
-Remove-Item -Path "$env:LOCALAPPDATA\CoreAIPlatform*" -Force -Recurse -ErrorAction SilentlyContinue
-
-
-$input = Read-Host 'Done! Press Any Key to Exit'
-if ($input) { exit }
-}
-
-10 {
-  Write-Host "Installing StartAllBack..."
-  Start-Sleep -Seconds 3
-  winget install -e -h --accept-source-agreements --accept-package-agreements --id StartIsBack.StartAllBack
-
-# Define the URL of the .reg file in the GitHub repository
-Write-Host "Applying settings..."
-Start-Sleep -Seconds 2
-$regFileUrl = "https://raw.githubusercontent.com/fivance/files/main/StartAllBack.reg"
-
-# Define the temporary path to save the .reg file
-$tempRegFilePath = "$env:TEMP\tempfile.reg"
-
-# Define the log file path
-$logFilePath = "$env:TEMP\reg_script_log.txt"
-
-# Function to log messages
-function Log-Message {
-    param (
-        [string]$message
-    )
-    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-    Add-Content -Path $logFilePath -Value "$timestamp - $message"
-}
-
-# Download the .reg file
-try {
-    Invoke-WebRequest -Uri $regFileUrl -OutFile $tempRegFilePath
-    Log-Message "Successfully downloaded the .reg file from $regFileUrl."
-    
-    # Check if the download was successful
-    if (Test-Path $tempRegFilePath) {
-        # Execute the .reg file
-        Start-Process regedit.exe -ArgumentList "/s `"$tempRegFilePath`"" -Wait
-        
-        # Check for successful execution
-        if ($LASTEXITCODE -eq 0) {
-            Log-Message "Successfully executed the .reg file."
-        } else {
-            Log-Message "Failed to execute the .reg file. Exit code: $LASTEXITCODE."
-        }
-
-        # Optionally, delete the temporary .reg file
-        Remove-Item -Path $tempRegFilePath -Force
-        Log-Message "Deleted temporary .reg file."
-    } else {
-        Log-Message "Download failed: .reg file not found."
-    }
-} catch {
-    Log-Message "Error occurred: $_"
-}
-}
-
-
-11 {
-  
-# Prompt user for language input
-$language = Read-Host "Enter the language code (e.g., en-US for English, hr-HR for Croatian)"
-
-# Set keyboard layout
-Set-WinUILanguageOverride -Language $language
-Set-WinUserLanguageList -Language $language -Force
-
-# Set region format
-Set-Culture -CultureInfo $language
-
-# Set system locale
-Set-WinSystemLocale -SystemLocale $language
-
-# Update Windows region settings using registry
-$languageRegion = $language -replace '-', '_'
-Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name "LocaleName" -Value $languageRegion
-
-# Restart system to apply changes
-Write-Host "System needs to restart to apply changes..."
-Start-Sleep -Seconds 3
-
-}
-
-12 {
-Write-Host "Disabling UAC..."
-Start-Sleep -Seconds 2
-Set-ItemProperty -Path REGISTRY::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System -Name ConsentPromptBehaviorAdmin -Value 0
-$currentValue = Get-ItemProperty -Path "REGISTRY::HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "ConsentPromptBehaviorAdmin"
-
-# If the value is 0, it was done correctly
-if ($currentValue.ConsentPromptBehaviorAdmin -eq 0) {
-    Write-Output "The registry value was set successfully."
-    Start-Sleep -Seconds 2
-} else {
-    Write-Output "The registry value was not set correctly."
-    Start-Sleep -Seconds 2
-}
-Clear-Host
-}
-
-13 {
+7 {
   function show-menu {
     param (
         [string]$title = 'Network Tweaks',
@@ -5391,16 +5203,7 @@ while ($true) {
 }
 }
 
-14 
-  {
-    iwr "https://raw.githubusercontent.com/ltx0101/SlimBrave/main/SlimBrave.ps1" -OutFile "SlimBrave.ps1"; .\SlimBrave.ps1
-    
-    
-  }
-
-
-
-15 { 
+8 { 
 
   Clear-Host
   Write-Host "Exiting..."
