@@ -160,7 +160,8 @@ Write-Host " 1. Clean graphics driver - DDU"
 Write-Host " 2. Install NVIDIA Driver"
 Write-Host " 3. Optimization script"
 Write-Host " 4. Disable MS Defender"
-Write-Host " 5. Exit script"
+Write-Host "5. MAS Activator"
+Write-Host " 6. Exit script"
                     }
 
 while ($true) {
@@ -4539,7 +4540,12 @@ exit
 } 
 
 
-5 { 
+5 {
+  irm https://get.activated.win | iex  
+  }
+
+
+6 { 
   Clear-Host
   Write-Host "Exiting..."
   Start-Sleep -Seconds 2
