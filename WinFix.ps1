@@ -161,6 +161,7 @@ Write-Host " 2. Install NVIDIA Driver"
 Write-Host " 3. Optimization script"
 Write-Host " 4. Disable MS Defender"
 Write-Host " 5. MAS Activator"
+Write-Host " 6. CTT winutil"
 Write-Host " 7. Exit script"
                     }
 
