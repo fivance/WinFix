@@ -529,6 +529,7 @@ Write-Output "MSISupported: Not found or error accessing the registry."
 }
 }
 
+Clear-Host
 Write-Host "Cleaning start menu and taskbar..."
 Start-Sleep -Seconds 3
 cmd /c "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband /f >nul 2>&1"
@@ -2315,6 +2316,7 @@ Remove-WindowsCapability -Online -Name "WMIC~~~~" | Out-Null
 # Breaks uwp snippingtool w10
 # Remove-WindowsCapability -Online -Name "Windows.Client.ShellComponents~~~~0.0.1.0" | Out-Null
 Remove-WindowsCapability -Online -Name "Windows.Kernel.LA57~~~~0.0.1.0" | Out-Null
+
 Clear-Host
 Write-Host "Uninstalling Legacy Features..."
 # .net framework 4.8 advanced services left out
@@ -2565,7 +2567,7 @@ Add-Content -Path $hostsFile -Value "`n$hostEntries" -Force
 Write-Host "Hosts file updated successfully."
 Start-Sleep -Seconds 3
 
-
+Clear-Host
 Write-Host "Installing ContextMenu entries..."
 Start-Sleep -Seconds 3
 $regFiles = @(
@@ -2590,7 +2592,6 @@ $tempRegFilePath = "$env:TEMP\tempfile.reg"
 # Define the log file path
 $logFilePath = "$env:TEMP\reg_script_log.txt"
 
-# Function to log messages
 function Log-Message {
     param (
         [string]$message
@@ -2599,24 +2600,19 @@ function Log-Message {
     Add-Content -Path $logFilePath -Value "$timestamp - $message"
 }
 
-# Download the .reg file
 try {
     Invoke-WebRequest -Uri $regFileUrl -OutFile $tempRegFilePath
     Log-Message "Successfully downloaded the .reg file from $regFileUrl."
     
-    # Check if the download was successful
     if (Test-Path $tempRegFilePath) {
-        # Execute the .reg file
         Start-Process regedit.exe -ArgumentList "/s `"$tempRegFilePath`"" -Wait
         
-        # Check for successful execution
         if ($LASTEXITCODE -eq 0) {
             Log-Message "Successfully executed the .reg file."
         } else {
             Log-Message "Failed to execute the .reg file. Exit code: $LASTEXITCODE."
         }
 
-        # Delete the temporary .reg file
         Remove-Item -Path $tempRegFilePath -Force
         Log-Message "Deleted temporary .reg file."
     } else {
@@ -2657,7 +2653,8 @@ Write-Host 'Removing Scheduled Tasks...'
     }
 
   }
-  
+
+Clear-Host
 Write-Host "Services to Manual ..."
 Start-Sleep -Seconds 3
 Clear-Host
@@ -2795,6 +2792,7 @@ New-Item -Path "$env:USERPROFILE\AppData\Local" -Name "Temp" -ItemType Directory
 Remove-Item -Path "$env:SystemDrive\Windows\Temp" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 New-Item -Path "$env:SystemDrive\Windows" -Name "Temp" -ItemType Directory -ErrorAction SilentlyContinue | Out-Null
 
+Clear-Host
 Start-Process cmd.exe /c
 reg add "HKU\S-1-5-19\Control Panel\Keyboard" /v "InitialKeyboardIndicators" /t REG_SZ /d "2147483650" /f $nul
 reg add "HKU\S-1-5-20\Control Panel\Keyboard" /v "InitialKeyboardIndicators" /t REG_SZ /d "2147483650" /f $nul
@@ -3075,7 +3073,7 @@ Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\WindowsAI\DisableImag
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint' /v 'DisableImageCreator' /t REG_DWORD /d '1' /f *>$null
 gpupdate /force >$null
 
-
+Clear-Host
 Write-Host 'Removing Copilot Nudges Registry Keys...'
 $keys = @(
   'registry::HKCR\Extensions\ContractId\Windows.BackgroundTasks\PackageId\MicrosoftWindows.Client.Core_*.*.*.*_x64__cw5n1h2txyewy\ActivatableClassId\Global.CopilotNudges.AppX*.wwa',
@@ -3188,7 +3186,7 @@ try {
 catch {
 }
 
-
+Clear-Host
 Write-Host 'Removing Package Files...'
 $appsPath = 'C:\Windows\SystemApps'
 $appsPath2 = 'C:\Program Files\WindowsApps'
