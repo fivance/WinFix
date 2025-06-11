@@ -15,7 +15,7 @@ Can also be run by running this command in Admin p$ window:
 ```iwr winfix.franivancevic.com | iex```
 
 
-![Example Image](images/ss.png)
+![Example Image](images/scr.jpg)
 
 
 
