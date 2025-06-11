@@ -2172,10 +2172,24 @@ $graphics.FillRectangle($color, 0, 0, $edit.Width, $edit.Height)
 $graphics.Dispose()
 $edit.Save($file)
 $edit.Dispose()
- Set image settings
+#Set image settings
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImagePath" /t REG_SZ /d "C:\Windows\Black.jpg" /f | Out-Null
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\PersonalizationCSP" /v "LockScreenImageStatus" /t REG_DWORD /d "1" /f | Out-Null
 Clear-Host
+
+#Set 24h time for lockscreen
+Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name "sShortTime" -Value "HH:mm"
+Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name "sTimeFormat" -Value "HH:mm:ss"
+$intlSettingsPath = "HKCU:\Control Panel\International"
+$exportFile = "$env:TEMP\intl.reg"
+reg export "HKCU\Control Panel\International" $exportFile /y
+reg load "HKU\DefaultUser" "C:\Users\Default\NTUSER.DAT"
+reg import $exportFile
+reg unload "HKU\DefaultUser"
+reg load "HKU\DefaultSystem" "C:\Windows\System32\config\systemprofile\NTUSER.DAT"
+reg import $exportFile
+reg unload "HKU\DefaultSystem"
+Remove-Item $exportFile
 
 Write-Host "Applying compact mode for explorer and small icons for desktop..."
 Start-Sleep -Seconds 3
