@@ -1,8 +1,10 @@
+Note: There is a bug that exits the script at the UWP uninstall section for some reason (doesn't happen every time). If you run the script second time it works fine.
+
 The idea is to collect good optimization scripts and combine them in a single ps1 script.
 
-It's mostly optimized for gaming, not  for Security (imo, one excludes the other in most cases)
+Optimized for gaming and performance.
 
-Use at your own risk, if anything breaks it's on you.
+Use at your own risk!
 
 Must be run in powershell as admin and with Set-ExecutionPolicy Unrestricted
 
@@ -51,6 +53,7 @@ Every option is self-explanatory except Optimization script and Advanced tweaks 
 -  Added Take Ownership ContextMenu to take control of your own files
 -  Removes useless Scheduled Tasks
 -  Sets all Services to Manual where applicable
+-  Sets 24h format for lockscreen
 -  Cleans temporary files at the end of the script
 
 
