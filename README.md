@@ -1,5 +1,3 @@
-Note: There is a bug that exits the script at the UWP uninstall section for some reason (doesn't happen every time). If you run the script second time it works fine.
-
 The idea is to collect good optimization scripts and combine them in a single ps1 script.
 
 Optimized for gaming and performance.
