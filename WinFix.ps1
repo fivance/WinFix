@@ -156,12 +156,12 @@ Set-ConsoleOpacity -Opacity 93
 Start-Sleep -Seconds 3
 function show-menu {
 Clear-Host
-Write-Host " 1. Clean graphics driver - DDU"
-Write-Host " 2. Install NVIDIA Driver"
-Write-Host " 3. Optimization script"
-Write-Host " 4. Disable MS Defender"
-Write-Host " 5. MAS Activator"
-Write-Host " 6. CTT winutil"
+Write-Host " 1. MAS Activator"
+Write-Host " 2. CTT winutil"
+Write-Host " 3. Clean graphics driver - DDU"
+Write-Host " 4. Install NVIDIA Driver"
+Write-Host " 5. Optimization script"
+Write-Host " 6. Disable MS Defender"
 Write-Host " 7. Exit script"
                     }
 
@@ -171,8 +171,14 @@ $choice = Read-Host "Please select an option"
 
 switch ($choice) {
 
+1 {
+  irm https://get.activated.win | iex  
+  }
   
-1 { 
+2 {
+  start powershell {irm christitus.com/win | iex}
+  }  
+3 { 
   Write-Host "Installing: DDU..."
 Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
 Expand-Archive "$env:TEMP\DDU.zip" -DestinationPath "$env:TEMP\DDU" -ErrorAction SilentlyContinue
@@ -225,7 +231,7 @@ cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
 shutdown -r -t 00
 }
 
-2 {
+4 {
   Clear-Host
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
 Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver" -ErrorAction SilentlyContinue | Out-Null
@@ -469,7 +475,7 @@ Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\FvSvc' /v 'Start' /t REG_DWO
 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 }
 
-3 {
+5 {
   Write-Host "Installing: Direct X..."
 Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
 Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2301-x64.exe" -File "$env:TEMP\7-Zip.exe"
@@ -2132,6 +2138,26 @@ $path = "$env:TEMP\Registry Optimize.reg"
 Regedit.exe /S "$env:TEMP\Registry Optimize.reg"
 Clear-Host
 
+#Disable Online tips in Settings
+New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "AllowOnlineTips" -Value 0 -Type DWord
+#Remove Health Check
+New-Item -Path "HKLM:\SOFTWARE\Microsoft\PCHC" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\PCHC" -Name "PreviousUninstall" -Value 1 -Type DWord
+New-Item -Path "HKLM:\SOFTWARE\Microsoft\PCHealthCheck" -Force | Out-Null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\PCHealthCheck" -Name "installed" -Value 1 -Type DWord
+# Disable Windows Spotlight
+$RegKeyCloudContent = "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+$RegKeyPersonalization = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization"
+New-Item -Path $RegKeyCloudContent -Force | Out-Null
+New-Item -Path $RegKeyPersonalization -Force | Out-Null
+Set-ItemProperty -Path $RegKeyCloudContent -Name "DisableWindowsSpotlightWindowsWelcomeExperience" -Value 1 -Type DWord
+Set-ItemProperty -Path $RegKeyPersonalization -Name "NoChangingLockScreen" -Value 0 -Type DWord
+Set-ItemProperty -Path $RegKeyCloudContent -Name "DisableWindowsSpotlightFeatures" -Value 1 -Type DWord
+Set-ItemProperty -Path $RegKeyCloudContent -Name "DisableWindowsSpotlightOnActionCenter" -Value 1 -Type DWord
+Set-ItemProperty -Path $RegKeyCloudContent -Name "DisableWindowsSpotlightOnSettings" -Value 1 -Type DWord
+Set-ItemProperty -Path $RegKeyCloudContent -Name "DisableThirdPartySuggestions" -Value 1 -Type DWord
+
 Write-Host "Applying black lockscreen..."
 Start-Sleep -Seconds 3
 Add-Type -AssemblyName System.Windows.Forms
@@ -2654,9 +2680,6 @@ Write-Host 'Removing Scheduled Tasks...'
 
   }
 
-Clear-Host
-Write-Host "Services to Manual ..."
-Start-Sleep -Seconds 3
 Clear-Host
   $services = Get-Service
   $servicesKeep = 'AudioEndpointBuilder
@@ -3438,7 +3461,7 @@ Write-Host 'Applying Network Settings to Limit Upload Bandwidth and Improve Late
 
 
 
-4 { 
+6 { 
    function RunAsTI($cmd, $arg) {
 $id = 'RunAsTI'; $key = "Registry::HKU\$(((whoami /user)-split' ')[-1])\Volatile Environment"; $code = @'
 $I=[int32]; $M=$I.module.gettype("System.Runtime.Interop`Services.Mar`shal"); $P=$I.module.gettype("System.Int`Ptr"); $S=[string]
@@ -4476,15 +4499,6 @@ exit
 } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
 
 } 
-
-
-5 {
-  irm https://get.activated.win | iex  
-  }
-
-6 {
-  start powershell {irm christitus.com/win | iex}
-  }
   
 7 { 
   Clear-Host
