@@ -3859,7 +3859,8 @@ Write-Host 'Applying Network Settings to Limit Upload Bandwidth and Improve Late
     &$netShTweaks *>$null
     Write-Host "Successfully applied network tweaks." -ForegroundColor Green
     Start-Sleep -Seconds 3
-    Start-Process cleanmgr.exe
+    { start powershell {iwr https://raw.githubusercontent.com/zoicware/UltimateDiskCleanup/main/UltimateDiskCleanup.ps1 | iex
+} }   
   }
 
 
