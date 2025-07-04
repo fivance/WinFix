@@ -162,7 +162,8 @@ Write-Host " 3. Clean graphics driver - DDU"
 Write-Host " 4. Install NVIDIA Driver"
 Write-Host " 5. Optimization script"
 Write-Host " 6. Disable MS Defender"
-Write-Host " 7. Exit script"
+Write-Host " 7. Disk Cleanup"
+Write-Host " 8. Exit script"
                     }
 
 while ($true) {
@@ -3858,9 +3859,7 @@ Write-Host 'Applying Network Settings to Limit Upload Bandwidth and Improve Late
     }
     &$netShTweaks *>$null
     Write-Host "Successfully applied network tweaks." -ForegroundColor Green
-    Start-Sleep -Seconds 3
-    { start powershell {iwr https://raw.githubusercontent.com/zoicware/UltimateDiskCleanup/main/UltimateDiskCleanup.ps1 | iex
-} }   
+    Start-Sleep -Seconds 3  
   }
 
 
@@ -4904,8 +4903,10 @@ exit
 } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
 
 } 
+
+7 {start powershell {iwr https://raw.githubusercontent.com/zoicware/UltimateDiskCleanup/main/UltimateDiskCleanup.ps1 | iex}}
   
-7 { 
+8 { 
   Clear-Host
   Write-Host "Exiting..."
   Start-Sleep -Seconds 2
