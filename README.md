@@ -1,77 +1,133 @@
-The idea is to collect good optimization scripts and combine them in a single ps1 script.
+<div id="top" align="center">
 
-Optimized for gaming and performance.
+<!-- Title & Tagline -->
+<h2 align="center">WinFix Script</h2>
+<p align="center">
+    <em>Self-opinionated Windows post-install script</em><br>
+    Automation. Hardening. Customization. Performance<br>
+    A PowerShell script for sysadmins, devs, power users.<br>
+    <strong>Windows - how it should be</strong>
+</p>
 
-Use at your own risk!
+</div>
 
-Must be run in powershell as admin and with Set-ExecutionPolicy Unrestricted
+## Table of Contents
 
-some of the scripts are made by me and some are from @fr33thyfr33thy and @zoicware -> amazing guys defintely go and check their work
+<details open>
+  <summary><strong>Click to collapse/expand</strong></summary>
+  <ol>
+    <li><a href="#-about">📖 About</a></li>
+    <li><a href="#-installation">🛠️ Installation</a></li>
+    <li><a href="#-usage">🎮 Usage</a></li>
+  </ol>
+</details>
 
-------------------------------------------
+## 📖 About
 
-Can also be run by running this command in Admin p$ window:
+WinFix is a comprehensive PowerShell script that automates post-installation on Windows systems geared towards sysadmins and power users.
 
-```iwr winfix.franivancevic.com | iex```
+Developed on Windows 11 and tested across several setups, it's meant to reproduce ideal system setup. Hardened, minimal, performant.
+
+> ⚙️ Note: This script is under active development — not production-grade yet. Treat it as a strong baseline and expect regular improvements.
+
+It leans on native PowerShell and thus should work on a wide range of modern Windows versions.
+
+### 💡 Goal
+
+- ⚙️ Hardened, secure, and reproducible setup — built around privacy, performance, and minimalism.
+- 🔐 Secure by default: disables legacy components, noisy services, telemetry and so much more.
+
+➡️ A fully optimized, secured, and ready-to-use Windows system — zero manual tweaks needed.
+
+> I built this script to get the exact system I need — consistently, efficiently, and silently.
+
+This script ensures your machine is:
+- 🛡️ Hardened against telemetry
+- 🧹 Purged of bloatware, spyware
+
+- 🧰 Windows Tweaks
+  - ✅ Disable Telemetry
+  - ✅ Disable Content Delivery Manager
+  - ✅ Apply performance and privacy optimizations
+  - ✅ Optimize NTFS file system parameters
+  - ✅ Optimize system performance settings
+  - ✅  Installs dependencies -> C++, DirectX
+  - ✅ Disables bacground apps
+  - ✅ Enables MSI Mode for GPU
+  - ✅ Cleans Taskbar and Start Menu
+  - ✅ Shows all Taskbar icons
+  - ✅ Disables gamebar and XBOX apps
+  - ✅ Installs proper power plan
+  - ✅ Disables hibernate
+  - ✅ Registry optimizations
+  - ✅ Enables compact mode in Windows explorer
+  - ✅ Sets small icons on Desktop
+  - ✅ Removes OneDrive and cleans File Explorer sidebar from Onedrive and Gallery entries
+  - ✅ Uninstalls all UWP applications except Calculator, Notepad, Paint, Photos and Store 
+  - ✅ Sets Network adapters to IPv4 only
+  - ✅ Sets DNS servers to Cloudflare
+  - ✅ Updates hosts file (blocks some microsoft sites and Store installs!) -> workaround is to rename hosts file, download/install what you need and rename hosts file back
+  - ✅ Added custom Context Menu entries -> SystemShortcuts and SystemTools to right click on the Desktop
+  - ✅ Added custom Context Menu entries -> Open Powershell 7 as admin / Copy as path to right click
+  - ✅ Added custom Context Menu entries -> Take Ownership ContextMenu to take control of your own files
+  - ✅ Removes useless Scheduled Tasks
+  - ✅ Sets all Services to Manual where applicable
+  - ✅ Sets 24h format for lockscreen
+  - ✅Enabled Numlock everywhere
+  - ✅Automatic discovery IE11 proxy
+  - ✅Disable Teredo
+  - ✅Removes any leftover background apps
+  - ✅Cleans Onedrive leftover files and telemetry after Office install
+  - ✅Set solid wallpaper color
+  - ✅Disables automatic folder type discovery
+  - ✅Enables DNS over HTTPS (DoH)
+  - ✅Removes Auto run Defender
+  - ✅Disables autologger telemetry: CloudExperienceHostOobe.etl, Cellcore.etl, WinPhoneCritical.etl
+  - ✅Disables updates for Microsoft Office
+  - ✅Disables activity log and clipboard history
+  - ✅Disables telemetry
+  - ✅Disables integrity checks for installing unsigned drivers
+  - ✅Passwords never expire
+  - ✅Sysmain optimizations
+  - ✅Disables telemetry for Microsoft Office 2016/2019+
+  - ✅ Cleans temporary files at the end of the script
+  And much more
+
+- 🔐 Basic Security Hardening
+  - ✅ Disable unnecessary services (e.g., Xbox, Telemetry, RemoteRegistry, etc.)
+  - ✅ Disable scheduled tasks tied to CEIP, SmartScreen, Xbox, Maps, etc.
+  - ✅ Remove preinstalled bloatware and OEM packages (e.g., Candy Crush, OneConnect, Skype, Flipboard)
+  - ✅ Disable optional Windows features like Internet Printing, PDF Print, SMB Direct, WorkFolders, RDC
 
 
-![Example Image](images/ss.png)
 
+<p align="right">(<a href="#top">🔼 Back to top</a>)</p>
 
+## 🚀 Installation
 
+### 📥 **Direct Download** from GitHub
 
+1. Go to GitHub repo.
+2. Click `<> Code` → `Download ZIP`.
+3. Extract the archive to your desired location.
 
+<p align="right">(<a href="#top">🔼 Back to top</a>)</p>
 
--------------------------------------------
-Every option is self-explanatory except Optimization script and Advanced tweaks which contains:
+## 🎮 Usage
 
+1. Temporarily allow script execution:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
+```
 
-   **OPTIMIZATION SCRIPT**
+> 🛑 Important: This command temporarily adjusts the execution policy to allow script execution for the current process only, minimizing security risks. 
+> Always examine scripts before executing them to ensure safety.
 
--  Installs dependencies -> C++, DirectX
--  Disables bacground apps
--  Enables MSI Mode for GPU
--  Cleans Taskbar and Start Menu
--  Shows all Taskbar icons
--  Disables gamebar and XBOX apps
--  Installs proper Power plan
--  Disables hibernate
--  Installs Set Timer Resolution Service
--  Registry optimizations
--  Enables compact mode in Windows explorer
--  Sets small icons on Desktop
--  Removes OneDrive and cleans File Explorer sidebar from Onedrive and Gallery entries
--  Uninstalls UWP applications except Calculator, Notepad, Paint, Photos, Store and SMB support
--  Uninstalls all features except SMB
--  Sets Network adapters to IPv4 only
--  Sets DNS servers to Cloudflare
--  Updates hosts file (blocks some microsoft sites not working properly and Store installs!) -> workaround is to rename hosts file, download/install what you need and rename hosts file back
--  Added custom Context Menu entries -> adds SystemShortcuts and SystemTools to right click on the Desktop
--  Added custom Context Menu entries -> Open Powershell 5/7 here as admin, copy as path to right click
--  Added Take Ownership ContextMenu to take control of your own files
--  Removes useless Scheduled Tasks
--  Sets all Services to Manual where applicable
--  Sets 24h format for lockscreen
--  Cleans temporary files at the end of the script
+2. Run the script:
+```powershell
+.\WinFix.ps1
+```
 
+> ⚠️ **Note**: This script must be run **as Administrator**. It will request administrator privileges automatically at start.
 
-
-**ADVANCED TWEAKS**
-
--  Enabled Numlock everywhere
--  Automatic discovery IE11 proxy
--  Disable Teredo
--  Removes any leftover background apps
--  Cleans Onedrive leftover files and telemetry after Office install
--  Set solid wallpaper color
--  Disables automatic folder type discovery
--  Enables DNS over HTTPS (DoH)
--  Removes Auto run Defender
--  Disables autologger telemetry: CloudExperienceHostOobe.etl, Cellcore.etl, WinPhoneCritical.etl
--  Disables updates for Microsoft Office
--  Disables activity log and clipboard history
--  Disables telemetry
--  Disables integrity checks for installing unsigned drivers
--  Passwords never expire
--  Sysmain optimizations
--  Disables telemetry for Microsoft Office 2016/2019+
+<p align="right">(<a href="#top">🔼 Back to top</a>)</p>
