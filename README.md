@@ -52,7 +52,7 @@ This script ensures your machine is:
   - ✅ Optimize NTFS file system parameters
   - ✅ Optimize system performance settings
   - ✅  Installs dependencies -> C++, DirectX
-  - ✅ Disables bacground apps
+  - ✅ Disables background apps
   - ✅ Enables MSI Mode for GPU
   - ✅ Cleans Taskbar and Start Menu
   - ✅ Shows all Taskbar icons
