@@ -1,87 +1,132 @@
 <div id="top" align="center">
 
-<h2 align="center">🛠️ WinFix Script</h2>
-<p align="center"><em>A post-install PowerShell toolkit for Windows</em><br>
-Automation • Hardening • Customization • Performance<br>
-Built for sysadmins, developers, and power users</p>
+<!-- Title & Tagline -->
+<h2 align="center">WinFix Script</h2>
+<p align="center">
+    <em>Windows post-install script</em><br>
+    Automation. Hardening. Customization. Performance<br>
+    A PowerShell script for sysadmins, devs, power users.<br>
+</p>
 
 </div>
 
----
-
-## 📑 Table of Contents
+## Table of Contents
 
 <details open>
-  <summary><strong>Click to expand/collapse</strong></summary>
+  <summary><strong>Click to collapse/expand</strong></summary>
   <ol>
     <li><a href="#-about">📖 About</a></li>
-    <li><a href="#-features">✨ Features</a></li>
-    <li><a href="#-installation">📥 Installation</a></li>
-    <li><a href="#-usage">🚀 Usage</a></li>
+    <li><a href="#-installation">🛠️ Installation</a></li>
+    <li><a href="#-usage">🎮 Usage</a></li>
   </ol>
 </details>
 
----
-
 ## 📖 About
 
-**WinFix** is a comprehensive PowerShell script that automates post-installation configuration for Windows systems. It’s designed to help power users, sysadmins, and developers achieve a clean, hardened, and optimized system — **without tedious manual tweaks**.
+WinFix is a comprehensive PowerShell script that automates post-installation on Windows systems geared towards sysadmins, power users and anyone wanting clean, optimised and streamlined Windows experience.
 
-It leans heavily on native PowerShell, making it compatible with a wide range of modern Windows versions.
+It's meant to reproduce ideal system setup. Hardened, minimal, performant.
 
-> ⚠️ **Note**: This script is under active development. It's a strong baseline, but not yet production-grade.
+> ⚙️ Note: This script is under active development — not production-grade yet. Treat it as a strong baseline and expect regular improvements.
 
----
+It leans on native PowerShell and thus should work on a wide range of modern Windows versions.
 
-## ✨ Features
+### 💡 Goal
 
-A quick overview of what WinFix does:
+- ⚙️ Hardened, secure, and reproducible setup — built around privacy, performance, and minimalism.
+- 🔐 Secure: disables legacy components, noisy services, telemetry and so much more.
 
-### 🔧 System Tweaks & Optimizations
+➡️ A fully optimized, secured, and ready-to-use Windows system — zero manual tweaks needed.
 
-- Disable telemetry & background services
-- Clean bloatware & UWP apps
-- Performance tuning (NTFS, power plans, GPU MSI mode)
-- Privacy enhancements
-- Desktop & Explorer UI customizations
-- DNS over HTTPS & hardened networking
-- Context menu enhancements (e.g., "Open PowerShell as Admin", "Take Ownership")
-- Custom host file entries (blocks Microsoft Store domains)
+> I built this script to get the exact system I need — consistently, efficiently, and silently.
 
-### 🛡 Security Hardening
+This script ensures your machine is:
+- 🛡️ Hardened against telemetry
+- 🧹 Purged of bloatware, spyware
+- 🎮 With performance and stability in mind
 
-- Disable legacy services & scheduled tasks (e.g., CEIP, SmartScreen, Xbox)
-- Remove pre-installed junk (Candy Crush, OneConnect, etc.)
-- Disable optional features (e.g., Internet Printing, SMB Direct, WorkFolders)
-- Office telemetry removal & update block
-- Disables unsigned driver enforcement
+- 🧰 Windows Tweaks
+  - ✅ Disable Telemetry
+  - ✅ Disable Content Delivery Manager
+  - ✅ Apply performance and privacy optimizations
+  - ✅ Optimize NTFS file system parameters
+  - ✅ Optimize system performance settings
+  - ✅  Installs dependencies -> C++, DirectX
+  - ✅ Disables bacground apps
+  - ✅ Enables MSI Mode for GPU
+  - ✅ Cleans Taskbar and Start Menu
+  - ✅ Shows all Taskbar icons
+  - ✅ Disables gamebar and XBOX apps
+  - ✅ Installs proper power plan
+  - ✅ Disables hibernate
+  - ✅ Registry optimizations
+  - ✅ Enables compact mode in Windows explorer
+  - ✅ Sets small icons on Desktop
+  - ✅ Removes OneDrive and cleans File Explorer sidebar from Onedrive and Gallery entries
+  - ✅ Uninstalls all UWP applications except Calculator, Notepad, Paint, Photos and Store 
+  - ✅ Sets Network adapters to IPv4 only
+  - ✅ Sets DNS servers to Cloudflare
+  - ✅ Updates hosts file (blocks some microsoft sites and Store installs!) -> workaround is to rename hosts file, download/install what you need and rename hosts file back
+  - ✅ Added custom Context Menu entries -> SystemShortcuts and SystemTools to right click on the Desktop
+  - ✅ Added custom Context Menu entries -> Open Powershell 7 as admin / Copy as path to right click
+  - ✅ Added custom Context Menu entries -> Take Ownership ContextMenu to take control of your own files
+  - ✅ Removes useless Scheduled Tasks
+  - ✅ Sets all Services to Manual where applicable
+  - ✅ Sets 24h format for lockscreen
+  - ✅Enabled Numlock everywhere
+  - ✅Automatic discovery IE11 proxy
+  - ✅Disable Teredo
+  - ✅Removes any leftover background apps
+  - ✅Cleans Onedrive leftover files and telemetry after Office install
+  - ✅Set solid wallpaper color
+  - ✅Disables automatic folder type discovery
+  - ✅Enables DNS over HTTPS (DoH)
+  - ✅Disables autologger telemetry: CloudExperienceHostOobe.etl, Cellcore.etl, WinPhoneCritical.etl
+  - ✅Disables updates for Microsoft Office
+  - ✅Disables activity log and clipboard history
+  - ✅Disables telemetry
+  - ✅Disables integrity checks for installing unsigned drivers
+  - ✅Passwords never expire
+  - ✅Sysmain optimizations
+  - ✅Disables telemetry for Microsoft Office 2016/2019+
+  - ✅ Cleans temporary files at the end of the script
+  And much more
 
-### ✅ Bonus Tweaks
+- 🔐 Basic Security Hardening
+  - ✅ Disable unnecessary services (e.g., Xbox, Telemetry, RemoteRegistry, etc.)
+  - ✅ Disable scheduled tasks tied to CEIP, SmartScreen, Xbox, Maps, etc.
+  - ✅ Remove preinstalled bloatware and OEM packages (e.g., Candy Crush, OneConnect, Skype, Flipboard)
+  - ✅ Disable optional Windows features like Internet Printing, PDF Print, SMB Direct, WorkFolders, RDC
 
-- IPv4 only network config
-- Disable Xbox/GameBar
-- Set system-wide 24h clock
-- Enable NumLock by default
-- Disable clipboard history, activity logging, and hibernation
-- Clean leftover OneDrive/Office junk
-- Set solid wallpaper & compact Explorer mode
-- Clean temp files on finish
 
-> All settings aim for **speed, privacy, and simplicity**.
 
 <p align="right">(<a href="#top">🔼 Back to top</a>)</p>
 
----
+## 🚀 Installation
 
-## 📥 Installation
+### 📥 **Direct Download** from GitHub
 
-### Option 1: Download Manually
+1. Go to GitHub repo.
+2. Click `<> Code` → `Download ZIP`.
+3. Extract the archive to your desired location.
 
-1. Go to this GitHub repo
-2. Click `<> Code` → `Download ZIP`
-3. Extract the archive anywhere you like
+<p align="right">(<a href="#top">🔼 Back to top</a>)</p>
 
-### Option 2: Git Clone
+## 🎮 Usage
 
-```bash
-git clone https://github.com/your-username/WinFix
+1. Temporarily allow script execution:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
+```
+
+> 🛑 Important: This command temporarily adjusts the execution policy to allow script execution for the current process only, minimizing security risks. 
+> Always examine scripts before executing them to ensure safety.
+
+2. Run the script:
+```powershell
+.\WinFix.ps1
+```
+
+> ⚠️ **Note**: This script must be run **as Administrator**. It will request administrator privileges automatically at start.
+
+<p align="right">(<a href="#top">🔼 Back to top</a>)</p>
