@@ -3,10 +3,9 @@
 <!-- Title & Tagline -->
 <h2 align="center">WinFix Script</h2>
 <p align="center">
-    <em>Self-opinionated Windows post-install script</em><br>
+    <em>Windows post-install script</em><br>
     Automation. Hardening. Customization. Performance<br>
     A PowerShell script for sysadmins, devs, power users.<br>
-    <strong>Windows - how it should be</strong>
 </p>
 
 </div>
@@ -24,9 +23,9 @@
 
 ## 📖 About
 
-WinFix is a comprehensive PowerShell script that automates post-installation on Windows systems geared towards sysadmins and power users.
+WinFix is a comprehensive PowerShell script that automates post-installation on Windows systems geared towards sysadmins, power users and anyone wanting clean, optimised and streamlined Windows experience.
 
-Developed on Windows 11 and tested across several setups, it's meant to reproduce ideal system setup. Hardened, minimal, performant.
+It's meant to reproduce ideal system setup. Hardened, minimal, performant.
 
 > ⚙️ Note: This script is under active development — not production-grade yet. Treat it as a strong baseline and expect regular improvements.
 
@@ -35,7 +34,7 @@ It leans on native PowerShell and thus should work on a wide range of modern Win
 ### 💡 Goal
 
 - ⚙️ Hardened, secure, and reproducible setup — built around privacy, performance, and minimalism.
-- 🔐 Secure by default: disables legacy components, noisy services, telemetry and so much more.
+- 🔐 Secure: disables legacy components, noisy services, telemetry and so much more.
 
 ➡️ A fully optimized, secured, and ready-to-use Windows system — zero manual tweaks needed.
 
@@ -44,6 +43,7 @@ It leans on native PowerShell and thus should work on a wide range of modern Win
 This script ensures your machine is:
 - 🛡️ Hardened against telemetry
 - 🧹 Purged of bloatware, spyware
+- 🎮 With performance and stability in mind
 
 - 🧰 Windows Tweaks
   - ✅ Disable Telemetry
@@ -81,7 +81,6 @@ This script ensures your machine is:
   - ✅Set solid wallpaper color
   - ✅Disables automatic folder type discovery
   - ✅Enables DNS over HTTPS (DoH)
-  - ✅Removes Auto run Defender
   - ✅Disables autologger telemetry: CloudExperienceHostOobe.etl, Cellcore.etl, WinPhoneCritical.etl
   - ✅Disables updates for Microsoft Office
   - ✅Disables activity log and clipboard history
