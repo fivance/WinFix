@@ -4451,10 +4451,10 @@ function Start-Menu {
         Write-Host "--- Network ---" -ForegroundColor Magenta
         Write-Host "12. Optimize network" -ForegroundColor Yellow
         Write-Host "13. Update hosts file" -ForegroundColor Yellow
-        Write-Host "14. Remove scheduled tasks" -ForegroundColor Yellow
         Write-Host ""
 
         Write-Host "--- Advanced & Cleanup ---" -ForegroundColor Magenta
+        Write-Host "14. Remove scheduled tasks" -ForegroundColor Yellow
         Write-Host "15. Run advanced tweaks" -ForegroundColor Yellow
         Write-Host "16. Remove AI" -ForegroundColor Yellow
         Write-Host "17. Install context menus" -ForegroundColor Yellow
