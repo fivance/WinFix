@@ -4124,7 +4124,7 @@ function Enable-VirtualizationSecurityFeatures {
   Write-Host "Credential Guard enabled." -ForegroundColor Green
   Start-Sleep -Seconds 2
   # Enable HVCI (Memory Integrity)
-  $response = Read-Host "Do you want to enable Memory Integrity (Performance hit in games 4-12% and 20% in 0.1% lows)? (Y/N)"
+  $response = Read-Host "Do you want to enable Memory Integrity (Secure but performance hit in games 4-12% and 20% in 0.1% lows)? (Y/N)"
   if ($response -match '^[Yy]') {
       New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" -Force | Out-Null
       Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" `
