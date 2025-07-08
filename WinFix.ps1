@@ -4494,7 +4494,7 @@ function Start-Menu {
             '19' { Set-DefenderConfig }
             '20' { Enable-WSL }
             '21' { Initialize-DiskCleanup }
-            '0'  { break }
+            '0'  { exit }
             default {
                 Write-Host "`nInvalid selection. Press Enter to try again..." -ForegroundColor Red
                 Read-Host
