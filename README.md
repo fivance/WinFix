@@ -10,6 +10,8 @@
 
 </div>
 
+![Logo](img/winfix.jpg)
+
 ## Table of Contents
 
 <details open>
