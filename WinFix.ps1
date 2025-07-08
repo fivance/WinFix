@@ -4112,6 +4112,7 @@ Windows Registry Editor Version 5.00
 
 function Enable-VirtualizationSecurityFeatures {
   Write-Host "Please note that enabling virtualization security features may induce performance hit in certain games." -ForegroundColor Yellow
+  Start-Sleep -Seconds 3
   # Enable VBS
   New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" -Force | Out-Null
   Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" `
