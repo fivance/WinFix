@@ -2975,54 +2975,96 @@ function Install-ContextMenus {
   Clear-Host
   Write-Host "Installing ContextMenu entries..."
   Start-Sleep -Seconds 3
-  $regFiles = @(
-  "https://raw.githubusercontent.com/fivance/ContextMenu/main/CommandStore.reg",
-  "https://raw.githubusercontent.com/fivance/ContextMenu/main/SystemShortcutsContextMenu.reg"
-  "https://raw.githubusercontent.com/fivance/ContextMenu/main/SystemToolsContextMenu.reg"
-)
+  $MultilineComment = @"
 
-  foreach ($url in $regFiles) {
-  $regFilePath = "$env:TEMP\" + [System.IO.Path]::GetFileName($url)
-  Invoke-WebRequest -Uri $url -OutFile $regFilePath
-  Start-Process -FilePath "regedit.exe" -ArgumentList "/s $regFilePath" -Wait
-  Remove-Item $regFilePath
-  }
-  
-  $regFileUrl = "https://raw.githubusercontent.com/fivance/files/main/TakeOwnership.reg"
-  
-  $tempRegFilePath = "$env:TEMP\tempfile.reg"
-  
-  $logFilePath = "$env:TEMP\reg_script_log.txt"
-  
-  function Show-Message {
-      param (
-          [string]$message
-      )
-      $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-      Add-Content -Path $logFilePath -Value "$timestamp - $message"
-  }
-  
-  try {
-      Invoke-WebRequest -Uri $regFileUrl -OutFile $tempRegFilePath
-      Show-Message "Successfully downloaded the .reg file from $regFileUrl."
-      
-      if (Test-Path $tempRegFilePath) {
-          Start-Process regedit.exe -ArgumentList "/s `"$tempRegFilePath`"" -Wait
-          
-          if ($LASTEXITCODE -eq 0) {
-              Show-Message "Successfully executed the .reg file."
-          } else {
-              Show-Message "Failed to execute the .reg file. Exit code: $LASTEXITCODE."
-          }
-  
-          Remove-Item -Path $tempRegFilePath -Force
-          Show-Message "Deleted temporary .reg file."
-      } else {
-          Show-Message "Download failed: .reg file not found."
-      }
-  } catch {
-      Show-Message "Error occurred: $_"
-  }
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\control]
+@="Control Panel"
+"icon"="shell32.dll,137"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\control\command]
+@="control"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\cleanmgr]
+@="Disk Cleanup"
+"icon"="cleanmgr.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\cleanmgr\command]
+@="cleanmgr.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\devmgr]
+@="Device Manager"
+"icon"="hdwwiz.cpl"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\devmgr\command]
+@="devmgmt.msc"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\event]
+@="Event Viewer"
+"icon"="eventvwr.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\event\command]
+@="eventvwr.msc"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\regedit]
+@="Registry Editor"
+"icon"="regedit.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\regedit\command]
+@="regedit.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\secctr]
+@="Security Center"
+"icon"="wscui.cpl"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\secctr\command]
+@="control /name Microsoft.SecurityCenter"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\msconfig]
+@="System Configuration"
+"icon"="msconfig.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\msconfig\command]
+@="msconfig.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\taskmgr]
+@="Task Manager"
+"icon"="taskmgr.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\taskmgr\command]
+@="taskmgr.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\taskschd]
+@="Task Scheduler"
+"icon"="taskschd.msc"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\taskschd\command]
+@="taskschd.msc"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\wu]
+@="Windows Update"
+"icon"="wuauclt.exe"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\wu\command]
+@="control /name Microsoft.WindowsUpdate"
+
+HKEY_CLASSES_ROOT\DesktopBackground\Shell\SystemShortcuts]
+"MUIVerb"="System Shortcuts"
+"SubCommands"="admintools;datetime;regional;folderoptions;gmode;internetoptions;network;power;appwiz;rbin;run;search;services;sysdm;user;user2;flip3d"
+"icon"="sysdm.cpl"
+
+[HKEY_CLASSES_ROOT\DesktopBackground\Shell\SystemTools]
+"MUIVerb"="System Tools"
+"SubCommands"="control;cleanmgr;devmgr;event;regedit;secctr;msconfig;taskmgr;taskschd;wu"
+"icon"="imageres.dll,104"
+"@
+
+  Set-Content -Path "$env:TEMP\ContextMenu.reg" -Value $MultilineComment -Force
+  Set-Location -Path "$env:TEMP"
+  Regedit.exe /S "ContextMenu.reg"
   
   # Add "Copy as Path" to Right Click Context Menu
   if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath" -Force | Out-Null}
