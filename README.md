@@ -10,7 +10,9 @@
 
 </div>
 
-![Logo](img/winfix.jpg)
+<p align="center">
+  <img src="img/winfix.jpg" alt="Winfix" width="400">
+</p>
 
 ## Table of Contents
 
