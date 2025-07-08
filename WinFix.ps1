@@ -26,6 +26,7 @@ With inspiration from:
 - fr33thy - https://github.com/fr33thyfr33thy/Ultimate-Windows-Optimization-Guide
 - Win11Debloat - https://github.com/Raphire/Win11Debloat  
 - Harden-Windows-Security - https://github.com/HotCakeX/Harden-Windows-Security
+- Win-PostInstall - https://github.com/franckferman/Win-PostInstall/
 
 .EXAMPLE
 PS C:\> Set-ExecutionPolicy Bypass -Scope Process -Force; .\WinFix.ps1
