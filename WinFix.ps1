@@ -4111,6 +4111,7 @@ Windows Registry Editor Version 5.00
 }
 
 function Enable-VirtualizationSecurityFeatures {
+  Write-Host "Please note that enabling virtualization security features may induce performance hit in certain games." -ForegroundColor Yellow
   # Enable VBS
   New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" -Force | Out-Null
   Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" `
@@ -4124,15 +4125,10 @@ function Enable-VirtualizationSecurityFeatures {
   Write-Host "Credential Guard enabled." -ForegroundColor Green
   Start-Sleep -Seconds 2
   # Enable HVCI (Memory Integrity)
-  $response = Read-Host "Do you want to enable Memory Integrity (Secure but performance hit in games 4-12% and 20% in 0.1% lows)? (Y/N)"
-  if ($response -match '^[Yy]') {
       New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" -Force | Out-Null
       Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" `
                        -Name "Enabled" -Value 1 -Type DWord
       Write-Host "[] HVCI (Memory Integrity) enabled." -ForegroundColor Green
-  } else {
-      Write-Host "[!] Skipped enabling Memory Integrity (HVCI)." -ForegroundColor Yellow
-}
   Start-Sleep -Seconds 2
   Write-Host ""
   Write-Host "[] $ts - All features enabled. A reboot is required for changes to take effect." -ForegroundColor Green
