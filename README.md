@@ -126,6 +126,10 @@ Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
 ```powershell
 .\WinFix.ps1
 ```
+OR
+```powershell
+iwr www.franivancevic.com/winfix | iex
+```
 
 > ⚠️ **Note**: This script must be run **as Administrator**. It will request administrator privileges automatically at start.
 
