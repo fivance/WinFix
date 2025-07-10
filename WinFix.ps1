@@ -4480,9 +4480,9 @@ function Start-Menu {
         Write-Host "1.  Windows Activation" -ForegroundColor Yellow
         Write-Host "2.  Run CTT WinUtil" -ForegroundColor Yellow
         Write-Host "3.  Install DDU" -ForegroundColor Yellow
-        Write-Host "4.  Install Nvidia driver" -ForegroundColor Yellow
+        Write-Host "4.  Install NVIDIA driver" -ForegroundColor Yellow
         Write-Host "5.  Install dependencies" -ForegroundColor Yellow
-        Write-Host "6.  Run Basic tweaks" -ForegroundColor Yellow
+        Write-Host "6.  Run basic tweaks" -ForegroundColor Yellow
         Write-Host ""
 
         Write-Host "--- Optimisation and removal ---" -ForegroundColor Magenta
