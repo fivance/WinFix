@@ -4476,7 +4476,7 @@ function Start-Menu {
         Write-Host "==========================" -ForegroundColor Cyan
         Write-Host ""
 
-        Write-Host "--- Basic setup & activation ---" -ForegroundColor Magenta
+        Write-Host "--- Basic setup & activation ---" -ForegroundColor Cyan
         Write-Host "1.  Windows Activation" -ForegroundColor Yellow
         Write-Host "2.  Run CTT WinUtil" -ForegroundColor Yellow
         Write-Host "3.  Install DDU" -ForegroundColor Yellow
@@ -4485,7 +4485,7 @@ function Start-Menu {
         Write-Host "6.  Run basic tweaks" -ForegroundColor Yellow
         Write-Host ""
 
-        Write-Host "--- Optimisation and removal ---" -ForegroundColor Magenta
+        Write-Host "--- Optimisation and removal ---" -ForegroundColor Cyan
         Write-Host "7.  Optimize registry" -ForegroundColor Yellow
         Write-Host "8.  Remove UWP apps" -ForegroundColor Yellow
         Write-Host "9.  Remove UWP features" -ForegroundColor Yellow
@@ -4493,12 +4493,12 @@ function Start-Menu {
         Write-Host "11. Remove legacy apps" -ForegroundColor Yellow
         Write-Host "" 
 
-        Write-Host "--- Network ---" -ForegroundColor Magenta
+        Write-Host "--- Network ---" -ForegroundColor Cyan
         Write-Host "12. Optimize network" -ForegroundColor Yellow
         Write-Host "13. Update hosts file" -ForegroundColor Yellow
         Write-Host ""
 
-        Write-Host "--- Advanced & Cleanup ---" -ForegroundColor Magenta
+        Write-Host "--- Advanced & Cleanup ---" -ForegroundColor Cyan
         Write-Host "14. Remove scheduled tasks" -ForegroundColor Yellow
         Write-Host "15. Run advanced tweaks" -ForegroundColor Yellow
         Write-Host "16. Remove AI" -ForegroundColor Yellow
@@ -4510,7 +4510,7 @@ function Start-Menu {
         Write-Host ""
 
         Write-Host "0.  Exit" -ForegroundColor Red
-        Write-Host "==================================" -ForegroundColor Cyan
+        Write-Host "==================================" -ForegroundColor Red
 
         $choice = Read-Host "Select an option (0 to exit)"
 
