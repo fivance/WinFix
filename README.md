@@ -40,9 +40,7 @@ It leans on native PowerShell and thus should work on a wide range of modern Win
 - ⚙️ Hardened, secure, and reproducible setup — built around privacy, performance, and minimalism.
 - 🔐 Secure: disables legacy components, noisy services, telemetry and so much more.
 
-➡️ A fully optimized, secured, and ready-to-use Windows system — zero manual tweaks needed.
-
-> I built this script to get the exact system I need — consistently, efficiently, and silently.
+➡️ A fully optimized, secured, and ready-to-use Windows system
 
 This script ensures your machine is:
 - 🛡️ Hardened against telemetry
@@ -100,7 +98,7 @@ This script ensures your machine is:
   - ✅ Disable unnecessary services (e.g., Xbox, Telemetry, RemoteRegistry, etc.)
   - ✅ Disable scheduled tasks tied to CEIP, SmartScreen, Xbox, Maps, etc.
   - ✅ Remove preinstalled bloatware and OEM packages (e.g., Candy Crush, OneConnect, Skype, Flipboard)
-  - ✅ Disable optional Windows features like Internet Printing, PDF Print, SMB Direct, WorkFolders, RDC
+  - ✅ Disable optional Windows features like Internet Printing, PDF Print, SMB Direct, WorkFolders
 
 
 
@@ -138,3 +136,4 @@ iwr www.franivancevic.com/winfix | iex
 > ⚠️ **Note**: This script must be run **as Administrator**. It will request administrator privileges automatically at start.
 
 <p align="right">(<a href="#top">🔼 Back to top</a>)</p>
+
