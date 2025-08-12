@@ -31,6 +31,8 @@ WinFix is a comprehensive PowerShell script that automates post-installation on 
 
 It's meant to reproduce ideal system setup. Hardened, minimal, performant.
 
+Idea was for it to be a single no bs script that can be run from anywhere.
+
 > ⚙️ Note: This script is under active development — not production-grade yet. Treat it as a strong baseline and expect regular improvements.
 
 It leans on native PowerShell and thus should work on a wide range of modern Windows versions.
