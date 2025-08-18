@@ -29,13 +29,13 @@
 
 WinFix is a comprehensive PowerShell script that automates post-installation on Windows systems geared towards sysadmins, power users and anyone wanting clean, optimised and streamlined Windows experience.
 
-It's meant to reproduce ideal system setup. Hardened, minimal, performant.
+It's meant to reproduce ideal system setup.
 
-Idea was for it to be a single no bs script that can be run from anywhere.
+Idea was for it to be a single script that can be run from anywhere.
 
 > ⚙️ Note: This script is under active development — not production-grade yet. Treat it as a strong baseline and expect regular improvements.
 
-It leans on native PowerShell and thus should work on a wide range of modern Windows versions.
+It leans on PowerShell and thus should work on a wide range of modern Windows versions.
 
 ### 💡 Goal
 
@@ -138,4 +138,5 @@ iwr www.franivancevic.com/winfix | iex
 > ⚠️ **Note**: This script must be run **as Administrator**. It will request administrator privileges automatically at start.
 
 <p align="right">(<a href="#top">🔼 Back to top</a>)</p>
+
 
