@@ -4466,7 +4466,6 @@ function Start-InNewShell ($functionName) {
 }
 
 Get-Admin
-Write-Status
 
 function Start-Menu {
     do {
