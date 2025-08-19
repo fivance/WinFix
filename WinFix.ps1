@@ -879,8 +879,10 @@ $MultilineComment = @"
   Get-AppxPackage -allusers *Microsoft.XboxIdentityProvider* | Remove-AppxPackage
   Get-AppxPackage -allusers *Microsoft.XboxSpeechToTextOverlay* | Remove-AppxPackage
   Clear-Host
-  
-  Write-Host "Installing powerplan..."
+}
+
+function Optimize-Powerplan {
+Write-Host "Installing powerplan..."
   Start-Sleep -Seconds 3
   cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 99999999-9999-9999-9999-999999999999 >nul 2>&1"
   cmd /c "powercfg /SETACTIVE 99999999-9999-9999-9999-999999999999 >nul 2>&1"
@@ -991,6 +993,7 @@ $MultilineComment = @"
   Clear-Host
 
 }
+
 
 function Optimize-Registry {
   Write-Host "Optimising registry..."
@@ -4483,30 +4486,31 @@ function Start-Menu {
         Write-Host "4.  Install NVIDIA driver" -ForegroundColor Yellow
         Write-Host "5.  Install dependencies" -ForegroundColor Yellow
         Write-Host "6.  Run basic tweaks" -ForegroundColor Yellow
+        Write-Host "7.  Optimize power plan" -ForegroundColor Yellow
         Write-Host ""
 
         Write-Host "--- Optimisation and removal ---" -ForegroundColor Cyan
-        Write-Host "7.  Optimize registry" -ForegroundColor Yellow
-        Write-Host "8.  Remove UWP apps" -ForegroundColor Yellow
-        Write-Host "9.  Remove UWP features" -ForegroundColor Yellow
-        Write-Host "10. Remove legacy features" -ForegroundColor Yellow
-        Write-Host "11. Remove legacy apps" -ForegroundColor Yellow
+        Write-Host "8.  Optimize registry" -ForegroundColor Yellow
+        Write-Host "9.  Remove UWP apps" -ForegroundColor Yellow
+        Write-Host "10.  Remove UWP features" -ForegroundColor Yellow
+        Write-Host "11. Remove legacy features" -ForegroundColor Yellow
+        Write-Host "12. Remove legacy apps" -ForegroundColor Yellow
         Write-Host "" 
 
         Write-Host "--- Network ---" -ForegroundColor Cyan
-        Write-Host "12. Optimize network" -ForegroundColor Yellow
-        Write-Host "13. Update hosts file" -ForegroundColor Yellow
+        Write-Host "13. Optimize network" -ForegroundColor Yellow
+        Write-Host "14. Update hosts file" -ForegroundColor Yellow
         Write-Host ""
 
         Write-Host "--- Advanced & Cleanup ---" -ForegroundColor Cyan
-        Write-Host "14. Remove scheduled tasks" -ForegroundColor Yellow
-        Write-Host "15. Run advanced tweaks" -ForegroundColor Yellow
-        Write-Host "16. Remove AI" -ForegroundColor Yellow
-        Write-Host "17. Install context menus" -ForegroundColor Yellow
-        Write-Host "18. Hardening - Virtualisation Security Features" -ForegroundColor Yellow
-        Write-Host "19. Hardening - Defender configuration" -ForegroundColor Yellow
-        Write-Host "20. Enable WSL" -ForegroundColor Yellow
-        Write-Host "21. Disk cleanup" -ForegroundColor Yellow
+        Write-Host "15. Remove scheduled tasks" -ForegroundColor Yellow
+        Write-Host "16. Run advanced tweaks" -ForegroundColor Yellow
+        Write-Host "17. Remove AI" -ForegroundColor Yellow
+        Write-Host "18. Install context menus" -ForegroundColor Yellow
+        Write-Host "19. Hardening - Virtualisation Security Features" -ForegroundColor Yellow
+        Write-Host "20. Hardening - Defender configuration" -ForegroundColor Yellow
+        Write-Host "21. Enable WSL" -ForegroundColor Yellow
+        Write-Host "22. Disk cleanup" -ForegroundColor Yellow
         Write-Host ""
 
         Write-Host "0.  Exit" -ForegroundColor Red
@@ -4521,21 +4525,22 @@ function Start-Menu {
             '4'  { Install-NvidiaDriver }
             '5'  { Install-Dependencies }
             '6'  { Optimize-BasicTweaks }
-            '7'  { Optimize-Registry }
-            '8'  { Remove-UWPApps }
-            '9'  { Remove-UWPFeatures }
-            '10' { Remove-LegacyFeatures }
-            '11' { Remove-LegacyApps }
-            '12' { Optimize-Network }
-            '13' { Update-Hostsfile }
-            '14' { Remove-ScheduledTasks }
-            '15' { Optimize-AdvancedTweaks }
-            '16' { Remove-AI }
-            '17' { Install-ContextMenus }
-            '18' { Enable-VirtualizationSecurityFeatures }
-            '19' { Set-DefenderConfig }
-            '20' { Enable-WSL }
-            '21' { Initialize-DiskCleanup }
+            '7'  { Optimize-PowerPlan }
+            '8'  { Optimize-Registry }
+            '9'  { Remove-UWPApps }
+            '10'  { Remove-UWPFeatures }
+            '11' { Remove-LegacyFeatures }
+            '12' { Remove-LegacyApps }
+            '13' { Optimize-Network }
+            '14' { Update-Hostsfile }
+            '15' { Remove-ScheduledTasks }
+            '16' { Optimize-AdvancedTweaks }
+            '17' { Remove-AI }
+            '18' { Install-ContextMenus }
+            '19' { Enable-VirtualizationSecurityFeatures }
+            '20' { Set-DefenderConfig }
+            '21' { Enable-WSL }
+            '22' { Initialize-DiskCleanup }
             '0'  { exit }
             default {
                 Write-Host "`nInvalid selection. Press Enter to try again..." -ForegroundColor Red
