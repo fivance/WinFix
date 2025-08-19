@@ -4466,7 +4466,6 @@ function Start-InNewShell ($functionName) {
 }
 
 Get-Admin
-Show-Message
 Start-Trusted
 Write-Status
 
