@@ -4471,9 +4471,9 @@ function Start-Menu {
     do {
         Clear-Host
 
-        Write-Host "==========================" -ForegroundColor Cyan
+        Write-Host "===========================" -ForegroundColor Cyan
         Write-Host "        WinFix Menu        " -ForegroundColor Cyan -BackgroundColor DarkBlue
-        Write-Host "==========================" -ForegroundColor Cyan
+        Write-Host "===========================" -ForegroundColor Cyan
         Write-Host ""
 
         Write-Host "--- Basic setup & activation ---" -ForegroundColor Cyan
