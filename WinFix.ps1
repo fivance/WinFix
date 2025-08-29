@@ -3132,7 +3132,7 @@ New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsA
 
 Write-Host "Explorer: '$menuName' - Right Click Context Menu [ADDED]" -ForegroundColor Green
   Start-Sleep -Seconds 3
-}}
+}
 
 
 function Remove-ScheduledTasks {
