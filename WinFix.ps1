@@ -879,10 +879,11 @@ $MultilineComment = @"
   Get-AppxPackage -allusers *Microsoft.XboxIdentityProvider* | Remove-AppxPackage
   Get-AppxPackage -allusers *Microsoft.XboxSpeechToTextOverlay* | Remove-AppxPackage
   Clear-Host
+  Write-Host "Basic optimizations done."
 }
 
 function Optimize-Powerplan {
-Write-Host "Installing powerplan..."
+Write-Host "Installing optimised powerplan..."
   Start-Sleep -Seconds 3
   cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 99999999-9999-9999-9999-999999999999 >nul 2>&1"
   cmd /c "powercfg /SETACTIVE 99999999-9999-9999-9999-999999999999 >nul 2>&1"
@@ -991,7 +992,7 @@ Write-Host "Installing powerplan..."
   Clear-Host
   powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da e69653ca-cf7f-4f05-aa73-cb833fa90ad4 0x00000000
   Clear-Host
-
+  Write-Host "Powerplan optimised."
 }
 
 
@@ -2506,6 +2507,8 @@ C0,CC,0C,00,00,00,00,00,\
   Start-Sleep -Seconds 1
   Start-Process "explorer.exe"
   Start-Sleep 3
+  Clear-Host
+  Write-Host "Registry tweaks applied."
   }
 
 function Remove-UWPApps {
@@ -2533,6 +2536,7 @@ function Remove-UWPApps {
   Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator * | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
   Timeout /T 2 | Out-Null
   Clear-Host
+  Write-Host "UWP Apps removed."
 }
 
 function Remove-UWPFeatures {
@@ -2556,6 +2560,8 @@ function Remove-UWPFeatures {
   Remove-WindowsCapability -Online -Name "Print.Management.Console~~~~0.0.1.0" | Out-Null
   Remove-WindowsCapability -Online -Name "WMIC~~~~" | Out-Null
   Remove-WindowsCapability -Online -Name "Windows.Kernel.LA57~~~~0.0.1.0" | Out-Null
+  Clear-Host
+  Write-Host "UWP Features removed."
 }
 
 function Remove-LegacyFeatures {
@@ -2586,6 +2592,7 @@ function Remove-LegacyFeatures {
   Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol-Deprecation -NoRestart
   Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol-Server -NoRestart
   Clear-Host
+  Write-Host "Legacy Features uninstalled."
 }
 
 function Remove-LegacyApps {
@@ -2624,11 +2631,13 @@ function Remove-LegacyApps {
   } else {
   }
   Timeout /T 1 | Out-Null
+  Clear-Host
+  Write-Host "Legacy Apps uninstalled."
 }
 
 function Optimize-Network {
   Clear-Host
-  Write-Host "Optimizing Network Adapter Settings..."
+  Write-Host "Optimizing network adapter settings..."
   Start-Sleep -Seconds 3
   $progresspreference = 'silentlycontinue'
   # Disable all adapter settings keep ipv4
@@ -2659,7 +2668,7 @@ function Optimize-Network {
   Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ("1.1.1.1","1.0.0.1")
   
   Clear-Host
-  Write-Host 'Applying Network Settings to Limit Upload Bandwidth and Improve Latency Under Load...'
+  Write-Host 'Applying network settings to limit upload bandwidth and improve latency under load...'
       Start-Sleep -Seconds 3
      
       $NIC = @()
@@ -3078,39 +3087,53 @@ HKEY_CLASSES_ROOT\DesktopBackground\Shell\SystemShortcuts]
   New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath' -Name 'Icon' -Value 'imageres.dll,-5302' -PropertyType String -Force | Out-Null
   Write-Host "Explorer: 'Copy as Path' - Right Click Context Menu [ADDED]" -ForegroundColor Green
   
-  # "Open with Powershell 7 (Admin)" to Right Click Context Menu
-  if (-not (Test-Path "C:\Program Files\PowerShell\7\pwsh.exe")) {
-      New-Item -Path "C:\PSTemp" -ItemType Directory | Out-Null
-      $PS7InstallerPath = "C:\PSTemp\PowerShell-7.3.9-win-x64.msi" 
-      $PS7InstallerURL = "https://github.com/PowerShell/PowerShell/releases/download/v7.4.1/PowerShell-7.4.1-win-x64.msi"
-      Invoke-WebRequest -Uri $PS7InstallerURL -OutFile $PS7InstallerPath
-      Start-Process -FilePath msiexec -ArgumentList "/i $PS7InstallerPath /qn" -Wait
-      Remove-Item -Path "C:\PSTemp" -Recurse -Force | Out-Null
-  }
-  if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin" -Force | Out-Null}
-  if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin\command") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin\command" -Force | Out-Null}
-  if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin" -Force | Out-Null}
-  if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin\command") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin\command" -Force | Out-Null}
-  if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin" -Force | Out-Null}
-  if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin\command") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin\command" -Force | Out-Null}
-  Remove-Item -LiteralPath "HKLM:\SOFTWARE\Classes\LibraryFolder\Background\shell\PowerShell7AsAdmin" -Force -ErrorAction "SilentlyContinue" | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name '(default)' -Value 'Open with PowerShell 7 (Admin)' -PropertyType String -Force | Out-Null
-  Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name 'Extended' -Force -ErrorAction "SilentlyContinue" | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value "" -PropertyType String -Force | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'powershell.exe' -PropertyType String -Force | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value 'powershell -WindowStyle Hidden -NoProfile -Command "Start-Process -Verb RunAs pwsh.exe -ArgumentList \"-NoExit -Command Push-Location \\\"\"%V/\\\"\"\"' -PropertyType String -Force | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name '(default)' -Value 'Open with PowerShell 7 (Admin)' -PropertyType String -Force | Out-Null
-  Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name 'Extended' -Force -ErrorAction "SilentlyContinue"  | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value "" -PropertyType String -Force | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'pwsh.exe' -PropertyType String -Force | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value 'powershell -WindowStyle Hidden -NoProfile -Command "Start-Process -Verb RunAs pwsh.exe -ArgumentList \"-NoExit -Command Push-Location \\\"\"%V/\\\"\"\"' -PropertyType String -Force | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name '(default)' -Value 'Open with PowerShell 7 (Admin)' -PropertyType String -Force | Out-Null
-  Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name 'Extended' -Force -ErrorAction "SilentlyContinue"  | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value "" -PropertyType String -Force | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'pwsh.exe' -PropertyType String -Force | Out-Null
-  New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value 'powershell -WindowStyle Hidden -NoProfile -Command "Start-Process -Verb RunAs pwsh.exe -ArgumentList \"-NoExit -Command Push-Location \\\"\"%V/\\\"\"\"' -PropertyType String -Force | Out-Null
-  Write-Host "Explorer: 'Open with PowerShell 7 (Admin)' - Right Click Context Menu [ADDED]" -ForegroundColor Green
+  $pwshPath = "C:\Program Files\PowerShell\7\pwsh.exe"
+
+if (-not (Test-Path $pwshPath)) {
+    Write-Host "PowerShell 7 not found. Installing with winget..." -ForegroundColor Yellow
+    Start-Process "winget" -ArgumentList "install --id Microsoft.Powershell --source winget --silent --accept-package-agreements --accept-source-agreements" -Wait -NoNewWindow
 }
+
+$keys = @(
+    "HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin",
+    "HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin\command",
+    "HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin",
+    "HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin\command",
+    "HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin",
+    "HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin\command"
+)
+
+foreach ($key in $keys) {
+    if (-not (Test-Path $key)) {
+        New-Item $key -Force | Out-Null
+    }
+}
+
+Remove-Item -LiteralPath "HKLM:\SOFTWARE\Classes\LibraryFolder\Background\shell\PowerShell7AsAdmin" -Force -ErrorAction SilentlyContinue | Out-Null
+
+$menuName = "Open with PowerShell 7 (Admin)"
+$command = 'powershell -WindowStyle Hidden -NoProfile -Command "Start-Process -Verb RunAs pwsh.exe -ArgumentList ''-NoExit'',''-Command'',''Push-Location \"\"%V\"\"''"'
+
+
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name '(default)' -Value $menuName -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value '' -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'pwsh.exe' -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value $command -Force | Out-Null
+
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name '(default)' -Value $menuName -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value '' -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'pwsh.exe' -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value $command -Force | Out-Null
+
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name '(default)' -Value $menuName -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value '' -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'pwsh.exe' -Force | Out-Null
+New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value $command -Force | Out-Null
+
+Write-Host "Explorer: '$menuName' - Right Click Context Menu [ADDED]" -ForegroundColor Green
+  Start-Sleep -Seconds 3
+}
+
 
 function Remove-ScheduledTasks {
   Clear-Host
