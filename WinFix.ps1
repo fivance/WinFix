@@ -509,7 +509,32 @@ $MultilineComment = @"
   Get-ScheduledTask -TaskName '*NvTmRep_CrashReport4*' | Disable-ScheduledTask
   Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\FvSvc' /v 'Start' /t REG_DWORD /d '4' /f
   
-  
+$response = Read-Host "Do you want to enable P0 state for GPU? (yes/no)"
+
+if ($response -match '^(y|yes)$') {
+    Write-Host "Enabling P0 state for GPU..."
+    Start-Sleep -Seconds 3
+    
+  Clear-Host
+  $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
+  foreach($key in $subkeys){
+  if ($key -notlike '*Configuration'){
+  # enable p0 state regedit
+  reg add "$key" /v "DisableDynamicPstate" /t REG_DWORD /d "1" /f | Out-Null
+}
+}
+Clear-Host
+Write-Host "P0 State: On . . ."
+  $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
+  foreach($key in $subkeys){
+  if ($key -notlike '*Configuration'){
+  Get-ItemProperty -Path "Registry::$key" -Name 'DisableDynamicPstate'
+}
+}
+
+} else {
+    Write-Host "Skipping GPU P0 state enable."
+}   
   Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 }
 
