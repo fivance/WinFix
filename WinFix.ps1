@@ -1368,9 +1368,10 @@ Windows Registry Editor Version 5.00
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
 "ListviewShadow"=dword:0
 
+; This registry value tells the windows scheduler how much cpu time a process should get. While there is lots of options outside of the two "Adjust for best performance: programs or background services" in legacy control panel, the default value when using "Programs" gives the scheduler the ideal cpu time for boosting foreground apps (longer cpu time). NOTE This will not affect input lag in anyway as I/O are received as interrupts and take cpu priority
 ; Adjust for best performance of programs
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl]
-"Win32PrioritySeparation"=dword:00000026
+;[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl]
+;"Win32PrioritySeparation"=dword:00000026
 
 ; Disable remote assistance
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Remote Assistance]
@@ -1395,9 +1396,9 @@ Windows Registry Editor Version 5.00
 
 
 ; SECURITY AND MAINTENANCE
-; Disable report problems
-[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting]
-"Disabled"=dword:00000001
+; Disable report problems - no logs when you encounter a BSOD screen so not being applied
+;[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting]
+;"Disabled"=dword:00000001
 
 
 
@@ -3752,10 +3753,10 @@ function Remove-BloatwarePackages {
   schtasks /change /tn "Microsoft\Windows\Input\PenSyncDataAvailable" /disable
   schtasks /change /tn "Microsoft\Windows\Input\TouchpadSyncDataAvailable" /disable
   schtasks /change /tn "Microsoft\Windows\International\Synchronize Language Settings" /disable
-  schtasks /change /tn "Microsoft\Windows\Sysmain\ResPriStaticDbSync" /disable
-  schtasks /change /tn "Microsoft\Windows\Sysmain\WsSwapAssessmentTask" /disable
-  schtasks /change /tn "Microsoft\Windows\Sysmain\HybridDriveCachePrepopulate" /disable
-  schtasks /change /tn "Microsoft\Windows\Sysmain\HybridDriveCacheRebalance" /disable
+  #schtasks /change /tn "Microsoft\Windows\Sysmain\ResPriStaticDbSync" /disable
+  #schtasks /change /tn "Microsoft\Windows\Sysmain\WsSwapAssessmentTask" /disable
+  #schtasks /change /tn "Microsoft\Windows\Sysmain\HybridDriveCachePrepopulate" /disable
+  #schtasks /change /tn "Microsoft\Windows\Sysmain\HybridDriveCacheRebalance" /disable
   schtasks /change /tn "Microsoft\Windows\DiskCleanup\SilentCleanup" /disable
   schtasks /change /tn "Microsoft\Windows\MUI\LPRemove" /disable
   schtasks /change /tn "Microsoft\Windows\SpacePort\SpaceAgentTask" /disable
@@ -4573,7 +4574,7 @@ function Start-Menu {
             '7'  { Optimize-PowerPlan }
             '8'  { Optimize-Registry }
             '9'  { Remove-UWPApps }
-            '10'  { Remove-UWPFeatures }
+            '10' { Remove-UWPFeatures }
             '11' { Remove-LegacyFeatures }
             '12' { Remove-LegacyApps }
             '13' { Optimize-Network }
