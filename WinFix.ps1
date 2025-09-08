@@ -5610,7 +5610,7 @@ function Start-Menu {
         Write-Host "19. Hardening - Virtualisation Security Features" -ForegroundColor Yellow
         Write-Host "20. Hardening - Defender configuration" -ForegroundColor Yellow
         Write-Host "21. Enable WSL" -ForegroundColor Yellow
-        Write-Host "22  Disable Defender/Security"
+        Write-Host "22  Disable Defender/Security" -ForegroundColor Yellow
         Write-Host "23. Disk cleanup" -ForegroundColor Yellow
         Write-Host ""
 
