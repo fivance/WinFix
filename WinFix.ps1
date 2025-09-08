@@ -1291,9 +1291,9 @@ Windows Registry Editor Version 5.00
 
 ; SYSTEM AND SECURITY
 
-; Disable core isolation
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
-"Enabled"=dword:00000000
+; Disable core isolation (turned it off for default settings)
+;[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
+;"Enabled"=dword:00000000
 
 ; Disable ai insights
 [HKEY_CURRENT_USER\Software\Microsoft\input\Settings]
@@ -3089,7 +3089,7 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\wu\command]
 @="control /name Microsoft.WindowsUpdate"
 
-HKEY_CLASSES_ROOT\DesktopBackground\Shell\SystemShortcuts]
+[HKEY_CLASSES_ROOT\DesktopBackground\Shell\SystemShortcuts]
 "MUIVerb"="System Shortcuts"
 "SubCommands"="admintools;datetime;regional;folderoptions;gmode;internetoptions;network;power;appwiz;rbin;run;search;services;sysdm;user;user2;flip3d"
 "icon"="sysdm.cpl"
@@ -4323,6 +4323,7 @@ function Set-DefenderConfig {
 }
 
 function Initialize-DiskCleanup {
+  Clear-Host
   Add-Type -AssemblyName System.Windows.Forms
   Add-Type -AssemblyName System.Drawing
   [System.Windows.Forms.Application]::EnableVisualStyles()
@@ -4510,9 +4511,7 @@ function Initialize-DiskCleanup {
       
   }
 }
-function Start-InNewShell ($functionName) {
-  Start-Process powershell -ArgumentList '-NoExit', '-Command', ". `"$PSScriptRoot\functions\functions.ps1`"; $functionName"
-}
+
 
 Get-Admin
 
