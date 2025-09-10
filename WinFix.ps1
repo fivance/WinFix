@@ -3014,16 +3014,13 @@ function Install-ContextMenus {
   Write-Host "Installing ContextMenu entries..."
   Start-Sleep -Seconds 3
 
-  # Requires Administrator rights
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "This script must be run as Administrator!" -ForegroundColor Red
     exit 1
 }
 
-# GitHub repo raw base URL
 $repoBase = "https://raw.githubusercontent.com/fivance/contextmenu/main"
 
-# List of .reg files to download & apply
 $regFiles = @(
     "CommandStore.reg",
     "SystemShortcutsContextMenu.reg",
