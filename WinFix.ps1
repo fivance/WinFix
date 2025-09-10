@@ -3013,8 +3013,7 @@ function Install-ContextMenus {
   Clear-Host
   Write-Host "Installing ContextMenu entries..."
   Start-Sleep -Seconds 3
-  $MultilineComment = @"
-
+    $MultilineComment = @"
 Windows Registry Editor Version 5.00
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell]
@@ -3100,9 +3099,10 @@ Windows Registry Editor Version 5.00
 "icon"="imageres.dll,104"
 "@
 
-  Set-Content -Path "$env:TEMP\ContextMenu.reg" -Value $MultilineComment -Force
-  Set-Location -Path "$env:TEMP"
-  Regedit.exe /S "ContextMenu.reg"
+    $regFile = Join-Path $env:TEMP "ContextMenu.reg"
+    Set-Content -Path $regFile -Value $MultilineComment -Force -Encoding Unicode
+
+    Start-Process regedit.exe -ArgumentList "/s `"$regFile`"" -Wait -NoNewWindow
   
   # Add "Copy as Path" to Right Click Context Menu
   if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath" -Force | Out-Null}
