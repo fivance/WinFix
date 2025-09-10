@@ -3013,266 +3013,42 @@ function Install-ContextMenus {
   Clear-Host
   Write-Host "Installing ContextMenu entries..."
   Start-Sleep -Seconds 3
-    $MultilineComment = @"
-Windows Registry Editor Version 5.00
 
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell]
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\admintools]
-@="Administrative Tools"
-"icon"="imageres.dll,109"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\admintools\command]
-@="control admintools"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\advancedoptions]
-@="Pokrenite sa naprednim opcijama"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\advancedoptions\command]
-@="Shutdown -r -o -f -t 00"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\appwiz]
-@="Programs and Features"
-"icon"="appwiz.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\appwiz\command]
-@="control appwiz.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\cleanmgr]
-@="Disk Cleanup"
-"icon"="cleanmgr.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\cleanmgr\command]
-@="cleanmgr.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\control]
-@="Control Panel"
-"icon"="control.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\control\command]
-@="control.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\datetime]
-@="Change Date and Time"
-"icon"="timedate.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\datetime\command]
-@="control timedate.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\devmgr]
-@="Device Manager"
-"Icon"=hex(2):64,00,65,00,76,00,6d,00,67,00,72,00,2e,00,64,00,6c,00,6c,00,00,\
-  00
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\devmgr\command]
-@=hex(2):25,00,53,00,79,00,73,00,74,00,65,00,6d,00,52,00,6f,00,6f,00,74,00,25,\
-  00,5c,00,73,00,79,00,73,00,74,00,65,00,6d,00,33,00,32,00,5c,00,6d,00,6d,00,\
-  63,00,2e,00,65,00,78,00,65,00,20,00,2f,00,73,00,20,00,25,00,53,00,79,00,73,\
-  00,74,00,65,00,6d,00,52,00,6f,00,6f,00,74,00,25,00,5c,00,73,00,79,00,73,00,\
-  74,00,65,00,6d,00,33,00,32,00,5c,00,64,00,65,00,76,00,6d,00,67,00,6d,00,74,\
-  00,2e,00,6d,00,73,00,63,00,00,00
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\event]
-@="Event Viewer"
-"icon"="eventvwr.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\event\command]
-@=hex(2):25,00,53,00,79,00,73,00,74,00,65,00,6d,00,52,00,6f,00,6f,00,74,00,25,\
-  00,5c,00,73,00,79,00,73,00,74,00,65,00,6d,00,33,00,32,00,5c,00,6d,00,6d,00,\
-  63,00,2e,00,65,00,78,00,65,00,20,00,2f,00,73,00,20,00,25,00,53,00,79,00,73,\
-  00,74,00,65,00,6d,00,52,00,6f,00,6f,00,74,00,25,00,5c,00,73,00,79,00,73,00,\
-  74,00,65,00,6d,00,33,00,32,00,5c,00,65,00,76,00,65,00,6e,00,74,00,76,00,77,\
-  00,72,00,2e,00,6d,00,73,00,63,00,00,00
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\flip3d]
-@="Window Switcher"
-"icon"="imageres.dll,0"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\flip3d\command]
-@="explorer shell:::{3080F90E-D7AD-11D9-BD98-0000947B0257}"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\folderoptions]
-@="Folder Options"
-"icon"="explorer.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\folderoptions\command]
-@="control folders"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\gmode]
-@="God Mode"
-"icon"="control.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\gmode\command]
-@="explorer shell:::{ED7BA470-8E54-465E-825C-99712043E01C}"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\internetoptions]
-@="Internet Options"
-"icon"="inetcpl.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\internetoptions\command]
-@="control inetcpl.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\lock]
-@="Zakljucaj"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\lock\command]
-@="Rundll32 User32.dll,LockWorkStation"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\logoff]
-@="Odjava"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\logoff\command]
-@="Shutdown -l"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\msconfig]
-@="System Configuration"
-"icon"="msconfig.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\msconfig\command]
-@="msconfig.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\network]
-@="Network Connections"
-"icon"="ncpa.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\network\command]
-@="control ncpa.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\power]
-@="Power Options"
-"icon"="powercfg.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\power\command]
-@="control powercfg.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\rbin]
-@="Recycle Bin"
-"icon"="imageres.dll,50"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\rbin\command]
-@="explorer shell:::{645FF040-5081-101B-9F08-00AA002F954E}"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\regedit]
-@="Registry Editor"
-"icon"="regedit.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\regedit\command]
-@="regedit.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\regional]
-@="Change Regional Settings"
-"icon"="intl.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\regional\command]
-@="control intl.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\restart]
-@="Ponovno pokreni"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\restart\command]
-@="Shutdown -r -f -t 00"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\run]
-@="Run"
-"icon"="shell32.dll,24"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\run\command]
-@="explorer shell:::{2559A1F3-21D7-11D4-BDAF-00C04F60B9F0}"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\search]
-@="Search"
-"icon"="shell32.dll,22"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\search\command]
-@="explorer shell:::{2559A1F0-21D7-11D4-BDAF-00C04F60B9F0}"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\secctr]
-@="Security Center"
-"icon"="wscui.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\secctr\command]
-@="control wscui.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\services]
-@="Services"
-"icon"="filemgmt.dll"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\services\command]
-@=hex(2):25,00,53,00,79,00,73,00,74,00,65,00,6d,00,52,00,6f,00,6f,00,74,00,25,\
-  00,5c,00,73,00,79,00,73,00,74,00,65,00,6d,00,33,00,32,00,5c,00,6d,00,6d,00,\
-  63,00,2e,00,65,00,78,00,65,00,20,00,2f,00,73,00,20,00,25,00,53,00,79,00,73,\
-  00,74,00,65,00,6d,00,52,00,6f,00,6f,00,74,00,25,00,5c,00,73,00,79,00,73,00,\
-  74,00,65,00,6d,00,33,00,32,00,5c,00,73,00,65,00,72,00,76,00,69,00,63,00,65,\
-  00,73,00,2e,00,6d,00,73,00,63,00,00,00
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\shutdown]
-@="Iskljuci racunalo"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\shutdown\command]
-@="Shutdown -s -f -t 00"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\sleep]
-@="Stanje mirovanja"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\sleep\command]
-@="rundll32.exe powrprof.dll,SetSuspendState Sleep"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\switch]
-@="Promijeni korisnika"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\switch\command]
-@="tsdiscon.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\sysdm]
-@="System Properties"
-"icon"="sysdm.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\sysdm\command]
-@="control sysdm.cpl"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\taskmgr]
-@="Task Manager"
-"icon"="taskmgr.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\taskmgr\command]
-@="taskmgr.exe"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\taskschd]
-@="Task Scheduler"
-"icon"="miguiresource.dll,1"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\taskschd\command]
-@="Control schedtasks"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\user]
-@="User Accounts"
-"icon"="imageres.dll,74"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\user\command]
-@="Control userpasswords"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\user2]
-@="User Accounts Classic"
-"icon"="shell32.dll,111"
-
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\CommandStore\shell\user2\command]
-@="Control userpasswords2"
-
-[HKEY_CLASSES_ROOT\DesktopBackground\Shell\SystemShortcuts]
-"MUIVerb"="System Shortcuts"
-"SubCommands"="admintools;datetime;regional;folderoptions;gmode;internetoptions;network;power;appwiz;rbin;run;search;services;sysdm;user;user2;flip3d"
-"icon"="sysdm.cpl"
-
-[HKEY_CLASSES_ROOT\DesktopBackground\Shell\SystemTools]
-"MUIVerb"="System Tools"
-"SubCommands"="control;cleanmgr;devmgr;event;regedit;secctr;msconfig;taskmgr;taskschd;wu"
-"icon"="imageres.dll,104"
-"@
-
-    $regFile = Join-Path $env:TEMP "ContextMenu.reg"
-    Set-Content -Path $regFile -Value $MultilineComment -Force -Encoding Unicode
-
-    Start-Process regedit.exe -ArgumentList "/s `"$regFile`"" -Wait -NoNewWindow
+  # Requires Administrator rights
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "This script must be run as Administrator!" -ForegroundColor Red
+    exit 1
+}
+
+# GitHub repo raw base URL
+$repoBase = "https://raw.githubusercontent.com/fivance/contextmenu/main"
+
+# List of .reg files to download & apply
+$regFiles = @(
+    "CommandStore.reg",
+    "SystemShortcutsContextMenu.reg",
+    "SystemToolsContextMenu.reg"
+)
+
+foreach ($file in $regFiles) {
+    try {
+        $url  = "$repoBase/$file"
+        $dest = Join-Path $env:TEMP $file
+
+        Write-Host "Downloading $file ..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing -ErrorAction Stop
+
+        Write-Host "Applying $file ..." -ForegroundColor Yellow
+        Start-Process regedit.exe -ArgumentList "/s `"$dest`"" -Wait -NoNewWindow
+
+        Write-Host "Cleaning up $file ..." -ForegroundColor DarkGray
+        Remove-Item -Path $dest -Force -ErrorAction SilentlyContinue
+        Write-Host "$file applied and removed from TEMP." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Failed to process $file : $_" -ForegroundColor Red
+    }
+}
   
   # Add "Copy as Path" to Right Click Context Menu
   if((Test-Path -LiteralPath "HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath") -ne $true) {New-Item "HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath" -Force | Out-Null}
