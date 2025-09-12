@@ -651,8 +651,8 @@ a4,58,a9,26,10,00,54,61,73,6b,42,61,72,00,40,00,09,00,04,00,ef,be,a4,58,a9,\
 "AllowNewsAndInterests"=dword:00000000
 
 ; left taskbar alignment
-[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
-"TaskbarAl"=dword:00000000
+;[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+;"TaskbarAl"=dword:00000000
 
 ; remove search from taskbar
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search]
