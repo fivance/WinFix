@@ -4709,8 +4709,8 @@ Windows Registry Editor Version 5.00
 "EnableFirewall"=dword:00000000
 
 ; UAC
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
-"EnableLUA"=dword:00000000
+;[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
+;"EnableLUA"=dword:00000000
 
 ; Spectre and Meltdown mitigations
 [HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Session Manager\Memory Management]
