@@ -3499,6 +3499,77 @@ function Disable-UnwantedScheduledTasks {
             "Microsoft\XblGameSave\XblGameSaveTaskLogon"
         )
     )
+    
+    
+    function Run-Trusted([String]$command) {
+
+  try {
+    Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
+  }
+  catch {
+    taskkill /im trustedinstaller.exe /f >$null
+  }
+  #get bin path to revert later
+  $service = Get-WmiObject -Class Win32_Service -Filter "Name='TrustedInstaller'"
+  $DefaultBinPath = $service.PathName
+  #make sure path is valid and the correct location
+  $trustedInstallerPath = "$env:SystemRoot\servicing\TrustedInstaller.exe"
+  if ($DefaultBinPath -ne $trustedInstallerPath) {
+    $DefaultBinPath = $trustedInstallerPath
+  }
+  #convert command to base64 to avoid errors with spaces
+  $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
+  $base64Command = [Convert]::ToBase64String($bytes)
+  #change bin to command
+  sc.exe config TrustedInstaller binPath= "cmd.exe /c powershell.exe -encodedcommand $base64Command" | Out-Null
+  #run the command
+  sc.exe start TrustedInstaller | Out-Null
+  #set bin back to default
+  sc.exe config TrustedInstaller binpath= "`"$DefaultBinPath`"" | Out-Null
+  try {
+    Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
+  }
+  catch {
+    taskkill /im trustedinstaller.exe /f >$null
+  }
+  
+}
+
+Write-Host "Disabling Bluetooth, Printing and other services..."
+Start-Sleep -Seconds 3
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\BTAGService' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\BthAvctpSvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\bthserv' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\BluetoothUserService' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\Fax' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\Spooler' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\PrintWorkflowUserSvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\PrintNotify' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\shpamsvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\RemoteRegistry' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\PhoneSvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\defragsvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\DoSvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\RmSvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\wisvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\TabletInputService' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\diagsvc' /v 'Start' /t REG_DWORD /d '4' /f
+      $command = "Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\DPS' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\WdiServiceHost' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\WdiSystemHost' /v 'Start' /t REG_DWORD /d '4' /f"
+      Run-Trusted -command $command
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\AssignedAccessManagerSvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\MapsBroker' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\lfsvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\Netlogon' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\WpcMonSvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\SCardSvr' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\ScDeviceEnum' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\SCPolicySvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\WbioSrvc' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\WalletService' /v 'Start' /t REG_DWORD /d '4' /f
+      Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\whesvc' /v 'Start' /t REG_DWORD /d '4' /f
+
   Clear-Host 
   Write-Host "Disabling unnecessary scheduled tasks..."
   Start-Sleep -Seconds 3
