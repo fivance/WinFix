@@ -3096,20 +3096,14 @@ New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsA
 New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value $command -Force | Out-Null
 
 Reg.exe add 'HKCR\*\shell\runas' /ve /t REG_SZ /d 'Take Ownership' /f
-      Reg.exe add 'HKCR\*\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" && icacls \"%1\" /grant administrators:F' /f
-      Reg.exe add 'HKCR\*\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" && icacls \"%1\" /grant administrators:F' /f
-      Reg.exe add 'HKCR\Directory\shell\runas' /ve /t REG_SZ /d 'Take Ownership' /f
-      Reg.exe add 'HKCR\Directory\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /f
-      Reg.exe add 'HKCR\Directory\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /
-
+Reg.exe add 'HKCR\*\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" && icacls \"%1\" /grant administrators:F' /f
+Reg.exe add 'HKCR\*\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" && icacls \"%1\" /grant administrators:F' /f
+Reg.exe add 'HKCR\Directory\shell\runas' /ve /t REG_SZ /d 'Take Ownership' /f
+Reg.exe add 'HKCR\Directory\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /f
+Reg.exe add 'HKCR\Directory\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked' /v '{9F156763-7844-4DC4-B2B1-901F640F5155}' /t REG_SZ /d `"`" /f
 
-
-
-Write-Host "Explorer: '$menuName' - Right Click Context Menu [ADDED]" -ForegroundColor Green
-  Start-Sleep -Seconds 3
 }
-
 
 function Remove-ScheduledTasks {
   Clear-Host
@@ -3141,6 +3135,31 @@ function Remove-ScheduledTasks {
 function Optimize-AdvancedTweaks {
   Clear-Host
   Start-Sleep -Seconds 3
+
+  $confirmation = Read-Host "Do you want to enable Start menu folder icons (Settings, File Explorer, Downloads, Network, Personal Folder)? (Y/N)"
+
+if ($confirmation -match '^(Y|y)$') {
+    # Registry path
+    $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+
+    # Folder options to enable
+    $foldersToEnable = @{
+        "Start_ShowSettings"     = 1
+        "Start_ShowExplorer"     = 1
+        "Start_ShowDownloads"    = 1
+        "Start_ShowNetwork"      = 1
+        "Start_ShowUser"         = 1  # Personal Folder
+    }
+
+    # Apply each registry setting
+    foreach ($name in $foldersToEnable.Keys) {
+        New-ItemProperty -Path $regPath -Name $name -Value $foldersToEnable[$name] -PropertyType DWord -Force
+    }
+
+    Write-Host " Folder icons have been enabled in the Start menu."
+} else {
+    Write-Host "Operation canceled by user."
+}
 
   Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Security' /V 'DisableSecuritySettingsCheck' /T 'REG_DWORD' /D '00000001' /F
   Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
