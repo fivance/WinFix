@@ -5834,8 +5834,8 @@ function Start-Menu {
         Write-Host "20. Hardening - Defender configuration" -ForegroundColor Yellow
         Write-Host "21. Enable WSL" -ForegroundColor Yellow
         Write-Host "22  Disable Defender/Security" -ForegroundColor Yellow
-        Write-Host "23. Disk cleanup" -ForegroundColor Yellow
-        Write-Host "24. Remove Edge" -ForegroundColor Yellow
+        Write-Host "23. Remove Edge" -ForegroundColor Yellow
+        Write-Host "24. Disk cleanup" -ForegroundColor Yellow
         Write-Host ""
 
         Write-Host "0.  Exit" -ForegroundColor Red
