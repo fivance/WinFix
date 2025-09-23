@@ -5866,8 +5866,8 @@ function Start-Menu {
             '20' { Set-DefenderConfig }
             '21' { Enable-WSL }
             '22' { Remove-Defender }
-            '23' { Initialize-DiskCleanup }
-            '24' { Remove-Edge }
+            '23' { Remove-Edge }            
+            '24' { Initialize-DiskCleanup }
             '0'  { exit }
             default {
                 Write-Host "`nInvalid selection. Press Enter to try again..." -ForegroundColor Red
