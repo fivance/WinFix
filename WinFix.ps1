@@ -1295,7 +1295,17 @@ Windows Registry Editor Version 5.00
 ;[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
 ;"Enabled"=dword:00000000
 
-; Disable ai insights
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard]
+"EnableVirtualizationBasedSecurity"=dword:00000000
+"RequirePlatformSecurityFeatures"=dword:00000000
+
+KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelShadowStacks]
+"Enabled"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\CredentialGuard]
+"Enabled"=dword:00000000
+
+; Disable AI insights
 [HKEY_CURRENT_USER\Software\Microsoft\input\Settings]
 "InsightsEnabled"=dword:00000000
 
@@ -1703,28 +1713,28 @@ Windows Registry Editor Version 5.00
 "BackgroundType"=dword:00000001
 
 ; Dark theme 
-;[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize]
-;"AppsUseLightTheme"=dword:00000000
-;"SystemUsesLightTheme"=dword:00000000
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize]
+"AppsUseLightTheme"=dword:00000000
+"SystemUsesLightTheme"=dword:00000000
 
-;[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize]
-;"AppsUseLightTheme"=dword:00000000
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize]
+"AppsUseLightTheme"=dword:00000000
 
-;[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Accent]
-;"StartColorMenu"=dword:ff3d3f41
-;"AccentColorMenu"=dword:ff484a4c
-;"AccentPalette"=hex(3):DF,DE,DC,00,A6,A5,A1,00,68,65,62,00,4C,4A,48,00,41,\
-;3F,3D,00,27,25,24,00,10,0D,0D,00,10,7C,10,00
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Accent]
+"StartColorMenu"=dword:ff3d3f41
+"AccentColorMenu"=dword:ff484a4c
+"AccentPalette"=hex(3):DF,DE,DC,00,A6,A5,A1,00,68,65,62,00,4C,4A,48,00,41,\
+3F,3D,00,27,25,24,00,10,0D,0D,00,10,7C,10,00
 
-;[HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM]
-;"EnableWindowColorization"=dword:00000001
-;"AccentColor"=dword:ff484a4c
-;"ColorizationColor"=dword:c44c4a48
-;"ColorizationAfterglow"=dword:c44c4a48
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM]
+"EnableWindowColorization"=dword:00000001
+"AccentColor"=dword:ff484a4c
+"ColorizationColor"=dword:c44c4a48
+"ColorizationAfterglow"=dword:c44c4a48
 
 ; Disable transparency
-;[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]
-;"EnableTransparency"=dword:00000000
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]
+"EnableTransparency"=dword:00000000
 
 ; Always hide most used list in start menu
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer]
@@ -1849,6 +1859,12 @@ Windows Registry Editor Version 5.00
 
 
 ; SYSTEM
+
+; System responsiveness + Network throttling
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile]
+"NetworkThrottlingIndex"=dword:ffffffff
+"SystemResponsiveness"=dword:00000000
+
 ; 100% DPI scaling
 [HKEY_CURRENT_USER\Control Panel\Desktop]
 "LogPixels"=dword:00000060
@@ -1860,6 +1876,20 @@ Windows Registry Editor Version 5.00
 ; Disable fix scaling for apps
 [HKEY_CURRENT_USER\Control Panel\Desktop]
 "EnablePerProcessSystemDPI"=dword:00000000
+
+; Disable W11 system requirements
+[HKEY_CURRENT_USER\Control Panel\UnsupportedHardwareNotificationCache]
+"SV2"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\SYSTEM\Setup\LabConfig] 
+"BypassCPUCheck"=dword:00000001
+"BypassRAMCheck"=dword:00000001
+"BypassSecureBootCheck"=dword:00000001
+"BypassStorageCheck"=dword:00000001
+"BypassTPMCheck"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\SYSTEM\Setup\MoSetup]
+"AllowUpgradesWithUnsupportedTPMOrCPU"=dword:00000001
 
 ; Turn on hardware accelerated gpu scheduling
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\GraphicsDrivers]
@@ -2182,6 +2212,14 @@ E0,F6,C5,D5,0E,CA,50,00,00
 "ConnectedSearchUseWeb"=dword:00000000
 "DisableWebSearch"=dword:00000001
 
+; Disable Phone Companion In StartMenu
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+"RightCompanionToggledOpen"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start\Companions\Microsoft.YourPhone_8wekyb3d8bbwe]
+"IsEnabled"=dword:00000000
+"IsAvailable"=dword:00000000
+
 ; Disable Backup Notifications
 [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.BackupReminder]
 "Enabled"=dword:00000000
@@ -2407,6 +2445,13 @@ E0,F6,C5,D5,0E,CA,50,00,00
 ; Disable menu show delay
 [HKEY_CURRENT_USER\Control Panel\Desktop]
 "MenuShowDelay"="0"
+
+; Disable Phone Companion In StartMenu
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start\Companions\Microsoft.YourPhone_8wekyb3d8bbwe]
+"IsEnabled"=dword:00000000
+"IsAvailable"=dword:00000000
 
 ; Disable driver searching & updates
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching]
