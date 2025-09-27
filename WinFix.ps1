@@ -1343,8 +1343,8 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 ;"MinAnimate"="0"
 
 ; Disable animations in the taskbar
-;[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
-;"TaskbarAnimations"=dword:0
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
+"TaskbarAnimations"=dword:0
 
 ; Disable enable peek
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\DWM]
