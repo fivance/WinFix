@@ -3150,7 +3150,7 @@ Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blo
 
 }
 
-function Remove-ScheduledTasks {
+function Set-ServicesManual {
   Clear-Host
   Write-Host "Removing unnecessary scheduled tasks..."
   Start-Sleep -Seconds 3
@@ -5846,7 +5846,7 @@ function Start-Menu {
         Write-Host ""
 
         Write-Host "--- Advanced & Cleanup ---" -ForegroundColor Cyan
-        Write-Host "15. Remove scheduled tasks" -ForegroundColor Yellow
+        Write-Host "15. Set services to manual" -ForegroundColor Yellow
         Write-Host "16. Run advanced tweaks" -ForegroundColor Yellow
         Write-Host "17. Remove AI" -ForegroundColor Yellow
         Write-Host "18. Install context menus" -ForegroundColor Yellow
@@ -5878,7 +5878,7 @@ function Start-Menu {
             '12' { Remove-LegacyApps }
             '13' { Optimize-Network }
             '14' { Update-Hostsfile }
-            '15' { Remove-ScheduledTasks }
+            '15' { Set-ServicesManual }
             '16' { Optimize-AdvancedTweaks }
             '17' { Remove-AI }
             '18' { Install-ContextMenus }
