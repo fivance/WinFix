@@ -3152,7 +3152,7 @@ Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blo
 
 function Set-ServicesManual {
   Clear-Host
-  Write-Host "Removing unnecessary scheduled tasks..."
+  Write-Host "Applying manual startup for services..."
   Start-Sleep -Seconds 3
   $services = Get-Service
   $servicesKeep = 'AudioEndpointBuilder
