@@ -285,7 +285,7 @@ function Install-NvidiaDriver {
   Get-FileFromWeb -URL $url -File "$env:TEMP\NvidiaDriver.exe"
   Clear-Host
   Write-Host "Installing: Nvidia Driver..."
-  Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/7-Zip.exe" -File "$env:TEMP\7-Zip.exe"
+  Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:TEMP\7-Zip.exe"
   Start-Process -wait "$env:TEMP\7-Zip.exe" /S
   cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\NvidiaDriver.exe" -o"$env:TEMP\NvidiaDriver" -y | Out-Null
   Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
@@ -545,7 +545,7 @@ function Install-Dependencies {
   Write-Host "Installing: Direct X..."
   Start-Sleep -Seconds 3
   Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
-  Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2301-x64.exe" -File "$env:TEMP\7-Zip.exe"
+  Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:TEMP\7-Zip.exe"
   Start-Process -wait "$env:TEMP\7-Zip.exe" /S
   cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\DirectX.exe" -o"$env:TEMP\DirectX" -y | Out-Null
   Start-Process "$env:TEMP\DirectX\DXSETUP.exe"
