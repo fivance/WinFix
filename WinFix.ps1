@@ -2931,8 +2931,8 @@ $hostEntries = @"
 127.0.0.1 edge.activity.windows.com
 127.0.0.1 edge.microsoft.com
 127.0.0.1 msedge.api.cdp.microsoft.com
-#127.0.0.1  go.microsoft.com/fwlink
-#127.0.0.1  go.microsoft.com
+#127.0.0.1 go.microsoft.com/fwlink
+#127.0.0.1 go.microsoft.com
 127.0.0.1 img-prod-cms-rt-microsoft-com.akamaized.net
 127.0.0.1 wns.windows.com
 127.0.0.1 storecatalogrevocation.storequality.microsoft.com
@@ -3041,6 +3041,60 @@ $hostEntries = @"
 0.0.0.0     live.mozillamessaging.com
 0.0.0.0     live.thunderbird.net
 0.0.0.0     broker-live.mozillamessaging.com
+0.0.0.0     v10.events.data.microsoft.com
+0.0.0.0     v10c.events.data.microsoft.com
+0.0.0.0     v10.vortex-win.data.microsoft.com
+0.0.0.0     watson.telemetry.microsoft.com
+0.0.0.0     umwatsonc.events.data.microsoft.com
+0.0.0.0     ceuswatcab01.blob.core.windows.net
+0.0.0.0     ceuswatcab02.blob.core.windows.net
+0.0.0.0     eaus2watcab01.blob.core.windows.net
+0.0.0.0     eaus2watcab02.blob.core.windows.net
+0.0.0.0     weus2watcab01.blob.core.windows.net
+0.0.0.0     weus2watcab02.blob.core.windows.net
+0.0.0.0     oca.telemetry.microsoft.com
+0.0.0.0     oca.microsoft.com
+0.0.0.0     kmwatsonc.events.data.microsoft.com
+0.0.0.0     au.vortex-win.data.microsoft.com
+0.0.0.0     au-v10.events.data.microsoft.com
+0.0.0.0     au-v20.events.data.microsoft.com
+0.0.0.0     eu-v10.events.data.microsoft.com
+0.0.0.0     eu-v20.events.data.microsoft.com
+0.0.0.0     in-v10.events.data.microsoft.com
+0.0.0.0     in-v20.events.data.microsoft.com
+0.0.0.0     jp-v10.events.data.microsoft.com
+0.0.0.0     jp-v20.events.data.microsoft.com
+0.0.0.0     uk.vortex-win.data.microsoft.com
+0.0.0.0     uk-v20.events.data.microsoft.com
+0.0.0.0     us4-v20.events.data.microsoft.com
+0.0.0.0     us5-v20.events.data.microsoft.com
+0.0.0.0     us-v10.events.data.microsoft.com
+0.0.0.0     us-v20.events.data.microsoft.com
+0.0.0.0     v20.events.data.microsoft.com
+0.0.0.0     synapse3ui-common.razerzone.com
+0.0.0.0     bespoke-analytics.razerapi.com
+0.0.0.0     discovery.razerapi.com
+0.0.0.0     manifest.razerapi.com
+0.0.0.0     cdn.razersynapse.com
+0.0.0.0     assets.razerzone.com
+0.0.0.0     assets2.razerzone.com
+0.0.0.0     deals-assets-cdn.razerzone.com
+0.0.0.0     synapse-3-webservice.razerzone.com
+0.0.0.0     albedozero.razerapi.com
+0.0.0.0     gms.razersynapse.com
+0.0.0.0     fs.razersynapse.com
+0.0.0.0     id.razer.com
+0.0.0.0     liveupdate01s.asus.com
+0.0.0.0     asusactivateservice.azurewebsites.net
+0.0.0.0     rog-live-service.asus.com
+0.0.0.0     dlcdn-rogboxbu1.asus.com
+0.0.0.0     dlcdn-rogboxbu2.asus.com
+0.0.0.0     mymessage.asus.com
+0.0.0.0     gaming-config.asus.com
+0.0.0.0     rog-content-platform.asus.com
+0.0.0.0     nomos.asus.com
+0.0.0.0     dlcdnrog.asus.com
+0.0.0.0     account.asus.com
 "@
   
   Copy-Item $hostsFile "$hostsFile.bak" -Force
@@ -3148,26 +3202,64 @@ Reg.exe add 'HKCR\Directory\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c ta
 Reg.exe add 'HKCR\Directory\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked' /v '{9F156763-7844-4DC4-B2B1-901F640F5155}' /t REG_SZ /d `"`" /f
 
+# Remove Open Terminal from ContextMenu
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked' /v '{9F156763-7844-4DC4-B2B1-901F640F5155}' /t REG_SZ /d `"`" /f
 }
+
+# Removing Restore Previous Versions from Context Menu
+Reg.exe delete 'HKCR\AllFilesystemObjects\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
+      Reg.exe delete 'HKCR\CLSID\{450D8FBA-AD25-11D0-98A8-0800361B1103}\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
+      Reg.exe delete 'HKCR\Directory\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
+      Reg.exe delete 'HKCR\Drive\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
+      Reg.exe delete 'HKCR\AllFilesystemObjects\shellex\PropertySheetHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
+      Reg.exe delete 'HKCR\CLSID\{450D8FBA-AD25-11D0-98A8-0800361B1103}\shellex\PropertySheetHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
+      Reg.exe delete 'HKCR\Directory\shellex\PropertySheetHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
+      Reg.exe delete 'HKCR\Drive\shellex\PropertySheetHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
+      #policies
+      Reg.exe delete 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'NoPreviousVersionsPage' /f >$null 2>&1
+      Reg.exe delete 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' /v 'NoPreviousVersionsPage' /f >$null 2>&1
+      Reg.exe delete 'HKLM\SOFTWARE\Policies\Microsoft\PreviousVersions' /v 'DisableLocalPage' /f >$null 2>&1
+      Reg.exe delete 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'NoPreviousVersionsPage' /f >$null 2>&1
+      Reg.exe delete 'HKCU\Software\Policies\Microsoft\PreviousVersions' /v 'DisableLocalPage' /f >$null 2>&1
+
 
 function Set-ServicesManual {
   Clear-Host
   Write-Host "Applying manual startup for services..."
   Start-Sleep -Seconds 3
   $services = Get-Service
-  $servicesKeep = 'AudioEndpointBuilder
-  Audiosrv
-  EventLog
-  SysMain
-  Themes
-  WSearch
-  NVDisplay.ContainerLocalSystem
-  WlanSvc'
-  foreach ($service in $services) { 
-    if ($service.StartType -like '*Auto*') {
-      if (!($servicesKeep -match $service.Name)) {
-          
-        Set-Service -Name $service.Name -StartupType Manual -ErrorAction SilentlyContinue
+  $servicesKeep = @(
+        'AudioEndpointBuilder',
+        'Audiosrv',
+        'EventLog',
+        'SysMain',
+        'Themes',
+        'WSearch',
+        'NVDisplay.ContainerLocalSystem',
+        'WlanSvc',
+        'BFE', 
+        'BrokerInfrastructure', 
+        'CoreMessagingRegistrar', 
+        'Dnscache', 
+        'LSM', 
+        'mpssvc', 
+        'RpcEptMapper', 
+        'Schedule', 
+        'SystemEventsBroker', 
+        'StateRepository', 
+        'TextInputManagementService', 
+        'sppsvc'
+      )
+     foreach ($service in $services) { 
+        if ($service.StartType -like '*Auto*') {
+          if ($servicesKeep -notcontains $service.Name) {
+            try {
+              Set-Service -Name $service.Name -StartupType Manual -ErrorAction Stop
+            }
+            catch {
+              $regPath = "HKLM:\SYSTEM\CurrentControlSet\Services\$($service.Name)"
+              Set-ItemProperty -Path $regPath -Name 'Start' -Value 3 -ErrorAction SilentlyContinue
+            }
          
       }         
     }
@@ -3181,10 +3273,76 @@ function Optimize-AdvancedTweaks {
   Clear-Host
   Start-Sleep -Seconds 3
 
-  Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Security' /V 'DisableSecuritySettingsCheck' /T 'REG_DWORD' /D '00000001' /F
-  Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
-  Reg.exe add 'HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
+# Disables telemetry trough gpdedit
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection' /v 'AllowTelemetry' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer' /v 'DisableGraphRecentItems' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' /v 'AllowClipboardHistory' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' /v 'AllowCrossDeviceClipboard' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' /v 'EnableActivityFeed' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' /v 'PublishUserActivities' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\System' /v 'UploadUserActivities' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AdvertisingInfo' /v 'Enabled' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo' /v 'DisabledByGroupPolicy' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Error Reporting' /v 'DontSendAdditionalData' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection' /v 'AllowDeviceNameInTelemetry' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent' /v 'DisableCloudOptimizedContent' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\CloudContent' /v 'DisableWindowsConsumerFeatures' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection' /v 'AllowTelemetry' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection' /v 'MaxTelemetryAllowed' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\DiagTrack' /v 'Start' /t REG_DWORD /d '4' /f
+Reg.exe add 'HKLM\System\ControlSet001\Services\dmwappushservice' /v 'Start' /t REG_DWORD /d '4' /f
+Reg.exe add 'HKLM\System\ControlSet001\Control\WMI\Autologger\Diagtrack-Listener' /v 'Start' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\Software\Policies\Microsoft\Biometrics' /v 'Enabled' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\AppV\CEIP' /v 'CEIPEnable' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\SQMClient\Windows' /v 'CEIPEnable' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKCU\Control Panel\International\User Profile' /v 'HttpAcceptLanguageOptOut' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CPSS\DevicePolicy\AllowTelemetry' /v 'DefaultValue' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\CPSS\Store\AllowTelemetry' /v 'Value' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\Software\Policies\Microsoft\Windows\DataCollection' /v 'AllowCommercialDataPipeline' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\Software\Policies\Microsoft\Windows\DataCollection' /v 'LimitEnhancedDiagnosticDataWindowsAnalytics' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy' /v 'TailoredExperiencesWithDiagnosticDataEnabled' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\Personalization\Settings' /v 'AcceptedPrivacyPolicy' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\Bluetooth' /v 'AllowAdvertising' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\System' /v 'AllowExperimentation' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\Wifi\AllowAutoConnectToWiFiSenseHotspots' /v 'value' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\Wifi\AllowWiFiHotSpotReporting' /v 'value' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\config' /v 'AutoConnectAllowedOEM' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\WMDRM' /v 'DisableOnline' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat' /v 'AITEnable' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat' /v 'DisableInventory' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat' /v 'DisablePCA' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat' /v 'DisablePcaRecording' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat' /v 'DisableScriptedDiagnosticLogging' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\AppCompat' /v 'DisableUAR' /t REG_DWORD /d '1' /f
+Reg.exe add 'HKLM\SYSTEM\ControlSet001\Control\StorPort' /v 'TelemetryDeviceHealthEnabled' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SYSTEM\ControlSet001\Control\StorPort' /v 'TelemetryErrorDataEnabled' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SYSTEM\ControlSet001\Control\StorPort' /v 'TelemetryPerformanceEnabled' /t REG_DWORD /d '0' /f
 
+
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Internet Explorer\Security' /V 'DisableSecuritySettingsCheck' /T 'REG_DWORD' /D '00000001' /F
+Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
+Reg.exe add 'HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Zones\3' /V '1806' /T 'REG_DWORD' /D '00000000' /F
+# Disable all the loggers under DiagTrack
+$subkeys = Get-ChildItem -Path 'HKLM:\System\ControlSet001\Control\WMI\Autologger\Diagtrack-Listener'
+foreach ($subkey in $subkeys) {
+  Set-ItemProperty -Path "registry::$($subkey.Name)" -Name 'Enabled' -Value 0 -Force
+}
+
+Disable-ScheduledTask -TaskName 'Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser' -ErrorAction SilentlyContinue
+Disable-ScheduledTask -TaskName 'Microsoft\Windows\Application Experience\ProgramDataUpdater' -ErrorAction SilentlyContinue
+Disable-ScheduledTask -TaskName 'Microsoft\Windows\Autochk\Proxy' -ErrorAction SilentlyContinue
+Disable-ScheduledTask -TaskName 'Microsoft\Windows\Customer Experience Improvement Program\Consolidator' -ErrorAction SilentlyContinue
+Disable-ScheduledTask -TaskName 'Microsoft\Windows\Customer Experience Improvement Program\UsbCeip' -ErrorAction SilentlyContinue
+Disable-ScheduledTask -TaskName 'Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector' -ErrorAction SilentlyContinue
+gpupdate /force
+
+# Faster shutdowns
+Reg.exe add 'HKCU\Control Panel\Desktop' /v 'WaitToKillAppTimeout' /t REG_SZ /d '1500' /f *>$null
+Reg.exe add 'HKCU\Control Panel\Desktop' /v 'AutoEndTasks' /t REG_SZ /d '1' /f *>$null
+Reg.exe add 'HKLM\SYSTEM\ControlSet001\Control' /v 'WaitToKillServiceTimeout' /t REG_SZ /d '1500' /f *>$null
+
+# Removes Windows Backup app
+Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount' /v 'DisableUserAuth' /t REG_DWORD /d '1' /f
 
   Write-Host 'Showing All Apps on Taskbar'
   Start-Sleep -Seconds 3
