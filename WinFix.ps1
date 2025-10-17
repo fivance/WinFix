@@ -3201,26 +3201,6 @@ Reg.exe add 'HKCR\Directory\shell\runas' /ve /t REG_SZ /d 'Take Ownership' /f
 Reg.exe add 'HKCR\Directory\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /f
 Reg.exe add 'HKCR\Directory\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked' /v '{9F156763-7844-4DC4-B2B1-901F640F5155}' /t REG_SZ /d `"`" /f
-
-# Remove Open Terminal from ContextMenu
-Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked' /v '{9F156763-7844-4DC4-B2B1-901F640F5155}' /t REG_SZ /d `"`" /f
-
-
-# Removing Restore Previous Versions from Context Menu
-Reg.exe delete 'HKCR\AllFilesystemObjects\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
-      Reg.exe delete 'HKCR\CLSID\{450D8FBA-AD25-11D0-98A8-0800361B1103}\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
-      Reg.exe delete 'HKCR\Directory\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
-      Reg.exe delete 'HKCR\Drive\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
-      Reg.exe delete 'HKCR\AllFilesystemObjects\shellex\PropertySheetHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
-      Reg.exe delete 'HKCR\CLSID\{450D8FBA-AD25-11D0-98A8-0800361B1103}\shellex\PropertySheetHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
-      Reg.exe delete 'HKCR\Directory\shellex\PropertySheetHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
-      Reg.exe delete 'HKCR\Drive\shellex\PropertySheetHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
-      #policies
-      Reg.exe delete 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'NoPreviousVersionsPage' /f >$null 2>&1
-      Reg.exe delete 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' /v 'NoPreviousVersionsPage' /f >$null 2>&1
-      Reg.exe delete 'HKLM\SOFTWARE\Policies\Microsoft\PreviousVersions' /v 'DisableLocalPage' /f >$null 2>&1
-      Reg.exe delete 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'NoPreviousVersionsPage' /f >$null 2>&1
-      Reg.exe delete 'HKCU\Software\Policies\Microsoft\PreviousVersions' /v 'DisableLocalPage' /f >$null 2>&1
 }
 
 function Set-ServicesManual {
