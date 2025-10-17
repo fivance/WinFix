@@ -3204,7 +3204,7 @@ Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blo
 
 # Remove Open Terminal from ContextMenu
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked' /v '{9F156763-7844-4DC4-B2B1-901F640F5155}' /t REG_SZ /d `"`" /f
-}
+
 
 # Removing Restore Previous Versions from Context Menu
 Reg.exe delete 'HKCR\AllFilesystemObjects\shellex\ContextMenuHandlers\{596AB062-B4D2-4215-9F74-E9109B0A8153}' /f
@@ -3221,7 +3221,7 @@ Reg.exe delete 'HKCR\AllFilesystemObjects\shellex\ContextMenuHandlers\{596AB062-
       Reg.exe delete 'HKLM\SOFTWARE\Policies\Microsoft\PreviousVersions' /v 'DisableLocalPage' /f >$null 2>&1
       Reg.exe delete 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'NoPreviousVersionsPage' /f >$null 2>&1
       Reg.exe delete 'HKCU\Software\Policies\Microsoft\PreviousVersions' /v 'DisableLocalPage' /f >$null 2>&1
-
+}
 
 function Set-ServicesManual {
   Clear-Host
@@ -3666,8 +3666,8 @@ function Disable-UnnecessaryServices {
         } catch {
             Write-Host "$ts - Could not disable $svc. Error: $_" -ForegroundColor Red
         }
-    }
-}
+      
+
 
 function Disable-UnwantedScheduledTasks {
     [CmdletBinding()]
@@ -4021,7 +4021,7 @@ function Remove-BloatwarePackages {
   gpupdate /force | Out-Null
 
 }
-}
+}}}
 
 function Enable-WSL {
   [CmdletBinding()]
