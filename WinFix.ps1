@@ -578,7 +578,6 @@ function Install-Dependencies {
   Start-Process -wait "$env:TEMP\vcredist2013_x64.exe" -ArgumentList "/passive /norestart"
   Start-Process -wait "$env:TEMP\vcredist2015_2017_2019_2022_x86.exe" -ArgumentList "/passive /norestart"
   Start-Process -wait "$env:TEMP\vcredist2015_2017_2019_2022_x64.exe" -ArgumentList "/passive /norestart"
-  Start-Menu
 }
 
 function Optimize-BasicTweaks {
@@ -6289,7 +6288,7 @@ function Start-Menu {
             '0'  { exit }
             default {
                 Write-Host "`nInvalid selection. Press Enter to try again..." -ForegroundColor Red
-                Read-Host
+                
             }
         }
 
