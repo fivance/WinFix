@@ -4067,6 +4067,9 @@ function Enable-WSL {
 }
 
 function Install-TimerResolution {
+  
+ $command =
+    'Clear-Host
     Write-Host "1. Timer Resolution: On"
     Write-Host "2. Timer Resolution: Off"
     while ($true) {
@@ -4335,6 +4338,8 @@ function Start-Trusted([String]$command) {
         taskkill /im trustedinstaller.exe /f >$null
     }
     
+}'
+Start-Process powershell -ArgumentList  "-Command", $command 
 }
 
 function Write-Status {
