@@ -908,7 +908,8 @@ $MultilineComment = @"
 }
 
 function Optimize-Powerplan {
-Write-Host "Installing optimised powerplan..."
+  Clear-Host
+  Write-Host "Installing optimised powerplan..."
   Start-Sleep -Seconds 3
   cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 99999999-9999-9999-9999-999999999999 >nul 2>&1"
   cmd /c "powercfg /SETACTIVE 99999999-9999-9999-9999-999999999999 >nul 2>&1"
@@ -1022,6 +1023,7 @@ Write-Host "Installing optimised powerplan..."
 
 
 function Optimize-Registry {
+  Clear-Host
   Write-Host "Optimising registry..."
   Start-Sleep -Seconds 3
   $MultilineComment = @"
@@ -3743,6 +3745,7 @@ function Disable-UnwantedScheduledTasks {
   
 }
 
+Clear-Host
 Write-Host "Disabling Bluetooth, Printing and other services..."
 Start-Sleep -Seconds 3
       Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\BTAGService' /v 'Start' /t REG_DWORD /d '4' /f
@@ -4282,7 +4285,7 @@ Set-Service -Name "Set Timer Resolution Service" -StartupType Auto -ErrorAction 
 Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction SilentlyContinue | Out-Null
 # start taskmanager
 Start-Process taskmgr.exe
-exit
+
 
       }
     2 {
@@ -4294,7 +4297,6 @@ Set-Service -Name "Set Timer Resolution Service" -Status Stopped -ErrorAction Si
 sc.exe delete "Set Timer Resolution Service" | Out-Null
 Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -Force -ErrorAction SilentlyContinue | Out-Null
 Start-Process taskmgr.exe
-exit
 
       }
     } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
@@ -4661,6 +4663,7 @@ Windows Registry Editor Version 5.00
 }
 
 function Enable-VirtualizationSecurityFeatures {
+  Clear-Host
   Write-Host "Please note that enabling virtualization security features may induce performance hit in certain games." -ForegroundColor Yellow
   Start-Sleep -Seconds 3
   # Enable VBS
@@ -5477,7 +5480,6 @@ $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
 # restart
 shutdown -r -t 00
-exit
 
     }
     2 {
@@ -5533,7 +5535,7 @@ $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
 # Restart
 shutdown -r -t 00
-exit
+
 
     }
     } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
@@ -5979,7 +5981,7 @@ $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
 # Restart
 shutdown -r -t 00
-exit
+
 
     }
     2 {
@@ -6014,7 +6016,7 @@ $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
 # Restart
 shutdown -r -t 00
-exit
+
 
     }
     } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
@@ -6134,7 +6136,6 @@ Get-AppxPackage -allusers *Microsoft.BingWeather* | Remove-AppxPackage
 Clear-Host
 Write-Host "Restart to apply . . ."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-exit
 
       }
     2 {
@@ -6200,7 +6201,6 @@ Write-Host "Restart to apply . . ."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # Open Ublock Origin in web browser
 Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "https://microsoftedge.microsoft.com/addons/detail/ublock-origin/odfafepnkmbhccpbejgmiehpchacaeak"
-exit
 
       }
     } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
