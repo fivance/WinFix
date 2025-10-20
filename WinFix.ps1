@@ -2583,7 +2583,7 @@ C0,CC,0C,00,00,00,00,00,\
 
 function Remove-UWPApps {
   Clear-Host
-  Write-Host "Removing UWP Apps... (sometimes closes script on first run -> Run it twice)"
+  Write-Host "Removing UWP Apps..."
   Start-Sleep -Seconds 3
   $progresspreference = 'silentlycontinue'
   # CBS needed for Windows 11 Explorer
