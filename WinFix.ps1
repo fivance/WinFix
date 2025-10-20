@@ -199,6 +199,7 @@ function Invoke-WinUtil {
 }
 
 function Install-DDU {
+  Clear-Host
   Write-Host "Installing: DDU..."
   Start-Sleep -Seconds 3
 
@@ -908,7 +909,8 @@ $MultilineComment = @"
 }
 
 function Optimize-Powerplan {
-Write-Host "Installing optimised powerplan..."
+  Clear-Host
+  Write-Host "Installing optimised powerplan..."
   Start-Sleep -Seconds 3
   cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 99999999-9999-9999-9999-999999999999 >nul 2>&1"
   cmd /c "powercfg /SETACTIVE 99999999-9999-9999-9999-999999999999 >nul 2>&1"
@@ -1022,6 +1024,7 @@ Write-Host "Installing optimised powerplan..."
 
 
 function Optimize-Registry {
+  Clear-Host
   Write-Host "Optimising registry..."
   Start-Sleep -Seconds 3
   $MultilineComment = @"
@@ -4001,7 +4004,9 @@ function Remove-BloatwarePackages {
   gpupdate /force | Out-Null
 
 }
-}}}
+}
+}
+}
 
 function Enable-WSL {
   [CmdletBinding()]
@@ -4262,7 +4267,7 @@ Set-Service -Name "Set Timer Resolution Service" -StartupType Auto -ErrorAction 
 Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction SilentlyContinue | Out-Null
 # start taskmanager
 Start-Process taskmgr.exe
-exit
+Start-Menu
 
       }
     2 {
@@ -4274,7 +4279,7 @@ Set-Service -Name "Set Timer Resolution Service" -Status Stopped -ErrorAction Si
 sc.exe delete "Set Timer Resolution Service" | Out-Null
 Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -Force -ErrorAction SilentlyContinue | Out-Null
 Start-Process taskmgr.exe
-exit
+Start-Menu
 
       }
     } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
@@ -6114,7 +6119,7 @@ Get-AppxPackage -allusers *Microsoft.BingWeather* | Remove-AppxPackage
 Clear-Host
 Write-Host "Restart to apply . . ."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-exit
+Start-Menu
 
       }
     2 {
@@ -6180,7 +6185,7 @@ Write-Host "Restart to apply . . ."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # Open Ublock Origin in web browser
 Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "https://microsoftedge.microsoft.com/addons/detail/ublock-origin/odfafepnkmbhccpbejgmiehpchacaeak"
-exit
+Start-Menu
 
       }
     } } else { Write-Host "Invalid input. Please select a valid option (1-2)." } }
