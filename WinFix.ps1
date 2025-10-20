@@ -3608,7 +3608,7 @@ else {
     if ($timeService.Status -ne "Running") {
   net start "W32Time" | Out-Null
   w32tm /resync | Out-Null
-
+    }
 function Disable-UnnecessaryServices {
     [CmdletBinding()]
     param (
@@ -4004,7 +4004,7 @@ function Remove-BloatwarePackages {
   schtasks /change /tn "Microsoft\Windows\WwanSvc\OobeDiscovery" /disable
   gpupdate /force | Out-Null
 
-}}
+}
 
 function Enable-WSL {
   [CmdletBinding()]
