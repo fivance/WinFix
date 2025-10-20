@@ -3333,7 +3333,6 @@ Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount' /v 'DisableUserA
   $keys = Get-ChildItem -Path 'registry::HKEY_CURRENT_USER\Control Panel\NotifyIconSettings' -Recurse -Force
   foreach ($key in $keys) {
     Set-ItemProperty -Path "registry::$key" -Name 'IsPromoted' -Value 1 -Force
-
   }
 
   $scriptContent = @"
@@ -3649,7 +3648,8 @@ function Disable-UnnecessaryServices {
         } catch {
             Write-Host "$ts - Could not disable $svc. Error: $_" -ForegroundColor Red
         }
-      
+      }
+    }
 
 
 function Disable-UnwantedScheduledTasks {
@@ -3726,6 +3726,7 @@ function Disable-UnwantedScheduledTasks {
   
 }
 
+
 Write-Host "Disabling Bluetooth, Printing and other services..."
 Start-Sleep -Seconds 3
       Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\BTAGService' /v 'Start' /t REG_DWORD /d '4' /f
@@ -3776,7 +3777,7 @@ Start-Sleep -Seconds 3
             Write-Host "$ts - Could not disable task: $task. Error: $_" -ForegroundColor Red
         }
     }
-}
+  }
 
 function Remove-BloatwarePackages {
 
@@ -4003,10 +4004,7 @@ function Remove-BloatwarePackages {
   schtasks /change /tn "Microsoft\Windows\WwanSvc\OobeDiscovery" /disable
   gpupdate /force | Out-Null
 
-}
-}
-}
-}
+}}
 
 function Enable-WSL {
   [CmdletBinding()]
