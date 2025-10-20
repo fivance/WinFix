@@ -6040,7 +6040,7 @@ function Remove-Edge {
     $writer.Close()
     }
     }
-
+    Clear-Host
     Write-Host "1. Edge: Off (Recommended)" -ForegroundColor Cyan
     Write-Host "2. Edge: Default" -ForegroundColor Cyan
     while ($true) {
