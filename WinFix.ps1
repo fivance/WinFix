@@ -200,7 +200,7 @@ function Invoke-WinUtil {
 
 function Install-DDU {
   Clear-Host
-  Write-Host "Installing: DDU..."
+  Write-Host "Installing: DDU..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
 
   Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
@@ -258,18 +258,18 @@ $MultilineComment = @"
   $response = Read-Host "Do you want to restart into Safe Mode now? (Y/N)"
 
   if ($response -match '^[Yy]') {
-      Write-Host "Restarting into Safe Mode..."
+      Write-Host "Restarting into Safe Mode..." -ForegroundColor Cyan
       cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
       shutdown -r -t 00
   }
   else {
-      Write-Host "Restart supressed."
+      Write-Host "Restart supressed." -ForegroundColor Cyan
   }
 }
 
 function Install-NvidiaDriver {
   Clear-Host
-  Write-Host "Installing latest Nvidia Driver..."
+  Write-Host "Installing latest Nvidia Driver..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
 
   Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
@@ -285,14 +285,13 @@ function Install-NvidiaDriver {
   Write-Output "Downloading: Nvidia Driver $version..."
   Get-FileFromWeb -URL $url -File "$env:TEMP\NvidiaDriver.exe"
   Clear-Host
-  Write-Host "Installing: Nvidia Driver..."
   Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:TEMP\7-Zip.exe"
   Start-Process -wait "$env:TEMP\7-Zip.exe" /S
   cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\NvidiaDriver.exe" -o"$env:TEMP\NvidiaDriver" -y | Out-Null
   Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
   Clear-Host
   Read-Host 'Press any key to continue (only press after driver is installed)'
-  Write-Host "Installing: NvidiaProfileInspector..."
+  Write-Host "Installing: NvidiaProfileInspector..." -ForegroundColor Cyan
   Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
   Expand-Archive "$env:TEMP\Inspector.zip" -DestinationPath "$env:TEMP\Inspector" -ErrorAction SilentlyContinue
 $MultilineComment = @"
@@ -513,7 +512,7 @@ $MultilineComment = @"
 $response = Read-Host "Do you want to enable P0 state for GPU? (yes/no)"
 
 if ($response -match '^(y|yes)$') {
-    Write-Host "Enabling P0 state for GPU..."
+    Write-Host "Enabling P0 state for GPU..." -ForegroundColor Cyan
     Start-Sleep -Seconds 3
     
   Clear-Host
@@ -525,7 +524,7 @@ if ($response -match '^(y|yes)$') {
 }
 }
 Clear-Host
-Write-Host "P0 State: On . . ."
+Write-Host "P0 State: On ..."  -ForegroundColor Cyan
   $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
   foreach($key in $subkeys){
   if ($key -notlike '*Configuration'){
@@ -534,7 +533,7 @@ Write-Host "P0 State: On . . ."
 }
 
 } else {
-    Write-Host "Skipping GPU P0 state enable."
+    Write-Host "Skipping GPU P0 state enable." -ForegroundColor Cyan
 }   
   Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
 }
@@ -543,7 +542,7 @@ Write-Host "P0 State: On . . ."
 
 function Install-Dependencies {
   Clear-Host
-  Write-Host "Installing: Direct X..."
+  Write-Host "Installing: Direct X..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
   Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:TEMP\7-Zip.exe"
@@ -553,7 +552,7 @@ function Install-Dependencies {
   Start-Sleep -Seconds 5
   Clear-Host
   
-  Write-Host "Installing: C++..."
+  Write-Host "Installing: C++..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x86.EXE" -File "$env:TEMP\vcredist2005_x86.exe"
   Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x64.EXE" -File "$env:TEMP\vcredist2005_x64.exe"
@@ -584,12 +583,12 @@ function Install-Dependencies {
 
 function Optimize-BasicTweaks {
   Clear-Host
-  Write-Host "Applying basic settings..."
+  Write-Host "Applying basic settings..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3 
   reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" /v "LetAppsRunInBackground" /t REG_DWORD /d "2" /f | Out-Null
   Clear-Host
 
-  Write-Host "Enabling MSI mode..."
+  Write-Host "Enabling MSI mode..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   Clear-Host
   $gpuDevices = Get-PnpDevice -Class Display
@@ -611,7 +610,7 @@ function Optimize-BasicTweaks {
   }
 
   Clear-Host
-  Write-Host "Cleaning start menu and taskbar..."
+  Write-Host "Cleaning start menu and taskbar..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   cmd /c "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband /f >nul 2>&1"
   Remove-Item -Recurse -Force "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch" -ErrorAction SilentlyContinue | Out-Null
@@ -884,7 +883,7 @@ $MultilineComment = @"
   Stop-Process -Force -Name Widgets -ErrorAction SilentlyContinue | Out-Null
   Stop-Process -Force -Name WidgetService -ErrorAction SilentlyContinue | Out-Null
   Clear-Host
-  Write-Host "Disabling Xbox Gamebar..."
+  Write-Host "Disabling Xbox Gamebar..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   $progresspreference = 'silentlycontinue'
   reg add "HKCU\System\GameConfigStore" /v "GameDVR_Enabled" /t REG_DWORD /d "0" /f | Out-Null
@@ -905,12 +904,12 @@ $MultilineComment = @"
   Get-AppxPackage -allusers *Microsoft.XboxIdentityProvider* | Remove-AppxPackage
   Get-AppxPackage -allusers *Microsoft.XboxSpeechToTextOverlay* | Remove-AppxPackage
   Clear-Host
-  Write-Host "Basic optimizations done."
+  Write-Host "Basic optimizations done." -ForegroundColor Green
 }
 
 function Optimize-Powerplan {
   Clear-Host
-  Write-Host "Installing optimised powerplan..."
+  Write-Host "Installing optimised powerplan..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   cmd /c "powercfg /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 99999999-9999-9999-9999-999999999999 >nul 2>&1"
   cmd /c "powercfg /SETACTIVE 99999999-9999-9999-9999-999999999999 >nul 2>&1"
@@ -1019,13 +1018,13 @@ function Optimize-Powerplan {
   Clear-Host
   powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 de830923-a562-41af-a086-e3a2c6bad2da e69653ca-cf7f-4f05-aa73-cb833fa90ad4 0x00000000
   Clear-Host
-  Write-Host "Powerplan optimised."
+  Write-Host "Powerplan optimised." -ForegroundColor Green
 }
 
 
 function Optimize-Registry {
   Clear-Host
-  Write-Host "Optimising registry..."
+  Write-Host "Optimising registry..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   $MultilineComment = @"
 Windows Registry Editor Version 5.00
@@ -2520,7 +2519,7 @@ C0,CC,0C,00,00,00,00,00,\
   reg unload "HKU\DefaultSystem"
   Remove-Item $exportFile
 
-  Write-Host "Applying compact mode for explorer and small icons for desktop..."
+  Write-Host "Applying compact mode for explorer and small icons for desktop..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v "UseCompactMode" /t REG_DWORD /d "1" /f | Out-Null
   Clear-Host
@@ -2537,7 +2536,7 @@ C0,CC,0C,00,00,00,00,00,\
   Start-Process explorer
   Clear-Host
   
-  Write-Host "Removing OneDrive..."
+  Write-Host "Removing OneDrive..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   taskkill.exe /F /IM "OneDrive.exe"
   taskkill.exe /F /IM "explorer.exe"
@@ -2578,12 +2577,12 @@ C0,CC,0C,00,00,00,00,00,\
   Start-Process "explorer.exe"
   Start-Sleep 3
   Clear-Host
-  Write-Host "Registry tweaks applied."
+  Write-Host "Registry tweaks applied." -ForegroundColor Green
   }
 
 function Remove-UWPApps {
   Clear-Host
-  Write-Host "Removing UWP Apps..."
+  Write-Host "Removing UWP Apps..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   $progresspreference = 'silentlycontinue'
   # CBS needed for Windows 11 Explorer
@@ -2606,12 +2605,12 @@ function Remove-UWPApps {
   Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator * | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
   Timeout /T 2 | Out-Null
   Clear-Host
-  Write-Host "UWP Apps removed."
+  Write-Host "UWP Apps removed." -ForegroundColor Green
 }
 
 function Remove-UWPFeatures {
   Clear-Host
-  Write-Host "Removing UWP Features..."
+  Write-Host "Removing UWP Features..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   Remove-WindowsCapability -Online -Name "App.StepsRecorder~~~~0.0.1.0" | Out-Null
   Remove-WindowsCapability -Online -Name "App.Support.QuickAssist~~~~0.0.1.0" | Out-Null
@@ -2631,12 +2630,12 @@ function Remove-UWPFeatures {
   Remove-WindowsCapability -Online -Name "WMIC~~~~" | Out-Null
   Remove-WindowsCapability -Online -Name "Windows.Kernel.LA57~~~~0.0.1.0" | Out-Null
   Clear-Host
-  Write-Host "UWP Features removed."
+  Write-Host "UWP Features removed." -ForegroundColor Green
 }
 
 function Remove-LegacyFeatures {
   Clear-Host
-  Write-Host "Uninstalling Legacy Features..."
+  Write-Host "Uninstalling Legacy Features..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   # .NET Framework 4.8 advanced services left out
   # Dism /Online /NoRestart /Disable-Feature /FeatureName:NetFx4-AdvSrvs | Out-Null
@@ -2662,12 +2661,12 @@ function Remove-LegacyFeatures {
   Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol-Deprecation -NoRestart
   Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol-Server -NoRestart
   Clear-Host
-  Write-Host "Legacy Features uninstalled."
+  Write-Host "Legacy Features uninstalled." -ForegroundColor Green
 }
 
 function Remove-LegacyApps {
   Clear-Host
-  Write-Host "Uninstalling Legacy Apps..."
+  Write-Host "Uninstalling Legacy Apps..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   # Uninstall Microsoft Update Health Tools Windows 11
   cmd /c "MsiExec.exe /X{C6FD611E-7EFE-488C-A0E0-974C09EF6473} /qn >nul 2>&1"
@@ -2702,12 +2701,12 @@ function Remove-LegacyApps {
   }
   Timeout /T 1 | Out-Null
   Clear-Host
-  Write-Host "Legacy Apps uninstalled."
+  Write-Host "Legacy Apps uninstalled." -ForegroundColor Green
 }
 
 function Optimize-Network {
   Clear-Host
-  Write-Host "Optimizing network adapter settings..."
+  Write-Host "Optimizing network adapter settings..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   $progresspreference = 'silentlycontinue'
   # Disable all adapter settings keep ipv4
@@ -2732,13 +2731,13 @@ function Optimize-Network {
   Disable-NetAdapterBinding -Name "*" -ComponentID ms_pacer -ErrorAction SilentlyContinue
   
   Clear-Host
-  Write-Host "Applying Cloudflare DNS servers for adapter..."
+  Write-Host "Applying Cloudflare DNS servers for adapter..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   $progresspreference = 'silentlycontinue'
   Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses ("1.1.1.1","1.0.0.1")
   
-  Clear-Host
-  Write-Host 'Applying network settings to limit upload bandwidth and improve latency under load...'
+  Clear-Host 
+  Write-Host 'Applying network settings to limit upload bandwidth and improve latency under load...' -ForegroundColor Cyan
       Start-Sleep -Seconds 3
      
       $NIC = @()
@@ -2898,7 +2897,7 @@ function Optimize-Network {
 
 function Update-Hostsfile {
   Clear-Host
-  Write-Host "Updating hosts file... (Breaks Microsoft Store Installs and some Microsoft sites)"
+  Write-Host "Updating hosts file... (Breaks Microsoft Store Installs and some Microsoft sites)" -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   
   
@@ -3103,13 +3102,13 @@ $hostEntries = @"
   Copy-Item $hostsFile "$hostsFile.bak" -Force
   Add-Content -Path $hostsFile -Value "`n$hostEntries" -Force
   
-  Write-Host "Hosts file updated successfully."
+  Write-Host "Hosts file updated successfully." -ForegroundColor Green
   Start-Sleep -Seconds 3
 }
 
 function Install-ContextMenus {
   Clear-Host
-  Write-Host "Installing ContextMenu entries..."
+  Write-Host "Installing ContextMenu entries..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
 
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -3208,7 +3207,7 @@ Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blo
 
 function Set-ServicesManual {
   Clear-Host
-  Write-Host "Applying manual startup for services..."
+  Write-Host "Applying manual startup for services..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   $services = Get-Service
   $servicesKeep = @(
@@ -3327,7 +3326,7 @@ Reg.exe add 'HKLM\SYSTEM\ControlSet001\Control' /v 'WaitToKillServiceTimeout' /t
 # Removes Windows Backup app
 Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\MicrosoftAccount' /v 'DisableUserAuth' /t REG_DWORD /d '1' /f
 
-  Write-Host 'Showing All Apps on Taskbar'
+  Write-Host 'Showing All Apps on Taskbar' -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer' /v 'EnableAutoTray' /t REG_DWORD /d '0' /f
   $keys = Get-ChildItem -Path 'registry::HKEY_CURRENT_USER\Control Panel\NotifyIconSettings' -Recurse -Force
@@ -3407,7 +3406,7 @@ else {
   schtasks /Create /XML "$env:TEMP\UpdateTaskTray" /TN '\UpdateTaskTray' /F | Out-Null 
 
   Remove-Item -Path "$env:TEMP\UpdateTaskTray" -Force -ErrorAction SilentlyContinue
-  Write-Host 'Update Task Tray Created...New Apps Will Be Shown Upon Restarting'
+  Write-Host 'Update Task Tray Created...New Apps Will Be Shown Upon Restarting' -ForegroundColor Green
 
 
   $registryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"
@@ -3635,7 +3634,7 @@ function Disable-UnnecessaryServices {
         )
     )
   Clear-Host 
-  Write-Host "Disabling unnecessary services..."
+  Write-Host "Disabling unnecessary services..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
     $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     Write-Host "$ts - Beginning service deactivation ritual..." -ForegroundColor Cyan
@@ -3727,7 +3726,7 @@ function Disable-UnwantedScheduledTasks {
 }
 
 
-Write-Host "Disabling Bluetooth, Printing and other services..."
+Write-Host "Disabling Bluetooth, Printing and other services..." -ForegroundColor Cyan
 Start-Sleep -Seconds 3
       Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\BTAGService' /v 'Start' /t REG_DWORD /d '4' /f
       Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\BthAvctpSvc' /v 'Start' /t REG_DWORD /d '4' /f
@@ -3763,7 +3762,7 @@ Start-Sleep -Seconds 3
       Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\whesvc' /v 'Start' /t REG_DWORD /d '4' /f
 
   Clear-Host 
-  Write-Host "Disabling unnecessary scheduled tasks..."
+  Write-Host "Disabling unnecessary scheduled tasks..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
     $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     Write-Host "$ts - Beginning scheduled task deactivation..." -ForegroundColor Cyan
@@ -3811,7 +3810,7 @@ function Remove-BloatwarePackages {
     )
   )
   Clear-Host 
-  Write-Host "Removing packages..."
+  Write-Host "Removing packages..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
   Write-Host "$ts - Initiating interstellar purge of Windows bloatware..." -ForegroundColor Cyan
@@ -4010,7 +4009,7 @@ function Enable-WSL {
   [CmdletBinding()]
   param()
   Clear-Host
-  Write-Host "Enabling WSL..."
+  Write-Host "Enabling WSL..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
     $ts = Get-Date -Format "M/d/yyyy h:mm:ss tt"
     Write-Host " $ts - Checking and enabling required WSL features..." -ForegroundColor Cyan
@@ -4048,8 +4047,8 @@ function Enable-WSL {
 }
 
 function Install-TimerResolution {
-    Write-Host "1. Timer Resolution: On"
-    Write-Host "2. Timer Resolution: Off"
+    Write-Host "1. Timer Resolution: On" -ForegroundColor Cyan
+    Write-Host "2. Timer Resolution: Off" -ForegroundColor Cyan
     while ($true) {
     $choice = Read-Host " "
     if ($choice -match '^[1-2]$') {
@@ -4057,7 +4056,7 @@ function Install-TimerResolution {
     1 {
 
 Clear-Host
-Write-Host "Installing: Set Timer Resolution Service . . ."
+Write-Host "Installing: Set Timer Resolution Service ..." -ForegroundColor Cyan
 $MultilineComment = @"
 using System;
 using System.Runtime.InteropServices;
@@ -4287,7 +4286,7 @@ Start-Menu
 
 function Remove-AI {
   Clear-Host
-  Write-Host "Removing AI/Copilot/Recall..."
+  Write-Host "Removing AI/Copilot/Recall..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   
   If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]'Administrator')) {
@@ -4673,7 +4672,7 @@ function Set-DefenderConfig {
     try {
         Clear-Host    
         Write-Host ""
-        Write-Host "Enabling and Setting Defender..." -ForegroundColor Yellow
+        Write-Host "Enabling and Setting Defender..." -ForegroundColor Cyan
         Start-Sleep -Seconds 3
 
         # https://www.powershellgallery.com/packages/WindowsDefender_InternalEvaluationSetting
@@ -4993,16 +4992,16 @@ function Remove-Defender {
     Start-Process powershell -args "-win 1 -nop -c `n$V `$env:R=(gi `$key -ea 0).getvalue(`$id)-join''; iex `$env:R" -verb runas -Wait
     }
 
-    Write-Host "1. Security: Off"
-    Write-Host "2. Security: On"
+    Write-Host "1. Security: Off" -ForegroundColor Cyan
+    Write-Host "2. Security: On" -ForegroundColor Cyan
     while ($true) {
     $choice = Read-Host " "
     if ($choice -match '^[1-2]$') {
     switch ($choice) {
     1 {
     Clear-Host
-    Write-Host "1. Step: One"
-    Write-Host "2. Step: Two (Im In Safe Mode)"
+    Write-Host "1. Step: One" -ForegroundColor Cyan
+    Write-Host "2. Step: Two (Im In Safe Mode)" -ForegroundColor Cyan
     while ($true) {
     $choice = Read-Host " "
     if ($choice -match '^[1-2]$') {
@@ -5029,7 +5028,7 @@ Write-Host "If uncomfortable, please close this window!" -ForegroundColor Red
 Write-Host ""
 Pause
 Clear-Host
-Write-Host "Step: One. Please wait . . ."
+Write-Host "Step: One. Please wait ..." -ForegroundColor Cyan
 # disable exploit protection, leaving control flow guard cfg on for vanguard anticheat
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Control\Session Manager\kernel`" /v `"MitigationOptions`" /t REG_BINARY /d `"222222000001000000000000000000000000000000000000`" /f >nul 2>&1"
 Timeout /T 2 | Out-Null
@@ -5454,7 +5453,7 @@ schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cleanu
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan" /Disable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Verification" /Disable | Out-Null
 Clear-Host
-Write-Host "Restarting To Safe Mode: Press any key to restart . . ."
+Write-Host "Restarting To Safe Mode: Press any key to restart ..." -ForegroundColor Yellow
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # toggle safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
@@ -5485,7 +5484,7 @@ Write-Host "If uncomfortable, please close this window!" -ForegroundColor Red
 Write-Host ""
 Pause
 Clear-Host
-Write-Host "Step: Two. Please wait . . ."
+Write-Host "Step: Two. Please wait ..." -ForegroundColor Cyan
 # Import reg file
 Regedit.exe /S "$env:TEMP\SecurityOff.reg"
 Timeout /T 5 | Out-Null
@@ -5510,7 +5509,7 @@ Dism /Online /NoRestart /Disable-Feature /FeatureName:Windows-Defender-Applicati
 # Disable data execution prevention
 cmd /c "bcdedit /set nx AlwaysOff >nul 2>&1"
 Clear-Host
-Write-Host "Press any key to restart . . ."
+Write-Host "Press any key to restart ..." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # Toggle normal boot
 cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
@@ -5524,8 +5523,8 @@ exit
     }
     2 {
     Clear-Host
-    Write-Host "1. Step: One"
-    Write-Host "2. Step: Two (Im In Safe Mode)"
+    Write-Host "1. Step: One" -ForegroundColor Cyan
+    Write-Host "2. Step: Two (Im In Safe Mode)" -ForegroundColor Cyan
     while ($true) {
     $choice = Read-Host " "
     if ($choice -match '^[1-2]$') {
@@ -5533,7 +5532,7 @@ exit
     1 {
 
 Clear-Host
-Write-Host "Step: One. Please wait . . ."
+Write-Host "Step: One. Please wait ..." -ForegroundColor Cyan
 # create reg file
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
@@ -5956,7 +5955,7 @@ schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cleanu
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Scheduled Scan" /Enable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Verification" /Enable | Out-Null
 Clear-Host
-Write-Host "Restarting To Safe Mode: Press any key to restart . . ."
+Write-Host "Restarting To Safe Mode: Press any key to restart ..." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # Toggle safe boot
 cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
@@ -5968,7 +5967,7 @@ exit
     2 {
 
 Clear-Host
-Write-Host "Step: Two. Please wait . . ."
+Write-Host "Step: Two. Please wait ..." -ForegroundColor Cyan
 # Import reg file
 Regedit.exe /S "$env:TEMP\SecurityOn.reg"
 Timeout /T 5 | Out-Null
@@ -5991,7 +5990,7 @@ Timeout /T 5 | Out-Null
 # Enable data execution prevention
 cmd /c "bcdedit /deletevalue nx >nul 2>&1"
 Clear-Host
-Write-Host "Press any key to restart . . ."
+Write-Host "Press any key to restart..." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # Toggle normal boot
 cmd /c "bcdedit /deletevalue safeboot >nul 2>&1"
@@ -6042,8 +6041,8 @@ function Remove-Edge {
     }
     }
 
-    Write-Host "1. Edge: Off (Recommended)"
-    Write-Host "2. Edge: Default"
+    Write-Host "1. Edge: Off (Recommended)" -ForegroundColor Cyan
+    Write-Host "2. Edge: Default" -ForegroundColor Cyan
     while ($true) {
     $choice = Read-Host " "
     if ($choice -match '^[1-2]$') {
@@ -6052,7 +6051,7 @@ function Remove-Edge {
 
 Clear-Host
 $progresspreference = 'silentlycontinue'
-Write-Host "Uninstalling: Edge . . ."
+Write-Host "Uninstalling: Edge ..." -ForegroundColor Cyan
 # Stop Edge running
 $stop = "MicrosoftEdgeUpdate", "OneDrive", "WidgetService", "Widgets", "msedge", "Resume", "CrossDeviceResume", "msedgewebview2"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
@@ -6115,7 +6114,7 @@ Get-AppxPackage -allusers *Microsoft.BingNews* | Remove-AppxPackage
 Get-AppxPackage -allusers *Microsoft.BingSearch* | Remove-AppxPackage
 Get-AppxPackage -allusers *Microsoft.BingWeather* | Remove-AppxPackage
 Clear-Host
-Write-Host "Restart to apply . . ."
+Write-Host "Restart to apply ..." -ForegroundColor Cyan
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 Start-Menu
 
@@ -6124,7 +6123,7 @@ Start-Menu
 
 Clear-Host
 $progresspreference = 'silentlycontinue'
-Write-Host "Installing & Updating: Edge . . ."
+Write-Host "Installing & Updating: Edge ..." -ForegroundColor Cyan
 # stop Edge running
 $stop = "MicrosoftEdgeUpdate", "OneDrive", "WidgetService", "Widgets", "msedge", "Resume", "CrossDeviceResume", "msedgewebview2"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
@@ -6179,7 +6178,7 @@ Get-AppXPackage -AllUsers *Microsoft.BingNews* | ForEach-Object {Add-AppxPackage
 Get-AppXPackage -AllUsers *Microsoft.BingSearch* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Get-AppXPackage -AllUsers *Microsoft.BingWeather* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
 Clear-Host
-Write-Host "Restart to apply . . ."
+Write-Host "Restart to apply ..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 # Open Ublock Origin in web browser
 Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "https://microsoftedge.microsoft.com/addons/detail/ublock-origin/odfafepnkmbhccpbejgmiehpchacaeak"
