@@ -6216,7 +6216,7 @@ function Start-Menu {
         Write-Host "--- Optimisation and removal ---" -ForegroundColor Cyan
         Write-Host "8.  Optimize registry" -ForegroundColor Yellow
         Write-Host "9.  Remove UWP apps" -ForegroundColor Yellow
-        Write-Host "10.  Remove UWP features" -ForegroundColor Yellow
+        Write-Host "10. Remove UWP features" -ForegroundColor Yellow
         Write-Host "11. Remove legacy features" -ForegroundColor Yellow
         Write-Host "12. Remove legacy apps" -ForegroundColor Yellow
         Write-Host "" 
