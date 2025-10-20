@@ -2587,7 +2587,7 @@ function Remove-UWPApps {
   Start-Sleep -Seconds 3
   $progresspreference = 'silentlycontinue'
   # CBS needed for Windows 11 Explorer
-  Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
+  Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*Terminal*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
   Timeout /T 2 | Out-Null
   Get-AppXPackage -AllUsers *Microsoft.HEVCVideoExtension* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
   Timeout /T 2 | Out-Null
