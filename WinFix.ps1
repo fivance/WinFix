@@ -40,13 +40,6 @@ GitHub  : https://github.com/fivance/
 https://github.com/fivance/WinFix
 #>
 
-$scriptContent = $MyInvocation.MyCommand.Definition
-if ([string]::IsNullOrEmpty($scriptContent)) {
-    $scriptContent = $MyInvocation.MyCommand.ScriptBlock.ToString()
-}
-$scriptPath = "$env:TEMP\my_script_$(Get-Date -Format 'yyyyMMdd_HHmmss').ps1"
-$scriptContent | Out-File $scriptPath -Encoding UTF8
-
 function Get-Admin {
   If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
   {Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
