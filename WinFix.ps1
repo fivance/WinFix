@@ -40,7 +40,16 @@ GitHub  : https://github.com/fivance/
 https://github.com/fivance/WinFix
 #>
 
+function Save-Script {
+# Define the URL and destination
+$scriptUrl = "https://raw.githubusercontent.com/fivance/WinFix/main/WinFix.ps1"
+$tempPath = "$env:TEMP\WinFix.ps1"
+Invoke-WebRequest -Uri $scriptUrl -OutFile $tempPath
 
+# Confirm it's saved
+Write-Host "Script saved to: $tempPath"
+Timeout /T 4
+}
 function Get-Admin {
   If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator"))
   {Start-Process PowerShell.exe -ArgumentList ("-NoProfile -ExecutionPolicy Bypass -File `"{0}`"" -f $PSCommandPath) -Verb RunAs
@@ -2889,6 +2898,7 @@ function Optimize-Network {
         netsh int ip set dynamicport udp start=32769 num=32766  # DynamicPortRange udp
       }
       &$netShTweaks *>$null
+      Clear-Host
       Write-Host "Successfully applied network tweaks." -ForegroundColor Green
       Start-Sleep -Seconds 3  
 }
@@ -3102,6 +3112,7 @@ $hostEntries = @"
   Copy-Item $hostsFile "$hostsFile.bak" -Force
   Add-Content -Path $hostsFile -Value "`n$hostEntries" -Force
   
+  Clear-Host
   Write-Host "Hosts file updated successfully." -ForegroundColor Green
   Start-Sleep -Seconds 3
 }
@@ -3247,6 +3258,7 @@ function Set-ServicesManual {
     }
   }
   Clear-Host
+  Write-Host "Sucessfully set services to manual" -ForegroundColor Green
   Start-Sleep -Seconds 3
   
 }
@@ -6190,6 +6202,7 @@ Start-Menu
 }
 
 Get-Admin
+Save-Script
 
 function Start-Menu {
     do {
