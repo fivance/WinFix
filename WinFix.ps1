@@ -41,12 +41,9 @@ https://github.com/fivance/WinFix
 #>
 
 function Save-Script {
-# Define the URL and destination
 $scriptUrl = "https://raw.githubusercontent.com/fivance/WinFix/main/WinFix.ps1"
 $tempPath = "$env:TEMP\WinFix.ps1"
 Invoke-WebRequest -Uri $scriptUrl -OutFile $tempPath
-
-# Confirm it's saved
 Write-Host "Script saved to: $tempPath"
 Timeout /T 4
 }
