@@ -10,7 +10,7 @@
 </div>
 
 <p align="center">
-  <img src="img/WinFix.jpg" alt="Winfix" width="600">
+  <img src="img/WinFix.jpg" alt="Winfix" width="800">
 </p>
 
 ## Table of Contents
@@ -133,6 +133,7 @@ iwr www.franivancevic.com/winfix | iex
 > ⚠️ **Note**: This script must be run **as Administrator**. It will request administrator privileges automatically at start.
 
 <p align="right">(<a href="#top">🔼 Back to top</a>)</p>
+
 
 
 
