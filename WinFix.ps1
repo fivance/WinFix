@@ -4056,6 +4056,7 @@ function Enable-WSL {
 }
 
 function Install-TimerResolution {
+    Clear-Host
     Write-Host "1. Timer Resolution: On" -ForegroundColor Cyan
     Write-Host "2. Timer Resolution: Off" -ForegroundColor Cyan
     while ($true) {
