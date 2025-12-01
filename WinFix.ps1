@@ -4770,6 +4770,11 @@ function Set-DefenderConfig {
   
 }
 
+function Invoke-NoIDPrivacy {
+  $command = 'Invoke-RestMethod https://raw.githubusercontent.com/NexusOne23/noid-privacy/main/install.ps1 | Invoke-Expression'
+  Start-Process powershell -ArgumentList  "-Command", $command
+}
+
 function Initialize-DiskCleanup {
   Clear-Host
   Add-Type -AssemblyName System.Windows.Forms
@@ -6241,11 +6246,13 @@ function Start-Menu {
         Write-Host "18. Install context menus" -ForegroundColor Yellow
         Write-Host "19. Hardening - Virtualisation Security Features" -ForegroundColor Yellow
         Write-Host "20. Hardening - Defender configuration" -ForegroundColor Yellow
-        Write-Host "21. Enable WSL" -ForegroundColor Yellow
-        Write-Host "22. Install Timer Resolution" -ForegroundColor Yellow
-        Write-Host "23. Disable Defender/Security" -ForegroundColor Yellow
-        Write-Host "24. Remove Edge" -ForegroundColor Yellow
-        Write-Host "25. Disk cleanup" -ForegroundColor Yellow
+        Write-Host "21. NoID Privacy - Enterprise-Grade Windows 11 Security & Privacy Hardening Tool"
+        
+        Write-Host "22. Enable WSL" -ForegroundColor Yellow
+        Write-Host "23. Install Timer Resolution" -ForegroundColor Yellow
+        Write-Host "24. Disable Defender/Security" -ForegroundColor Yellow
+        Write-Host "25. Remove Edge" -ForegroundColor Yellow
+        Write-Host "26. Disk cleanup" -ForegroundColor Yellow
         Write-Host ""
 
         Write-Host "0.  Exit" -ForegroundColor Red
@@ -6274,11 +6281,12 @@ function Start-Menu {
             '18' { Install-ContextMenus }
             '19' { Enable-VirtualizationSecurityFeatures }
             '20' { Set-DefenderConfig }
-            '21' { Enable-WSL }
-            '22' { Install-TimerResolution }
-            '23' { Remove-Defender }
-            '24' { Remove-Edge }            
-            '25' { Initialize-DiskCleanup }
+            '21' { Invoke-NoIDPrivacy }
+            '22' { Enable-WSL }
+            '23' { Install-TimerResolution }
+            '24' { Remove-Defender }
+            '25' { Remove-Edge }            
+            '26' { Initialize-DiskCleanup }
             '0'  { exit }
             default {
                 Write-Host "`nInvalid selection. Press Enter to try again..." -ForegroundColor Red
