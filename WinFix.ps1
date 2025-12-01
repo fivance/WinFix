@@ -6246,7 +6246,7 @@ function Start-Menu {
         Write-Host "18. Install context menus" -ForegroundColor Yellow
         Write-Host "19. Hardening - Virtualisation Security Features" -ForegroundColor Yellow
         Write-Host "20. Hardening - Defender configuration" -ForegroundColor Yellow
-        Write-Host "21. NoID Privacy - Enterprise-Grade Windows 11 Security & Privacy Hardening Tool"
+        Write-Host "21. NoID Privacy - Enterprise-Grade Windows 11 Security & Privacy Hardening Tool" -ForegroundColor Yellow
         
         Write-Host "22. Enable WSL" -ForegroundColor Yellow
         Write-Host "23. Install Timer Resolution" -ForegroundColor Yellow
