@@ -915,10 +915,12 @@ $MultilineComment = @"
   Get-AppxPackage -allusers *Microsoft.XboxIdentityProvider* | Remove-AppxPackage
   Get-AppxPackage -allusers *Microsoft.XboxSpeechToTextOverlay* | Remove-AppxPackage
   
+Clear-Host
+# create reg file
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
 
-; New 25H2 Start Menu
+; new 25h2 start menu
 [HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\FeatureManagement\Overrides\14\3036241548]
 "EnabledState"=dword:00000002
 "EnabledStateOptions"=dword:00000000
@@ -947,7 +949,7 @@ Windows Registry Editor Version 5.00
 "EnabledState"=dword:00000002
 "EnabledStateOptions"=dword:00000000
 
-; Set Start Menu Apps View to list
+; set start menu apps view to list
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
 "AllAppsViewMode"=dword:00000002
 "@
@@ -957,8 +959,9 @@ $path = "$env:TEMP\NewStartMenu.reg"
 (Get-Content $path) -replace "\?","$" | Out-File $path
 # import reg file
 Regedit.exe /S "$env:TEMP\NewStartMenu.reg"
-  Clear-Host
-  Write-Host "Basic optimizations done." -ForegroundColor Green
+Clear-Host
+Write-Host "Restart to apply..."
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 }
 
 function Optimize-Powerplan {
@@ -7653,4 +7656,5 @@ function Start-Menu {
 }
 
 Start-Menu
+
 
