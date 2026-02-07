@@ -915,9 +915,6 @@ $MultilineComment = @"
   Get-AppxPackage -allusers *Microsoft.XboxIdentityProvider* | Remove-AppxPackage
   Get-AppxPackage -allusers *Microsoft.XboxSpeechToTextOverlay* | Remove-AppxPackage
   
-  Write-Host "Enable new Start Menu W11 25H2? (Y/N)"
-  if ($response -match '^(y|yes)$')
-{
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
 
@@ -960,9 +957,6 @@ $path = "$env:TEMP\NewStartMenu.reg"
 (Get-Content $path) -replace "\?","$" | Out-File $path
 # import reg file
 Regedit.exe /S "$env:TEMP\NewStartMenu.reg"
-Clear-Host    
-  }
-  Start-Sleep -Seconds 3  
   Clear-Host
   Write-Host "Basic optimizations done." -ForegroundColor Green
 }
@@ -7659,3 +7653,4 @@ function Start-Menu {
 }
 
 Start-Menu
+
