@@ -6450,13 +6450,13 @@ Windows Registry Editor Version 5.00
 "Epoch"=dword:000004cf
 
 [HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\DomainProfile]
-"DisableNotifications"=dword:00000001
+"DisableNotifications"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\PublicProfile]
-"DisableNotifications"=dword:00000001
+"DisableNotifications"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile]
-"DisableNotifications"=dword:00000001
+"DisableNotifications"=dword:00000000
 
 ; Smart app control
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender]
@@ -6569,10 +6569,10 @@ Windows Registry Editor Version 5.00
 ; DISABLE OTHER
 ; Windows Defender firewall
 [HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\PublicProfile]
-"EnableFirewall"=dword:00000000
+"EnableFirewall"=dword:00000001
 
 [HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile]
-"EnableFirewall"=dword:00000000
+"EnableFirewall"=dword:00000001
 
 ; UAC
 ;[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
