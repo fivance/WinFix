@@ -4888,203 +4888,6 @@ function Test-RegistryValue {
     }
 }
 
-# ============================================================================
-# 1. Windows Copilot
-# ============================================================================
-Write-Host "[1/10] Checking Windows Copilot..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "TurnOffWindowsCopilot" -ExpectedValue 1 -Description "WindowsAI Copilot disabled (HKLM)"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -ExpectedValue 1 -Description "WindowsCopilot disabled (HKLM)"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "ShowCopilotButton" -ExpectedValue 0 -Description "Copilot button hidden (HKLM)"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableWindowsCopilot" -ExpectedValue 1 -Description "Explorer Copilot disabled"
-Test-RegistryValue -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -ExpectedValue 1 -Description "WindowsCopilot disabled (HKCU)"
-Test-RegistryValue -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "ShowCopilotButton" -ExpectedValue 0 -Description "Copilot button hidden (HKCU)"
-Test-RegistryValue -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsAI" -Name "SetCopilotHardwareKey" -ExpectedValue "Microsoft.WindowsNotepad_8wekyb3d8bbwe!App" -Description "Hardware key remapped to Notepad"
-
-# Check Copilot app packages
-$totalChecks++
-$copilotPackages = Get-AppxPackage -Name "*Copilot*" -ErrorAction SilentlyContinue
-if ($copilotPackages) {
-    Write-Host "    WARNING: Copilot app packages still present" -ForegroundColor Yellow
-    $failedChecks++
-} else {
-    Write-Host "   PASS: Copilot app packages removed" -ForegroundColor Green
-    $passedChecks++
-}
-
-Write-Host ""
-
-# ============================================================================
-# 2. Advanced Copilot Features
-# ============================================================================
-Write-Host "[2/10] Checking Advanced Copilot Features..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "AllowRecallExport" -ExpectedValue 0 -Description "Recall export blocked"
-
-# Check URI handlers
-$totalChecks++
-$uriBlocked = $true
-foreach ($handler in @("ms-copilot", "ms-edge-copilot")) {
-    $handlerPath = "Registry::HKEY_CLASSES_ROOT\$handler"
-    if (Test-Path $handlerPath) {
-        $uriBlocked = $false
-        break
-    }
-}
-if ($uriBlocked) {
-    Write-Host "   PASS: URI handlers blocked (ms-copilot, ms-edge-copilot)" -ForegroundColor Green
-    $passedChecks++
-} else {
-    Write-Host "   FAIL: URI handlers still active" -ForegroundColor Red
-    $failedChecks++
-}
-
-# Edge sidebar
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "EdgeSidebarEnabled" -ExpectedValue 0 -Description "Edge sidebar disabled"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "ShowHubsSidebar" -ExpectedValue 0 -Description "Hubs sidebar hidden"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "CopilotPageContext" -ExpectedValue 0 -Description "Copilot page context disabled"
-
-Write-Host ""
-
-# ============================================================================
-# 3. Windows Recall
-# ============================================================================
-Write-Host "[3/10] Checking Windows Recall..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "AllowRecallEnablement" -ExpectedValue 0 -Description "Recall component disabled (requires reboot)"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableAIDataAnalysis" -ExpectedValue 1 -Description "AI data analysis disabled (HKLM)"
-Test-RegistryValue -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableAIDataAnalysis" -ExpectedValue 1 -Description "AI data analysis disabled (HKCU)"
-Test-RegistryValue -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableRecallDataProviders" -ExpectedValue 1 -Description "Recall data providers disabled"
-
-Write-Host ""
-
-# ============================================================================
-# 4. Recall Protection
-# ============================================================================
-Write-Host "[4/10] Checking Recall Protection..." -ForegroundColor Yellow
-
-# App deny list (just check if exists, not exact content)
-$totalChecks++
-$appDenyList = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "SetDenyAppListForRecall" -ErrorAction SilentlyContinue).SetDenyAppListForRecall
-if ($appDenyList) {
-    Write-Host "   PASS: App deny list configured ($($appDenyList.Count) apps)" -ForegroundColor Green
-    $passedChecks++
-} else {
-    Write-Host "   FAIL: App deny list not configured" -ForegroundColor Red
-    $failedChecks++
-}
-
-# URI deny list
-$totalChecks++
-$uriDenyList = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "SetDenyUriListForRecall" -ErrorAction SilentlyContinue).SetDenyUriListForRecall
-if ($uriDenyList) {
-    Write-Host "   PASS: URI deny list configured ($($uriDenyList.Count) patterns)" -ForegroundColor Green
-    $passedChecks++
-} else {
-    Write-Host "   FAIL: URI deny list not configured" -ForegroundColor Red
-    $failedChecks++
-}
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "SetMaximumStorageDurationForRecallSnapshots" -ExpectedValue 30 -Description "Storage duration limit: 30 days"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "SetMaximumStorageSpaceForRecallSnapshots" -ExpectedValue 10 -Description "Storage space limit: 10 GB"
-
-Write-Host ""
-
-# ============================================================================
-# 5. Click to Do
-# ============================================================================
-Write-Host "[5/10] Checking Click to Do..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableClickToDo" -ExpectedValue 1 -Description "Click to Do disabled (HKLM)"
-Test-RegistryValue -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableClickToDo" -ExpectedValue 1 -Description "Click to Do disabled (HKCU)"
-
-Write-Host ""
-
-# ============================================================================
-# 6. File Explorer AI Actions
-# ============================================================================
-Write-Host "[6/10] Checking File Explorer AI Actions..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "HideAIActionsMenu" -ExpectedValue 1 -Description "AI Actions menu hidden"
-
-Write-Host ""
-
-# ============================================================================
-# 7. Notepad AI
-# ============================================================================
-Write-Host "[7/10] Checking Notepad AI..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\WindowsNotepad" -Name "DisableAIFeatures" -ExpectedValue 1 -Description "Notepad AI features disabled"
-
-Write-Host ""
-
-# ============================================================================
-# 8. Paint AI
-# ============================================================================
-Write-Host "[8/10] Checking Paint AI..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint" -Name "DisableCocreator" -ExpectedValue 1 -Description "Cocreator disabled"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint" -Name "DisableGenerativeFill" -ExpectedValue 1 -Description "Generative Fill disabled"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint" -Name "DisableImageCreator" -ExpectedValue 1 -Description "Image Creator disabled"
-
-Write-Host ""
-
-# ============================================================================
-# 9. Settings Agent
-# ============================================================================
-Write-Host "[9/10] Checking Settings Agent..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableSettingsAgent" -ExpectedValue 1 -Description "Settings Agent disabled"
-
-Write-Host ""
-
-# ============================================================================
-# 10. System AI Models
-# ============================================================================
-Write-Host "[10/10] Checking System AI Models..." -ForegroundColor Yellow
-
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" -Name "LetAppsAccessSystemAIModels" -ExpectedValue 2 -Description "System AI Models access: Force Deny"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" -Name "LetAppsAccessGenerativeAI" -ExpectedValue 2 -Description "Generative AI access: Force Deny"
-Test-RegistryValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\systemAIModels" -Name "Value" -ExpectedValue "Deny" -Description "CapabilityAccessManager: Deny"
-
-Write-Host ""
-
-# ============================================================================
-# Summary
-# ============================================================================
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Verification Summary" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Total Checks:  $totalChecks" -ForegroundColor White
-Write-Host "Passed:        $passedChecks" -ForegroundColor Green
-Write-Host "Failed:        $failedChecks" -ForegroundColor Red
-Write-Host ""
-
-$percentage = [math]::Round(($passedChecks / $totalChecks) * 100, 1)
-
-if ($failedChecks -eq 0) {
-    Write-Host " SUCCESS! All Anti-AI settings are properly configured!" -ForegroundColor Green
-    Write-Host "   Your system is fully protected (100%)" -ForegroundColor Green
-} elseif ($percentage -ge 80) {
-    Write-Host "  MOSTLY CONFIGURED ($percentage%)" -ForegroundColor Yellow
-    Write-Host "   Most settings are applied, but some failed." -ForegroundColor Yellow
-    Write-Host "   Review failed checks above and re-run the configuration script." -ForegroundColor Yellow
-} else {
-    Write-Host " INCOMPLETE CONFIGURATION ($percentage%)" -ForegroundColor Red
-    Write-Host "   Many settings are missing or incorrect." -ForegroundColor Red
-    Write-Host "   Please run the Anti-AI Configuration script." -ForegroundColor Red
-}
-
-Write-Host ""
-Write-Host "IMPORTANT NOTES:" -ForegroundColor Cyan
-Write-Host "  - If Recall shows as disabled, reboot is required for full removal" -ForegroundColor Gray
-Write-Host "  - Some changes may require restarting affected applications" -ForegroundColor Gray
-Write-Host "  - Run this script again after reboot to verify final state" -ForegroundColor Gray
-Write-Host ""
-Start-Sleep -Seconds 3
-
-
 function Start-Trusted([String]$command) {
 
     try {
@@ -5430,6 +5233,203 @@ Windows Registry Editor Version 5.00
   
   Write-Status -msg 'Removing Any Screenshots By Recall...'
   Remove-Item -Path "$env:LOCALAPPDATA\CoreAIPlatform*" -Force -Recurse -ErrorAction SilentlyContinue
+  
+
+# ============================================================================
+# 1. Windows Copilot
+# ============================================================================
+Write-Host "[1/10] Checking Windows Copilot..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "TurnOffWindowsCopilot" -ExpectedValue 1 -Description "WindowsAI Copilot disabled (HKLM)"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -ExpectedValue 1 -Description "WindowsCopilot disabled (HKLM)"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" -Name "ShowCopilotButton" -ExpectedValue 0 -Description "Copilot button hidden (HKLM)"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableWindowsCopilot" -ExpectedValue 1 -Description "Explorer Copilot disabled"
+Test-RegistryValue -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "TurnOffWindowsCopilot" -ExpectedValue 1 -Description "WindowsCopilot disabled (HKCU)"
+Test-RegistryValue -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" -Name "ShowCopilotButton" -ExpectedValue 0 -Description "Copilot button hidden (HKCU)"
+Test-RegistryValue -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsAI" -Name "SetCopilotHardwareKey" -ExpectedValue "Microsoft.WindowsNotepad_8wekyb3d8bbwe!App" -Description "Hardware key remapped to Notepad"
+
+# Check Copilot app packages
+$totalChecks++
+$copilotPackages = Get-AppxPackage -Name "*Copilot*" -ErrorAction SilentlyContinue
+if ($copilotPackages) {
+    Write-Host "    WARNING: Copilot app packages still present" -ForegroundColor Yellow
+    $failedChecks++
+} else {
+    Write-Host "   PASS: Copilot app packages removed" -ForegroundColor Green
+    $passedChecks++
+}
+
+Write-Host ""
+
+# ============================================================================
+# 2. Advanced Copilot Features
+# ============================================================================
+Write-Host "[2/10] Checking Advanced Copilot Features..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "AllowRecallExport" -ExpectedValue 0 -Description "Recall export blocked"
+
+# Check URI handlers
+$totalChecks++
+$uriBlocked = $true
+foreach ($handler in @("ms-copilot", "ms-edge-copilot")) {
+    $handlerPath = "Registry::HKEY_CLASSES_ROOT\$handler"
+    if (Test-Path $handlerPath) {
+        $uriBlocked = $false
+        break
+    }
+}
+if ($uriBlocked) {
+    Write-Host "   PASS: URI handlers blocked (ms-copilot, ms-edge-copilot)" -ForegroundColor Green
+    $passedChecks++
+} else {
+    Write-Host "   FAIL: URI handlers still active" -ForegroundColor Red
+    $failedChecks++
+}
+
+# Edge sidebar
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "EdgeSidebarEnabled" -ExpectedValue 0 -Description "Edge sidebar disabled"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "ShowHubsSidebar" -ExpectedValue 0 -Description "Hubs sidebar hidden"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Edge" -Name "CopilotPageContext" -ExpectedValue 0 -Description "Copilot page context disabled"
+
+Write-Host ""
+
+# ============================================================================
+# 3. Windows Recall
+# ============================================================================
+Write-Host "[3/10] Checking Windows Recall..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "AllowRecallEnablement" -ExpectedValue 0 -Description "Recall component disabled (requires reboot)"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableAIDataAnalysis" -ExpectedValue 1 -Description "AI data analysis disabled (HKLM)"
+Test-RegistryValue -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableAIDataAnalysis" -ExpectedValue 1 -Description "AI data analysis disabled (HKCU)"
+Test-RegistryValue -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableRecallDataProviders" -ExpectedValue 1 -Description "Recall data providers disabled"
+
+Write-Host ""
+
+# ============================================================================
+# 4. Recall Protection
+# ============================================================================
+Write-Host "[4/10] Checking Recall Protection..." -ForegroundColor Yellow
+
+# App deny list (just check if exists, not exact content)
+$totalChecks++
+$appDenyList = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "SetDenyAppListForRecall" -ErrorAction SilentlyContinue).SetDenyAppListForRecall
+if ($appDenyList) {
+    Write-Host "   PASS: App deny list configured ($($appDenyList.Count) apps)" -ForegroundColor Green
+    $passedChecks++
+} else {
+    Write-Host "   FAIL: App deny list not configured" -ForegroundColor Red
+    $failedChecks++
+}
+
+# URI deny list
+$totalChecks++
+$uriDenyList = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "SetDenyUriListForRecall" -ErrorAction SilentlyContinue).SetDenyUriListForRecall
+if ($uriDenyList) {
+    Write-Host "   PASS: URI deny list configured ($($uriDenyList.Count) patterns)" -ForegroundColor Green
+    $passedChecks++
+} else {
+    Write-Host "   FAIL: URI deny list not configured" -ForegroundColor Red
+    $failedChecks++
+}
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "SetMaximumStorageDurationForRecallSnapshots" -ExpectedValue 30 -Description "Storage duration limit: 30 days"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "SetMaximumStorageSpaceForRecallSnapshots" -ExpectedValue 10 -Description "Storage space limit: 10 GB"
+
+Write-Host ""
+
+# ============================================================================
+# 5. Click to Do
+# ============================================================================
+Write-Host "[5/10] Checking Click to Do..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableClickToDo" -ExpectedValue 1 -Description "Click to Do disabled (HKLM)"
+Test-RegistryValue -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableClickToDo" -ExpectedValue 1 -Description "Click to Do disabled (HKCU)"
+
+Write-Host ""
+
+# ============================================================================
+# 6. File Explorer AI Actions
+# ============================================================================
+Write-Host "[6/10] Checking File Explorer AI Actions..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "HideAIActionsMenu" -ExpectedValue 1 -Description "AI Actions menu hidden"
+
+Write-Host ""
+
+# ============================================================================
+# 7. Notepad AI
+# ============================================================================
+Write-Host "[7/10] Checking Notepad AI..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\WindowsNotepad" -Name "DisableAIFeatures" -ExpectedValue 1 -Description "Notepad AI features disabled"
+
+Write-Host ""
+
+# ============================================================================
+# 8. Paint AI
+# ============================================================================
+Write-Host "[8/10] Checking Paint AI..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint" -Name "DisableCocreator" -ExpectedValue 1 -Description "Cocreator disabled"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint" -Name "DisableGenerativeFill" -ExpectedValue 1 -Description "Generative Fill disabled"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Paint" -Name "DisableImageCreator" -ExpectedValue 1 -Description "Image Creator disabled"
+
+Write-Host ""
+
+# ============================================================================
+# 9. Settings Agent
+# ============================================================================
+Write-Host "[9/10] Checking Settings Agent..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" -Name "DisableSettingsAgent" -ExpectedValue 1 -Description "Settings Agent disabled"
+
+Write-Host ""
+
+# ============================================================================
+# 10. System AI Models
+# ============================================================================
+Write-Host "[10/10] Checking System AI Models..." -ForegroundColor Yellow
+
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" -Name "LetAppsAccessSystemAIModels" -ExpectedValue 2 -Description "System AI Models access: Force Deny"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy" -Name "LetAppsAccessGenerativeAI" -ExpectedValue 2 -Description "Generative AI access: Force Deny"
+Test-RegistryValue -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\systemAIModels" -Name "Value" -ExpectedValue "Deny" -Description "CapabilityAccessManager: Deny"
+
+Write-Host ""
+
+# ============================================================================
+# Summary
+# ============================================================================
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "  Verification Summary" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Total Checks:  $totalChecks" -ForegroundColor White
+Write-Host "Passed:        $passedChecks" -ForegroundColor Green
+Write-Host "Failed:        $failedChecks" -ForegroundColor Red
+Write-Host ""
+
+$percentage = [math]::Round(($passedChecks / $totalChecks) * 100, 1)
+
+if ($failedChecks -eq 0) {
+    Write-Host " SUCCESS! All Anti-AI settings are properly configured!" -ForegroundColor Green
+    Write-Host "   Your system is fully protected (100%)" -ForegroundColor Green
+} elseif ($percentage -ge 80) {
+    Write-Host "  MOSTLY CONFIGURED ($percentage%)" -ForegroundColor Yellow
+    Write-Host "   Most settings are applied, but some failed." -ForegroundColor Yellow
+    Write-Host "   Review failed checks above and re-run the configuration script." -ForegroundColor Yellow
+} else {
+    Write-Host " INCOMPLETE CONFIGURATION ($percentage%)" -ForegroundColor Red
+    Write-Host "   Many settings are missing or incorrect." -ForegroundColor Red
+    Write-Host "   Please run the Anti-AI Configuration script." -ForegroundColor Red
+}
+
+Write-Host ""
+Write-Host "IMPORTANT NOTES:" -ForegroundColor Cyan
+Write-Host "  - If Recall shows as disabled, reboot is required for full removal" -ForegroundColor Gray
+Write-Host "  - Some changes may require restarting affected applications" -ForegroundColor Gray
+Write-Host "  - Run this script again after reboot to verify final state" -ForegroundColor Gray
+Write-Host ""
+Start-Sleep -Seconds 3
 
 }
 
