@@ -43,7 +43,7 @@ https://github.com/fivance/WinFix
 
 function Save-Script {
 $scriptUrl = "https://raw.githubusercontent.com/fivance/WinFix/main/WinFix.ps1"
-$tempPath = "$env:TEMP\WinFix.ps1"
+$tempPath = "$env:SystemRoot\Temp\WinFix.ps1"
 Invoke-WebRequest -Uri $scriptUrl -OutFile $tempPath
 Write-Host "Script saved to: $tempPath"
 Timeout /T 4
@@ -210,8 +210,8 @@ function Install-DDU {
   Write-Host "Installing: DDU..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
 
-  Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/DDU.zip" -File "$env:TEMP\DDU.zip"
-  Expand-Archive "$env:TEMP\DDU.zip" -DestinationPath "$env:TEMP\DDU" -ErrorAction SilentlyContinue
+Get-FileFromWeb -URL "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.4.2_setup.exe" -File "$env:SystemRoot\Temp\DDU.exe"
+& "C:\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\DDU.exe" -o"$env:SystemRoot\Temp\DDU" -y | Out-Null
 
 $MultilineComment = @"
 <?xml version="1.0" encoding="utf-8"?>
@@ -239,30 +239,42 @@ $MultilineComment = @"
 <CheckUpdates>False</CheckUpdates>
 <CreateRestorePoint>False</CreateRestorePoint>
 <SaveLogs>False</SaveLogs>
-<RemoveVulkan>False</RemoveVulkan>
+<RemoveVulkan>True</RemoveVulkan>
 <ShowOffer>False</ShowOffer>
 <EnableSafeModeDialog>False</EnableSafeModeDialog>
 <PreventWinUpdate>True</PreventWinUpdate>
 <UsedBCD>False</UsedBCD>
 <KeepNVCPopt>False</KeepNVCPopt>
+<RememberLastChoice>False</RememberLastChoice>
+<LastSelectedGPUIndex>0</LastSelectedGPUIndex>
+<LastSelectedTypeIndex>0</LastSelectedTypeIndex>
 </Settings>
 </DisplayDriverUninstaller>
 "@
-  Set-Content -Path "$env:TEMP\DDU\Settings\Settings.xml" -Value $MultilineComment -Force
-  Set-ItemProperty -Path "$env:TEMP\DDU\Settings\Settings.xml" -Name IsReadOnly -Value $true
+  Set-Content -Path "$env:SystemRoot\Temp\DDU\Settings\Settings.xml" -Value $MultilineComment -Force
+  Set-ItemProperty -Path "$env:SystemRoot\Temp\DDU\Settings\Settings.xml" -Name IsReadOnly -Value $true
 
-  # Disable automatic driver install via Windows Update
-  reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\DriverSearching" /v "SearchOrderConfig" /t REG_DWORD /d "0" /f | Out-Null
-
-  $WshShell = New-Object -ComObject WScript.Shell
-
-  $SafeModeShortcut = $WshShell.CreateShortcut("$Home\Desktop\Safe Mode Toggle.lnk")
-  $SafeModeShortcut.TargetPath = "$env:SystemDrive\Windows\System32\msconfig.exe"
-  $SafeModeShortcut.Save()
-
-  $DDUShortcut = $WshShell.CreateShortcut("$Home\Desktop\Display Driver Uninstaller.lnk")
-  $DDUShortcut.TargetPath = "$env:TEMP\DDU\Display Driver Uninstaller.exe"
-  $DDUShortcut.Save()
+  # Set DDU config to read only
+  cmd /c "reg add `"HKLM\Software\Microsoft\Windows\CurrentVersion\DriverSearching`" /v `"SearchOrderConfig`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+  Set-ItemProperty -Path "$env:SystemRoot\Temp\DDU\Settings\Settings.xml" -Name IsReadOnly -Value $true
+   
+  # Create DDU ps1 file
+  $DDU = @'
+  # Remove WinLogon
+    cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`" /v `"Userinit`" /t REG_SZ /d `"C:\WINDOWS\system32\userinit.exe,`" /f >nul 2>&1"
+  
+  # remove safe mode boot
+  cmd /c "bcdedit /deletevalue {current} safeboot >nul 2>&1"
+  
+          Write-Host "DDU`n"
+  
+  # Uninstall Soundblaster Realtek Intel AMD Nvidia drivers & restart
+  Start-Process "$env:SystemRoot\Temp\DDU\Display Driver Uninstaller.exe" -ArgumentList "-CleanSoundBlaster -CleanRealtek -CleanAllGpus -Restart" -Wait
+  '@
+  Set-Content -Path "$env:SystemRoot\Temp\DDU.ps1" -Value $DDU -Force
+  
+  # install Winlogon 
+  cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`" /v `"Userinit`" /t REG_SZ /d `"powershell.exe -nop -ep bypass -WindowStyle Maximized -f $env:SystemRoot\Temp\DDU.ps1`" /f >nul 2>&1"
 
   Clear-Host
 
@@ -278,274 +290,792 @@ $MultilineComment = @"
   }
 }
 
-function Install-NvidiaDriver {
-  Clear-Host
-  Write-Host "Installing latest Nvidia Driver..." -ForegroundColor Cyan
-  Start-Sleep -Seconds 3
+function Install-GPUDriver {
+         function show-menu {
+        Clear-Host
+        Write-Host "INSTALL GRAPHICS DRIVERS" -ForegroundColor Yellow
+        Write-Host "SELECT YOUR SYSTEM'S GPU`n" -ForegroundColor Yellow
+        Write-Host " 1.  NVIDIA" -ForegroundColor Green
+        Write-Host " 2.  AMD" -ForegroundColor Red
+        Write-Host " 3.  INTEL" -ForegroundColor Blue
+        Write-Host " 4.  SKIP`n"
+        }
+        :MainLoop while ($true) {
+        show-menu
+        $choice = Read-Host " "
+        if ($choice -match '^[1-4]$') {
+        switch ($choice) {
+        1 {
 
-  Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
-  Remove-Item -Recurse -Force "$env:TEMP\NvidiaDriver" -ErrorAction SilentlyContinue | Out-Null
-  Remove-Item -Recurse -Force "$env:TEMP\7-Zip.exe" -ErrorAction SilentlyContinue | Out-Null
-  $uri = 'https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=120&pfid=929&osID=57&languageCode=1033&isWHQL=1&dch=1&sort1=0&numberOfResults=1'
-  $response = Invoke-WebRequest -Uri $uri -Method GET -UseBasicParsing
-  $payload = $response.Content | ConvertFrom-Json
-  $version =  $payload.IDS[0].downloadInfo.Version
-  $windowsVersion = if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {"win10-win11"} else {"win8-win7"}
-  $windowsArchitecture = if ([Environment]::Is64BitOperatingSystem) {"64bit"} else {"32bit"}
-  $url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-dch-whql.exe"
-  Write-Output "Downloading: Nvidia Driver $version..."
-  Get-FileFromWeb -URL $url -File "$env:TEMP\NvidiaDriver.exe"
-  Clear-Host
-  Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:TEMP\7-Zip.exe"
-  Start-Process -wait "$env:TEMP\7-Zip.exe" /S
-  cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\NvidiaDriver.exe" -o"$env:TEMP\NvidiaDriver" -y | Out-Null
-  Start-Process "$env:TEMP\NvidiaDriver\setup.exe"
-  Clear-Host
-  Read-Host 'Press any key to continue (only press after driver is installed)'
-  Write-Host "Installing: NvidiaProfileInspector..." -ForegroundColor Cyan
-  Get-FileFromWeb -URL "https://github.com/fivance/files/raw/main/Inspector.zip" -File "$env:TEMP\Inspector.zip"
-  Expand-Archive "$env:TEMP\Inspector.zip" -DestinationPath "$env:TEMP\Inspector" -ErrorAction SilentlyContinue
-$MultilineComment = @"
+        Clear-Host
+
+        Write-Host "DOWNLOAD NVIDIA GPU DRIVER`n" -ForegroundColor Yellow
+    	## explorer "https://www.nvidia.com/en-us/drivers"
+		## shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel
+
+# download driver
+Start-Sleep -Seconds 5
+Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" "https://www.nvidia.com/en-us/drivers"
+Wait-Process -Name chrome
+
+        Write-Host "SELECT DOWNLOADED DRIVER`n" -ForegroundColor Yellow
+
+# select driver
+Start-Sleep -Seconds 5
+$InstallFile = Show-ModernFilePicker -Mode File
+
+        Write-Host "DEBLOATING DRIVER`n"
+
+# extract driver with 7zip
+& "C:\Program Files\7-Zip\7z.exe" x "$InstallFile" -o"$env:SystemRoot\Temp\NvidiaDriver" -y | Out-Null
+
+# debloat nvidia driver
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\Display.Nview" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\FrameViewSDK" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\HDAudio" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\MSVCRT" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp.MessageBus" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvBackend" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvContainer" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvCpl" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvDLISR" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NVPCF" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvTelemetry" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvVAD" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\PhysX" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\PPC" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\ShadowPlay" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\CEF" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\osc" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\Plugins" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\UpgradeConsent" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\www" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\7z.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\7z.exe" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\DarkModeCheck.exe" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\InstallerExtension.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvApp.nvi" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvAppApi.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvAppExt.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvConfigGenerator.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+
+        Write-Host "INSTALLING DRIVER`n"
+
+# install nvidia driver
+Start-Process "$env:SystemRoot\Temp\NvidiaDriver\setup.exe" -ArgumentList "-s -noreboot -noeula -clean" -Wait -NoNewWindow
+
+# install nvidia control panel
+try {
+Start-Process "winget" -ArgumentList "install `"9NF8H0H7WMLT`" --silent --accept-package-agreements --accept-source-agreements --disable-interactivity --no-upgrade" -Wait -WindowStyle Hidden
+} catch { }
+
+# uninstall winget
+Get-AppxPackage -allusers *Microsoft.Winget.Source* | Remove-AppxPackage
+
+# delete old driver files
+Remove-Item "$env:SystemDrive\NVIDIA" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+
+        Write-Host "IMPORTING SETTINGS`n"
+
+# turn on disable dynamic pstate
+$subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
+foreach($key in $subkeys){
+if ($key -notlike '*Configuration'){
+reg add "$key" /v "DisableDynamicPstate" /t REG_DWORD /d "1" /f | Out-Null
+}
+}
+
+# disable hdcp
+$subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
+foreach($key in $subkeys){
+if ($key -notlike '*Configuration'){
+reg add "$key" /v "RMHdcpKeyglobZero" /t REG_DWORD /d "1" /f | Out-Null
+}
+}
+
+# unblock drs files
+$path = "C:\ProgramData\NVIDIA Corporation\Drs"
+Get-ChildItem -Path $path -Recurse | Unblock-File
+
+# set physx to gpu
+cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"NvCplPhysxAuto`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# enable developer settings
+cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"NvDevToolsVisible`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+
+# allow access to the gpu performance counters to all users
+$subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
+foreach($key in $subkeys){
+if ($key -notlike '*Configuration'){
+reg add "$key" /v "RmProfilingAdminOnly" /t REG_DWORD /d "0" /f | Out-Null
+}
+}
+cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"RmProfilingAdminOnly`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# disable show notification tray icon
+cmd /c "reg add `"HKCU\Software\NVIDIA Corporation\NvTray`" /v `"StartOnLogin`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# enable nvidia legacy sharpen
+cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# turn on no scaling for all displays
+$configKeys = Get-ChildItem -Path "HKLM:\System\ControlSet001\Control\GraphicsDrivers\Configuration" -Recurse -ErrorAction SilentlyContinue
+foreach ($key in $configKeys) {
+$scalingValue = Get-ItemProperty -Path $key.PSPath -Name "Scaling" -ErrorAction SilentlyContinue
+if ($scalingValue) {
+$regPath = $key.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
+Run-Trusted -command "reg add `"$regPath`" /v `"Scaling`" /t REG_DWORD /d `"2`" /f"
+}
+}
+
+# turn on override the scaling mode set by games and programs for all displays
+# perform scaling on display
+$displayDbPath = "HKLM:\System\ControlSet001\Services\nvlddmkm\State\DisplayDatabase"
+if (Test-Path $displayDbPath) {
+$displays = Get-ChildItem -Path $displayDbPath -ErrorAction SilentlyContinue
+foreach ($display in $displays) {
+$regPath = $display.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
+Run-Trusted -command "reg add `"$regPath`" /v `"ScalingConfig`" /t REG_BINARY /d `"DB02000010000000200100000E010000`" /f"
+}
+}
+
+# download inspector
+Get-FileFromWeb -URL "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.31/nvidiaProfileInspector.zip" -File "$env:SystemRoot\Temp\Inspector.zip"
+
+# extract inspector with 7zip
+& "C:\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\Inspector.zip" -o"$env:SystemRoot\Temp\Inspector" -y | Out-Null
+
+# set config for inspector
+$nipfile = @'
 <?xml version="1.0" encoding="utf-16"?>
 <ArrayOfProfile>
-<Profile>
-<ProfileName>Base Profile</ProfileName>
-<Executeables />
-<Settings>
-  <ProfileSetting>
-    <SettingNameInfo> </SettingNameInfo>
-    <SettingID>390467</SettingID>
-    <SettingValue>2</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Texture filtering - Negative LOD bias</SettingNameInfo>
-    <SettingID>1686376</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Texture filtering - Trilinear optimization</SettingNameInfo>
-    <SettingID>3066610</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Vertical Sync Tear Control</SettingNameInfo>
-    <SettingID>5912412</SettingID>
-    <SettingValue>2525368439</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Preferred refresh rate</SettingNameInfo>
-    <SettingID>6600001</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Maximum pre-rendered frames</SettingNameInfo>
-    <SettingID>8102046</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Texture filtering - Anisotropic filter optimization</SettingNameInfo>
-    <SettingID>8703344</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Vertical Sync</SettingNameInfo>
-    <SettingID>11041231</SettingID>
-    <SettingValue>138504007</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Shader disk cache maximum size</SettingNameInfo>
-    <SettingID>11306135</SettingID>
-    <SettingValue>4294967295</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Texture filtering - Quality</SettingNameInfo>
-    <SettingID>13510289</SettingID>
-    <SettingValue>20</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Texture filtering - Anisotropic sample optimization</SettingNameInfo>
-    <SettingID>15151633</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Display the VRR Indicator</SettingNameInfo>
-    <SettingID>268604728</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Flag to control smooth AFR behavior</SettingNameInfo>
-    <SettingID>270198627</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Anisotropic filtering setting</SettingNameInfo>
-    <SettingID>270426537</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Power management mode</SettingNameInfo>
-    <SettingID>274197361</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Antialiasing - Gamma correction</SettingNameInfo>
-    <SettingID>276652957</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Antialiasing - Mode</SettingNameInfo>
-    <SettingID>276757595</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>FRL Low Latency</SettingNameInfo>
-    <SettingID>277041152</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Frame Rate Limiter</SettingNameInfo>
-    <SettingID>277041154</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Frame Rate Limiter for NVCPL</SettingNameInfo>
-    <SettingID>277041162</SettingID>
-    <SettingValue>357</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Toggle the VRR global feature</SettingNameInfo>
-    <SettingID>278196567</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>VRR requested state</SettingNameInfo>
-    <SettingID>278196727</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>G-SYNC</SettingNameInfo>
-    <SettingID>279476687</SettingID>
-    <SettingValue>4</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Anisotropic filtering mode</SettingNameInfo>
-    <SettingID>282245910</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Antialiasing - Setting</SettingNameInfo>
-    <SettingID>282555346</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>CUDA Sysmem Fallback Policy</SettingNameInfo>
-    <SettingID>283962569</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Enable G-SYNC globally</SettingNameInfo>
-    <SettingID>294973784</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>OpenGL GDI compatibility</SettingNameInfo>
-    <SettingID>544392611</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Threaded optimization</SettingNameInfo>
-    <SettingID>549528094</SettingID>
-    <SettingValue>1</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Preferred OpenGL GPU</SettingNameInfo>
-    <SettingID>550564838</SettingID>
-    <SettingValue>id,2.0:268410DE,00000100,GF - (400,2,161,24564) @ (0)</SettingValue>
-    <ValueType>String</ValueType>
-  </ProfileSetting>
-  <ProfileSetting>
-    <SettingNameInfo>Vulkan/OpenGL present method</SettingNameInfo>
-    <SettingID>550932728</SettingID>
-    <SettingValue>0</SettingValue>
-    <ValueType>Dword</ValueType>
-  </ProfileSetting>
-</Settings>
-</Profile>
+  <Profile>
+    <ProfileName>Base Profile</ProfileName>
+    <Executeables />
+    <Settings>
+      <ProfileSetting>
+        <SettingNameInfo>Frame Rate Limiter V3</SettingNameInfo>
+        <SettingID>277041154</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>GSYNC - Application Mode</SettingNameInfo>
+        <SettingID>294973784</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>GSYNC - Application State</SettingNameInfo>
+        <SettingID>279476687</SettingID>
+        <SettingValue>4</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>GSYNC - Global Feature</SettingNameInfo>
+        <SettingID>278196567</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>GSYNC - Global Mode</SettingNameInfo>
+        <SettingID>278196727</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>GSYNC - Indicator Overlay</SettingNameInfo>
+        <SettingID>268604728</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Maximum Pre-Rendered Frames</SettingNameInfo>
+        <SettingID>8102046</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Preferred Refresh Rate</SettingNameInfo>
+        <SettingID>6600001</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Ultra Low Latency - CPL State</SettingNameInfo>
+        <SettingID>390467</SettingID>
+        <SettingValue>2</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Ultra Low Latency - Enabled</SettingNameInfo>
+        <SettingID>277041152</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Vertical Sync</SettingNameInfo>
+        <SettingID>11041231</SettingID>
+        <SettingValue>138504007</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Vertical Sync - Smooth AFR Behavior</SettingNameInfo>
+        <SettingID>270198627</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Vertical Sync - Tear Control</SettingNameInfo>
+        <SettingID>5912412</SettingID>
+        <SettingValue>2525368439</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Vulkan/OpenGL Present Method</SettingNameInfo>
+        <SettingID>550932728</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Antialiasing - Gamma Correction</SettingNameInfo>
+        <SettingID>276652957</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Antialiasing - Mode</SettingNameInfo>
+        <SettingID>276757595</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Antialiasing - Setting</SettingNameInfo>
+        <SettingID>282555346</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Anisotropic Filter - Optimization</SettingNameInfo>
+        <SettingID>8703344</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Anisotropic Filter - Sample Optimization</SettingNameInfo>
+        <SettingID>15151633</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Anisotropic Filtering - Mode</SettingNameInfo>
+        <SettingID>282245910</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Anisotropic Filtering - Setting</SettingNameInfo>
+        <SettingID>270426537</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Texture Filtering - Negative LOD Bias</SettingNameInfo>
+        <SettingID>1686376</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Texture Filtering - Quality</SettingNameInfo>
+        <SettingID>13510289</SettingID>
+        <SettingValue>20</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Texture Filtering - Trilinear Optimization</SettingNameInfo>
+        <SettingID>3066610</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>CUDA - Force P2 State</SettingNameInfo>
+        <SettingID>1343646814</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+	  <ProfileSetting>
+        <SettingNameInfo>CUDA - Sysmem Fallback Policy</SettingNameInfo>
+        <SettingID>283962569</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Power Management - Mode</SettingNameInfo>
+        <SettingID>274197361</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Shader Cache - Cache Size</SettingNameInfo>
+        <SettingID>11306135</SettingID>
+        <SettingValue>4294967295</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Threaded Optimization</SettingNameInfo>
+        <SettingID>549528094</SettingID>
+        <SettingValue>1</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>OpenGL GDI Compatibility</SettingNameInfo>
+        <SettingID>544392611</SettingID>
+        <SettingValue>0</SettingValue>
+        <ValueType>Dword</ValueType>
+      </ProfileSetting>
+      <ProfileSetting>
+        <SettingNameInfo>Preferred OpenGL GPU</SettingNameInfo>
+        <SettingID>550564838</SettingID>
+        <SettingValue>id,2.0:268410DE,00000100,GF - (400,2,161,24564) @ (0)</SettingValue>
+        <ValueType>String</ValueType>
+      </ProfileSetting>
+    </Settings>
+  </Profile>
 </ArrayOfProfile>
-"@
-  Set-Content -Path "$env:TEMP\Inspector\Inspector.nip" -Value $MultilineComment -Force
-  Start-Process -wait "$env:TEMP\Inspector\nvidiaProfileInspector.exe" -ArgumentList "$env:TEMP\Inspector\Inspector.nip"
-  
-  (Get-ChildItem -Path "$env:windir\System32\DriverStore\FileRepository\nv_dispi*" -Directory).FullName | ForEach-Object { 
-    takeown /f "$_\NvTelemetry64.dll" *>$null
-    icacls "$_\NvTelemetry64.dll" /grant administrators:F /t *>$null
-    Remove-Item "$_\NvTelemetry64.dll" -Force 
-  }
-  Get-ScheduledTask -TaskName '*NvDriverUpdateCheckDaily*' | Disable-ScheduledTask 
-  Get-ScheduledTask -TaskName '*NVIDIA GeForce Experience SelfUpdate*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvProfileUpdaterDaily*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvProfileUpdaterOnLogon*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvTmRep_CrashReport1*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvTmRep_CrashReport2*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvTmRep_CrashReport3*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvTmRep_CrashReport4*' | Disable-ScheduledTask
-  Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\FvSvc' /v 'Start' /t REG_DWORD /d '4' /f
-  
-$response = Read-Host "Do you want to enable P0 state for GPU? (yes/no)"
+`'@
+Set-Content -Path "$env:SystemRoot\Temp\Inspector.nip" -Value $nipfile -Force
 
-if ($response -match '^(y|yes)$') {
-    Write-Host "Enabling P0 state for GPU..." -ForegroundColor Cyan
-    Start-Sleep -Seconds 3
-    
-  Clear-Host
-  $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
-  foreach($key in $subkeys){
-  if ($key -notlike '*Configuration'){
-  reg add "$key" /v "DisableDynamicPstate" /t REG_DWORD /d "1" /f | Out-Null
-}
-}
-Clear-Host
-Write-Host "P0 State: On ..."  -ForegroundColor Cyan
-  $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
-  foreach($key in $subkeys){
-  if ($key -notlike '*Configuration'){
-  Get-ItemProperty -Path "Registry::$key" -Name 'DisableDynamicPstate'
+# import nip
+Start-Process -wait "$env:SystemRoot\Temp\Inspector\nvidiaProfileInspector.exe" -ArgumentList "-silentImport -silent $env:SystemRoot\Temp\Inspector.nip"
+
+        break MainLoop
+
+          }
+    	2 {
+
+        Clear-Host
+
+        Write-Host "DOWNLOAD AMD GPU DRIVER`n" -ForegroundColor Yellow
+		## explorer "https://www.amd.com/en/support/download/drivers.html"
+		## C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe
+
+# download driver
+Start-Sleep -Seconds 5
+Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" "https://www.amd.com/en/support/download/drivers.html"
+Wait-Process -Name chrome
+
+        Write-Host "SELECT DOWNLOADED DRIVER`n" -ForegroundColor Yellow
+
+# select driver
+Start-Sleep -Seconds 5
+$InstallFile = Show-ModernFilePicker -Mode File
+
+        Write-Host "DEBLOATING DRIVER`n"
+
+# extract driver with 7zip
+& "C:\Program Files\7-Zip\7z.exe" x "$InstallFile" -o"$env:SystemRoot\Temp\AmdDriver" -y | Out-Null
+
+# debloat amd driver
+$path = "$env:SystemRoot\Temp\AmdDriver\Packages\Drivers\Display\WT6A_INF"
+Get-ChildItem $path -Directory | Where-Object {
+    $_.Name -notlike "B*" -and
+    $_.Name -ne "amdvlk" -and
+    $_.Name -ne "amdogl" -and
+	$_.Name -ne "amdocl"
+} | Remove-Item -Recurse -Force
+
+# edit xml files, set enabled & hidden to false
+$xmlFiles = @(
+"$env:SystemRoot\Temp\AmdDriver\Config\AMDAUEPInstaller.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\AMDCOMPUTE.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\AMDLinkDriverUpdate.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\AMDRELAUNCHER.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\AMDScoSupportTypeUpdate.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\AMDUpdater.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\AMDUWPLauncher.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\EnableWindowsDriverSearch.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\InstallUEP.xml"
+"$env:SystemRoot\Temp\AmdDriver\Config\ModifyLinkUpdate.xml"
+)
+foreach ($file in $xmlFiles) {
+if (Test-Path $file) {
+$content = Get-Content $file -Raw
+$content = $content -replace '<Enabled>true</Enabled>', '<Enabled>false</Enabled>'
+$content = $content -replace '<Hidden>true</Hidden>', '<Hidden>false</Hidden>'
+Set-Content $file -Value $content -NoNewline
 }
 }
 
-} else {
-    Write-Host "Skipping GPU P0 state enable." -ForegroundColor Cyan
+# edit json files, set installbydefault to no
+$jsonFiles = @(
+"$env:SystemRoot\Temp\AmdDriver\Config\InstallManifest.json"
+"$env:SystemRoot\Temp\AmdDriver\Bin64\cccmanifest_64.json"
+)
+foreach ($file in $jsonFiles) {
+if (Test-Path $file) {
+$content = Get-Content $file -Raw
+$content = $content -replace '"InstallByDefault"\s*:\s*"Yes"', '"InstallByDefault" : "No"'
+Set-Content $file -Value $content -NoNewline
+}
+}
+
+        Write-Host "INSTALLING DRIVER`n"
+
+# install amd driver
+Start-Process -Wait "$env:SystemRoot\Temp\AmdDriver\Bin64\ATISetup.exe" -ArgumentList "-INSTALL -VIEW:2" -WindowStyle Hidden
+
+# delete amdnoisesuppression startup
+cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\Run`" /v `"AMDNoiseSuppression`" /f >nul 2>&1"
+
+# delete startrsx startup
+cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"StartRSX`" /f >nul 2>&1"
+
+# delete startcn task
+Unregister-ScheduledTask -TaskName "StartCN" -Confirm:$false -ErrorAction SilentlyContinue
+
+# delete amd audio coprocessr dsp driver
+cmd /c "sc stop `"amdacpbus`" >nul 2>&1"
+cmd /c "sc delete `"amdacpbus`" >nul 2>&1"
+
+# delete amd streaming audio function driver
+cmd /c "sc stop `"AMDSAFD`" >nul 2>&1"
+cmd /c "sc delete `"AMDSAFD`" >nul 2>&1"
+
+# delete amd function driver for hd audio service driver
+cmd /c "sc stop `"AtiHDAudioService`" >nul 2>&1"
+cmd /c "sc delete `"AtiHDAudioService`" >nul 2>&1"
+
+# delete amd bug report tool
+Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\AMD Bug Report Tool" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemDrive\Windows\SysWOW64\AMDBugReportTool.exe" -Force -ErrorAction SilentlyContinue | Out-Null
+
+# uninstall amd install manager
+$findamdinstallmanager = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
+$amdinstallmanager = Get-ItemProperty $findamdinstallmanager -ErrorAction SilentlyContinue |
+Where-Object { $_.DisplayName -like "*AMD Install Manager*" }
+if ($amdinstallmanager) {
+$guid = $amdinstallmanager.PSChildName
+Start-Process "msiexec.exe" -ArgumentList "/x $guid /qn /norestart" -Wait -NoNewWindow
+}
+
+# delete download
+Remove-Item "$InstallFile" -Force -ErrorAction SilentlyContinue | Out-Null
+
+# cleaner start menu shortcut path
+$folderName = "AMD Software$([char]0xA789) Adrenalin Edition"
+Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\$folderName\$folderName.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\$folderName" -Recurse -Force -ErrorAction SilentlyContinue
+
+# delete old driver files
+Remove-Item "$env:SystemDrive\AMD" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+
+# wait incase driver timeout or installer bugs
+
+        80..0 | % { Write-Host "`rIMPORTING SETTINGS $_   " -NoNewline; Start-Sleep 1 }; Write-Host "`n"
+
+# open & close amd software adrenalin edition settings page so settings stick
+Start-Process "C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe"
+Start-Sleep -Seconds 30
+Stop-Process -Name "RadeonSoftware" -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
+
+# disable ulps
+$subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
+foreach($key in $subkeys){
+if ($key -notlike '*Configuration'){
+reg add "$key" /v "EnableUlps" /t REG_DWORD /d "0" /f | Out-Null
+}
+}
+
+# import amd software adrenalin edition settings
+# system
+# manual check for updates
+cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"AutoUpdate`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# graphics
+# graphics profile - custom
+cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"WizardProfile`" /t REG_SZ /d `"PROFILE_CUSTOM`" /f >nul 2>&1"
+
+# wait for vertical refresh - always off
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+$optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "UMD" }
+foreach ($key in $optionKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"VSyncControl`" /t REG_BINARY /d `"3000`" /f >nul 2>&1"
+}
+
+# texture filtering quality - performance
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+$optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "UMD" }
+foreach ($key in $optionKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"TFQ`" /t REG_BINARY /d `"3200`" /f >nul 2>&1"
+}
+
+# tessellation mode - override application settings
+# maximum tessellation level - off
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+$optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "UMD" }
+foreach ($key in $optionKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"Tessellation`" /t REG_BINARY /d `"3100`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"Tessellation_OPTION`" /t REG_BINARY /d `"3200`" /f >nul 2>&1"
+}
+
+# display
+# accept custom resolution eula
+cmd /c "reg add `"HKCU\Software\AMD\CN\CustomResolutions`" /v `"EulaAccepted`" /t REG_SZ /d `"true`" /f >nul 2>&1"
+
+# accept overrides eula
+cmd /c "reg add `"HKCU\Software\AMD\CN\DisplayOverride`" /v `"EulaAccepted`" /t REG_SZ /d `"true`" /f >nul 2>&1"
+
+# disable hdcp support
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+$edidKeysWithSuffix = $allKeys | Where-Object { $_.PSChildName -match '^EDID_[A-F0-9]+_[A-F0-9]+_[A-F0-9]+$' }
+foreach ($edidKey in $edidKeysWithSuffix) {
+if ($edidKey.PSChildName -match '^(EDID_[A-F0-9]+_[A-F0-9]+)_[A-F0-9]+$') {
+$baseEdidName = $matches[1]
+$parentPath = Split-Path $edidKey.PSPath
+$baseEdidPath = Join-Path $parentPath $baseEdidName
+if (!(Test-Path $baseEdidPath)) {
+New-Item -Path $baseEdidPath -Force -ErrorAction SilentlyContinue | Out-Null
 }   
-  Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
+$optionPathNew = Join-Path $baseEdidPath "Option"
+if (!(Test-Path $optionPathNew)) {
+New-Item -Path $optionPathNew -Force -ErrorAction SilentlyContinue | Out-Null
+}
+$regPath = $optionPathNew.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
+cmd /c "reg add `"$regPath`" /v `"All_nodes`" /t REG_BINARY /d `"50726F74656374696F6E436F6E74726F6C00`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"default`" /t REG_BINARY /d `"64`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"ProtectionControl`" /t REG_BINARY /d `"0100000001000000`" /f >nul 2>&1"
+}
+}
+
+# vari-bright - maximize brightness
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+$optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "power_v1" }
+foreach ($key in $optionKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"abmlevel`" /t REG_BINARY /d `"00000000`" /f >nul 2>&1"
+}
+
+# preferences
+# disable system tray menu
+cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"SystemTray`" /t REG_SZ /d `"false`" /f >nul 2>&1"
+
+# disable toast notifications
+cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"CN_Hide_Toast_Notification`" /t REG_SZ /d `"true`" /f >nul 2>&1"
+
+# disable animation & effects
+cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"AnimationEffect`" /t REG_SZ /d `"false`" /f >nul 2>&1"
+
+# notifications - remove
+cmd /c "reg delete `"HKCU\Software\AMD\CN\Notification`" /f >nul 2>&1"
+cmd /c "reg add `"HKCU\Software\AMD\CN\Notification`" /f >nul 2>&1"
+cmd /c "reg add `"HKCU\Software\AMD\CN\FreeSync`" /v `"AlreadyNotified`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+cmd /c "reg add `"HKCU\Software\AMD\CN\OverlayNotification`" /v `"AlreadyNotified`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+cmd /c "reg add `"HKCU\Software\AMD\CN\VirtualSuperResolution`" /v `"AlreadyNotified`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+
+        break MainLoop
+
+          }
+    	3 {
+
+        Clear-Host
+        
+        Write-Host "DOWNLOAD INTEL GPU DRIVER`n" -ForegroundColor Yellow
+		## explorer "https://www.intel.com/content/www/us/en/search.html#sortCriteria=%40lastmodifieddt%20descending&f-operatingsystem_en=Windows%2011%20Family*&f-downloadtype=Drivers&cf-tabfilter=Downloads&cf-downloadsppth=Graphics"
+		## shell:appsFolder\AppUp.IntelGraphicsExperience_8j3eq9eme6ctt!App
+		## C:\Program Files\Intel\Intel Graphics Software\IntelGraphicsSoftware.exe
+
+# download driver
+Start-Sleep -Seconds 5
+Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" "https://www.intel.com/content/www/us/en/search.html#sortCriteria=%40lastmodifieddt%20descending&f-operatingsystem_en=Windows%2011%20Family*&f-downloadtype=Drivers&cf-tabfilter=Downloads&cf-downloadsppth=Graphics"
+Wait-Process -Name chrome
+
+        Write-Host "SELECT DOWNLOADED DRIVER`n" -ForegroundColor Yellow
+
+# select driver
+Start-Sleep -Seconds 5
+$InstallFile = Show-ModernFilePicker -Mode File
+
+        Write-Host "DEBLOATING DRIVER`n"
+
+# extract driver with 7zip
+& "C:\Program Files\7-Zip\7z.exe" x "$InstallFile" -o"$env:SystemDrive\IntelDriver" -y | Out-Null
+
+        Write-Host "INSTALLING DRIVER`n"
+
+# install intel driver
+Start-Process "cmd.exe" -ArgumentList "/c `"$env:SystemDrive\IntelDriver\Installer.exe`" -f --noExtras --terminateProcesses -s" -WindowStyle Hidden -Wait
+
+# install intel control panel
+$IntelGraphicsSoftware = Get-ChildItem "$env:SystemDrive\IntelDriver\Resources\Extras\IntelGraphicsSoftware_*.exe" | Select-Object -First 1 -ExpandProperty Name
+if ($IntelGraphicsSoftware) {
+Start-Process "$env:SystemDrive\IntelDriver\Resources\Extras\$IntelGraphicsSoftware" -ArgumentList "/s" -Wait -NoNewWindow
+}
+
+# delete intel® graphics software startup
+$FileName = "Intel$([char]0xAE) Graphics Software"
+cmd /c "reg delete `"HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run`" /v `"$FileName`" /f >nul 2>&1"
+
+# delete intelgfxfwupdatetool service
+cmd /c "sc stop `"IntelGFXFWupdateTool`" >nul 2>&1"
+cmd /c "sc delete `"IntelGFXFWupdateTool`" >nul 2>&1"
+
+# delete intel® content protection hdcp service
+cmd /c "sc stop `"cplspcon`" >nul 2>&1"
+cmd /c "sc delete `"cplspcon`" >nul 2>&1"
+
+# delete intel(r) cta child driver driver
+cmd /c "sc stop `"CtaChildDriver`" >nul 2>&1"
+cmd /c "sc delete `"CtaChildDriver`" >nul 2>&1"
+
+# delete intel(r) graphics system controller auxiliary firmware interface driver
+cmd /c "sc stop `"GSCAuxDriver`" >nul 2>&1"
+cmd /c "sc delete `"GSCAuxDriver`" >nul 2>&1"
+
+# delete intel(r) graphics system controller firmware interface driver
+cmd /c "sc stop `"GSCx64`" >nul 2>&1"
+cmd /c "sc delete `"GSCx64`" >nul 2>&1"
+
+# stop intelgraphicssoftware presentmonservice running
+$stop = "IntelGraphicsSoftware", "PresentMonService"
+$stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
+Start-Sleep -Seconds 2
+
+# delete presentmonservice.exe
+Remove-Item "$env:SystemDrive\Program Files\Intel\Intel Graphics Software\PresentMonService.exe" -Force -ErrorAction SilentlyContinue | Out-Null 
+
+# delete download
+Remove-Item "$InstallFile" -Force -ErrorAction SilentlyContinue | Out-Null
+
+# cleaner start menu shortcut path
+$FileName = "Intel$([char]0xAE) Graphics Software"
+Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Intel\Intel Graphics Software\$FileName.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Intel" -Recurse -Force -ErrorAction SilentlyContinue
+
+# delete old driver files
+Remove-Item "$env:SystemDrive\Intel" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemDrive\IntelDriver" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+
+        Write-Host "IMPORTING SETTINGS`n"
+
+# create 3dkeys key
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$adapterKeys = Get-ChildItem -Path $basePath -ErrorAction SilentlyContinue
+foreach ($key in $adapterKeys) {
+if ($key.PSChildName -match '^\d{4}$') {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath\3DKeys`" /f >nul 2>&1"
+}
+}
+
+# display
+# variable refresh rate mode - disabled
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+$optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "3DKeys" }
+foreach ($key in $optionKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"Global_VRRWindowedBLT`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
+}
+
+# variable refresh rate - disabled
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$adapterKeys = Get-ChildItem -Path $basePath -ErrorAction SilentlyContinue
+foreach ($key in $adapterKeys) {
+if ($key.PSChildName -match '^\d{4}$') {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"AdaptiveVsyncEnableUserSetting`" /t REG_BINARY /d `"00000000`" /f >nul 2>&1"
+}
+}
+
+# graphics
+# frame synchronization - vsync off
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+$optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "3DKeys" }
+foreach ($key in $optionKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"Global_AsyncFlipMode`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
+}
+
+# low latency mode - off
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+$allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+$optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "3DKeys" }
+foreach ($key in $optionKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"Global_LowLatency`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+        break MainLoop
+
+          }
+        4 {
+
+        Clear-Host
+
+        break MainLoop
+
+          }
+          }
+          } else {
+          Write-Host "Invalid input. Please select a valid option (1-4).`n" -ForegroundColor Yellow
+          Pause
+          show-menu
+          }
+          }
+
+        Clear-Host
+        Write-Host "SET" -ForegroundColor Yellow
+        Write-Host "- SOUND" -ForegroundColor Yellow
+        Write-Host "- RESOLUTION" -ForegroundColor Yellow
+        Write-Host "- REFRESH RATE" -ForegroundColor Yellow
+        Write-Host "- PRIMARY DISPLAY`n" -ForegroundColor Yellow
+		## shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel
+    	## ms-settings:display
+		## mmsys.cpl
+
+# open display, nvidia & sound panels
+try {
+Start-Process "ms-settings:display"
+} catch { }
+try {
+Start-Process shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel
+} catch { }
+Start-Process mmsys.cpl
+Pause
+
+        Clear-Host
+
+# disable automatically manage color for apps
+$basePath = "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers\MonitorDataStore"
+$monitorKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+foreach ($key in $monitorKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"AutoColorManagementEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"AutoColorManagementSupported`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# reapply for nvidia cards after changing resolution
+# turn on no scaling for all displays
+$configKeys = Get-ChildItem -Path "HKLM:\System\ControlSet001\Control\GraphicsDrivers\Configuration" -Recurse -ErrorAction SilentlyContinue
+foreach ($key in $configKeys) {
+$scalingValue = Get-ItemProperty -Path $key.PSPath -Name "Scaling" -ErrorAction SilentlyContinue
+if ($scalingValue) {
+$regPath = $key.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
+Run-Trusted -command "reg add `"$regPath`" /v `"Scaling`" /t REG_DWORD /d `"2`" /f"
+}
+}
 }
 
 
@@ -554,41 +1084,76 @@ function Install-Dependencies {
   Clear-Host
   Write-Host "Installing: Direct X..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:TEMP\DirectX.exe"
-  Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:TEMP\7-Zip.exe"
-  Start-Process -wait "$env:TEMP\7-Zip.exe" /S
-  cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:TEMP\DirectX.exe" -o"$env:TEMP\DirectX" -y | Out-Null
-  Start-Process "$env:TEMP\DirectX\DXSETUP.exe"
+  Get-FileFromWeb -URL "https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe" -File "$env:SystemRoot\Temp\DirectX.exe"
+  Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:SystemRoot\Temp\7-Zip.exe"
+  Start-Process -wait "$env:SystemRoot\Temp\7-Zip.exe" /S
+  cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\DirectX.exe" -o"$env:SystemRoot\Temp\DirectX" -y | Out-Null
+  Start-Process "$env:SystemRoot\Temp\DirectX\DXSETUP.exe"
   Start-Sleep -Seconds 5
   Clear-Host
   
-  Write-Host "Installing: C++..." -ForegroundColor Cyan
-  Start-Sleep -Seconds 3
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x86.EXE" -File "$env:TEMP\vcredist2005_x86.exe"
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x64.EXE" -File "$env:TEMP\vcredist2005_x64.exe"
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x86.exe" -File "$env:TEMP\vcredist2008_x86.exe"
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x64.exe" -File "$env:TEMP\vcredist2008_x64.exe"
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x86.exe" -File "$env:TEMP\vcredist2010_x86.exe" 
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe" -File "$env:TEMP\vcredist2010_x64.exe"
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe" -File "$env:TEMP\vcredist2012_x86.exe"
-  Get-FileFromWeb -URL "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe" -File "$env:TEMP\vcredist2012_x64.exe"
-  Get-FileFromWeb -URL "https://aka.ms/highdpimfc2013x86enu" -File "$env:TEMP\vcredist2013_x86.exe"
-  Get-FileFromWeb -URL "https://aka.ms/highdpimfc2013x64enu" -File "$env:TEMP\vcredist2013_x64.exe"
-  Get-FileFromWeb -URL "https://aka.ms/vs/17/release/vc_redist.x86.exe" -File "$env:TEMP\vcredist2015_2017_2019_2022_x86.exe"
-  Get-FileFromWeb -URL "https://aka.ms/vs/17/release/vc_redist.x64.exe" -File "$env:TEMP\vcredist2015_2017_2019_2022_x64.exe"
-  Start-Process -wait "$env:TEMP\vcredist2005_x86.exe" -ArgumentList "/q"
-  Start-Process -wait "$env:TEMP\vcredist2005_x64.exe" -ArgumentList "/q"
-  Start-Process -wait "$env:TEMP\vcredist2008_x86.exe" -ArgumentList "/qb"
-  Start-Process -wait "$env:TEMP\vcredist2008_x64.exe" -ArgumentList "/qb"
-  Start-Process -wait "$env:TEMP\vcredist2010_x86.exe" -ArgumentList "/passive /norestart"
-  Start-Process -wait "$env:TEMP\vcredist2010_x64.exe" -ArgumentList "/passive /norestart"
-  Start-Process -wait "$env:TEMP\vcredist2012_x86.exe" -ArgumentList "/passive /norestart"
-  Start-Process -wait "$env:TEMP\vcredist2012_x64.exe" -ArgumentList "/passive /norestart"
-  Start-Process -wait "$env:TEMP\vcredist2013_x86.exe" -ArgumentList "/passive /norestart"
-  Start-Process -wait "$env:TEMP\vcredist2013_x64.exe" -ArgumentList "/passive /norestart"
-  Start-Process -wait "$env:TEMP\vcredist2015_2017_2019_2022_x86.exe" -ArgumentList "/passive /norestart"
-  Start-Process -wait "$env:TEMP\vcredist2015_2017_2019_2022_x64.exe" -ArgumentList "/passive /norestart"
-  
+Write-Host "Installing: C++..." -ForegroundColor Cyan
+Start-Sleep -Seconds 3
+Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x86.EXE" -File "$env:SystemRoot\Temp\vcredist2005_x86.exe"
+Get-FileFromWeb -URL "https://download.microsoft.com/download/8/B/4/8B42259F-5D70-43F4-AC2E-4B208FD8D66A/vcredist_x64.EXE" -File "$env:SystemRoot\Temp\vcredist2005_x64.exe"
+Get-FileFromWeb -URL "https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x86.exe" -File "$env:SystemRoot\Temp\vcredist2008_x86.exe"
+Get-FileFromWeb -URL "https://download.microsoft.com/download/5/D/8/5D8C65CB-C849-4025-8E95-C3966CAFD8AE/vcredist_x64.exe" -File "$env:SystemRoot\Temp\vcredist2008_x64.exe"
+Get-FileFromWeb -URL "https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x86.exe" -File "$env:SystemRoot\Temp\vcredist2010_x86.exe" 
+Get-FileFromWeb -URL "https://download.microsoft.com/download/1/6/5/165255E7-1014-4D0A-B094-B6A430A6BFFC/vcredist_x64.exe" -File "$env:SystemRoot\Temp\vcredist2010_x64.exe"
+Get-FileFromWeb -URL "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x86.exe" -File "$env:SystemRoot\Temp\vcredist2012_x86.exe"
+Get-FileFromWeb -URL "https://download.microsoft.com/download/1/6/B/16B06F60-3B20-4FF2-B699-5E9B7962F9AE/VSU_4/vcredist_x64.exe" -File "$env:SystemRoot\Temp\vcredist2012_x64.exe"
+Get-FileFromWeb -URL "https://download.microsoft.com/download/2/e/6/2e61cfa4-993b-4dd4-91da-3737cd5cd6e3/vcredist_x86.exe" -File "$env:SystemRoot\Temp\vcredist2013_x86.exe"
+Get-FileFromWeb -URL "https://download.microsoft.com/download/2/e/6/2e61cfa4-993b-4dd4-91da-3737cd5cd6e3/vcredist_x64.exe" -File "$env:SystemRoot\Temp\vcredist2013_x64.exe"
+Get-FileFromWeb -URL "https://aka.ms/vs/17/release/vc_redist.x86.exe" -File "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x86.exe"
+Get-FileFromWeb -URL "https://aka.ms/vs/17/release/vc_redist.x64.exe" -File "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x64.exe"
+
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2005_x86.exe" -ArgumentList "/Q /C:`"msiexec /i vcredist.msi /qn /norestart`"" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2005_x64.exe" -ArgumentList "/Q /C:`"msiexec /i vcredist.msi /qn /norestart`"" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2008_x86.exe" -ArgumentList "/q" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2008_x64.exe" -ArgumentList "/q" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2010_x86.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2010_x64.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2012_x86.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2012_x64.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2013_x86.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2013_x64.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x86.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden
+Start-Process -Wait "$env:SystemRoot\Temp\vcredist2015_2017_2019_2022_x64.exe" -ArgumentList "/quiet /norestart" -WindowStyle Hidden 
+
+$response = Read-Host "Do you want to install Google Chrome? (Y/N)"
+if ($response -match '^[Yy]') {
+# Download google chrome
+Get-FileFromWeb -URL "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi" -File "$env:SystemRoot\Temp\Chrome.msi"
+
+# Install Google Chrome
+Start-Process -Wait "$env:SystemRoot\Temp\Chrome.msi" -ArgumentList "/quiet"
+
+# Install Ublock Origin Lite
+cmd /c "reg add `"HKLM\SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist`" /v `"1`" /t REG_SZ /d `"ddkjiahejlhfcafbddmgiahcphecmpfh;https://clients2.google.com/service/update2/crx`" /f >nul 2>&1"
+
+# Add Chrome policies
+cmd /c "reg add `"HKLM\SOFTWARE\Policies\Google\Chrome`" /v `"HardwareAccelerationModeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SOFTWARE\Policies\Google\Chrome`" /v `"BackgroundModeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"HKLM\SOFTWARE\Policies\Google\Chrome`" /v `"HighEfficiencyModeEnabled`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+
+# Remove Logon Chrome
+cmd /c "reg delete `"HKLM\Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}`" /f >nul 2>&1"
+
+# Remove Chrome services
+$services = Get-Service | Where-Object { $_.Name -match 'Google' }
+foreach ($service in $services) {
+cmd /c "sc stop `"$($service.Name)`" >nul 2>&1"
+cmd /c "sc delete `"$($service.Name)`" >nul 2>&1"
+}
+
+# Remove Chrome scheduled tasks
+Get-ScheduledTask | Where-Object {$_.Taskname -match 'GoogleUpdateTaskMachineCore'} | Unregister-ScheduledTask -Confirm:$false
+Get-ScheduledTask | Where-Object {$_.Taskname -match 'GoogleUpdateTaskMachineUA'} | Unregister-ScheduledTask -Confirm:$false
+Get-ScheduledTask | Where-Object {$_.Taskname -match 'GoogleUpdaterTaskSystem'} | Unregister-ScheduledTask -Confirm:$false
+}
+else {
+    Write-Host "Restart supressed." -ForegroundColor Cyan
+}
 }
 
 function Optimize-BasicTweaks {
@@ -737,8 +1302,8 @@ a4,58,a9,26,10,00,54,61,73,6b,42,61,72,00,40,00,09,00,04,00,ef,be,a4,58,a9,\
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer]
 "EnableAutoTray"=dword:00000000
 "@
-  Set-Content -Path "$env:TEMP\Taskbar Clean.reg" -Value $MultilineComment -Force
-  Set-Location -Path "$env:TEMP"
+  Set-Content -Path "$env:SystemRoot\Temp\Taskbar Clean.reg" -Value $MultilineComment -Force
+  Set-Location -Path "$env:SystemRoot\Temp"
   Regedit.exe /S "Taskbar Clean.reg"
   $progresspreference = 'silentlycontinue'
   Remove-Item -Recurse -Force "$env:USERPROFILE\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState\start2.bin" -ErrorAction SilentlyContinue
@@ -841,9 +1406,9 @@ DQv51k5/v4ZE2VL0dIIvj1M+KPw0nSs271QgJanYwK3CpFluK/1ilEi7JKDikT8X
 TSz1QZdkum5Y3uC7wc7paXh1rm11nwluCC7jiA==
 -----END CERTIFICATE-----
 "
-  New-Item "$env:TEMP\start2.txt" -Value $certContent -Force | Out-Null
-  certutil.exe -decode "$env:TEMP\start2.txt" "$env:TEMP\start2.bin" >$null
-  Copy-Item "$env:TEMP\start2.bin" -Destination "$env:USERPROFILE\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState" -Force | Out-Null
+  New-Item "$env:SystemRoot\Temp\start2.txt" -Value $certContent -Force | Out-Null
+  certutil.exe -decode "$env:SystemRoot\Temp\start2.txt" "$env:SystemRoot\Temp\start2.bin" >$null
+  Copy-Item "$env:SystemRoot\Temp\start2.bin" -Destination "$env:USERPROFILE\AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\LocalState" -Force | Out-Null
 
 Remove-Item -Recurse -Force "$env:SystemDrive\Windows\StartMenuLayout.xml" -ErrorAction SilentlyContinue | Out-Null
 
@@ -952,10 +1517,10 @@ Windows Registry Editor Version 5.00
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Start]
 "AllAppsViewMode"=dword:00000002
 "@
-Set-Content -Path "$env:TEMP\NewStartMenu.reg" -Value $MultilineComment -Force
-$path = "$env:TEMP\NewStartMenu.reg"
+Set-Content -Path "$env:SystemRoot\Temp\NewStartMenu.reg" -Value $MultilineComment -Force
+$path = "$env:SystemRoot\Temp\NewStartMenu.reg"
 (Get-Content $path) -replace "\?","$" | Out-File $path
-Regedit.exe /S "$env:TEMP\NewStartMenu.reg"
+Regedit.exe /S "$env:SystemRoot\Temp\NewStartMenu.reg"
 Clear-Host
 Write-Host "Restart to apply..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
@@ -978,7 +1543,7 @@ function Optimize-Powerplan {
   }
   }
   foreach ($plan in $powerPlans) {
-  cmd /c "powercfg /delete $plan" | Out-Null
+  cmd /c "powercfg /delete $plan 2>nul" | Out-Null
   }
   Clear-Host
   powercfg /hibernate off
@@ -987,7 +1552,11 @@ function Optimize-Powerplan {
   cmd /c "reg add `"HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings`" /v `"ShowLockOption`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
   cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings`" /v `"ShowSleepOption`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
   cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power`" /v `"HiberbootEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-  cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583`" /v `"ValueMax`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# Unpark cpu cores
+cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583`" /v `"ValueMax`" /t REG_DWORD /d `"100`" /f >nul 2>&1"
+
+# Disable power throttling
   cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling`" /v `"PowerThrottlingOff`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
   cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\0853a681-27c8-4100-a2fd-82013e970683`" /v `"Attributes`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
   cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\d4e98f31-5ffe-4ce1-be31-1b38b384c009`" /v `"Attributes`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
@@ -1080,6 +1649,7 @@ function Optimize-Registry {
 Clear-Host
 Write-Host "Optimising registry..." -ForegroundColor Cyan
 Start-Sleep -Seconds 3
+
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
 
@@ -1346,6 +1916,9 @@ Windows Registry Editor Version 5.00
 
 
 ; SYSTEM AND SECURITY
+
+# Disable apps updates
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate`" /v `"AutoDownload`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
 
 ; Disable core isolation (turned it off for default settings)
 ;[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
@@ -2415,7 +2988,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 "NtfsDisableLastAccessUpdate"=dword:00000001
 `'@
 
-    New-Item "$env:TEMP\RegTweaks.reg" -Value $regContent -Force | Out-Null
+    New-Item "$env:SystemRoot\Temp\RegTweaks.reg" -Value $regContent -Force | Out-Null
 
     $OS = Get-CimInstance Win32_OperatingSystem
     if ($OS.Caption -like '*Windows 11*') {
@@ -2650,10 +3223,10 @@ C0,CC,0C,00,00,00,00,00,\
 "MouseThreshold1"="0"
 "MouseThreshold2"="0"
 "@
-  Set-Content -Path "$env:TEMP\Registry Optimize.reg" -Value $MultilineComment -Force
-  $path = "$env:TEMP\Registry Optimize.reg"
+  Set-Content -Path "$env:SystemRoot\Temp\Registry Optimize.reg" -Value $MultilineComment -Force
+  $path = "$env:SystemRoot\Temp\Registry Optimize.reg"
   (Get-Content $path) -replace "\?","$" | Out-File $path
-  Regedit.exe /S "$env:TEMP\Registry Optimize.reg"
+  Regedit.exe /S "$env:SystemRoot\Temp\Registry Optimize.reg"
   Clear-Host
   
   #Disable Online tips in Settings
@@ -2679,7 +3252,7 @@ C0,CC,0C,00,00,00,00,00,\
   #Set 24h time for lockscreen
   Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name "sShortTime" -Value "HH:mm"
   Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name "sTimeFormat" -Value "HH:mm:ss"
-  $exportFile = "$env:TEMP\intl.reg"
+  $exportFile = "$env:SystemRoot\Temp\intl.reg"
   reg export "HKCU\Control Panel\International" $exportFile /y
   reg load "HKU\DefaultUser" "C:\Users\Default\NTUSER.DAT"
   reg import $exportFile
@@ -3299,7 +3872,7 @@ $regFiles = @(
 foreach ($file in $regFiles) {
     try {
         $url  = "$repoBase/$file"
-        $dest = Join-Path $env:TEMP $file
+        $dest = Join-Path $env:SystemRoot\Temp $file
 
         Write-Host "Downloading $file ..." -ForegroundColor Cyan
         Invoke-WebRequest -Uri $url -OutFile $dest -UseBasicParsing -ErrorAction Stop
@@ -3427,6 +4000,171 @@ function Set-ServicesManual {
 function Optimize-AdvancedTweaks {
   Clear-Host
   Start-Sleep -Seconds 3
+
+# Stop cam service and remove the database
+Stop-Service -Name 'camsvc' -Force -ErrorAction SilentlyContinue
+$capabilityconsentstoragedb = "Remove-item `"$env:ProgramData\Microsoft\Windows\CapabilityAccessManager\CapabilityConsentStorage.db*`" -Force"
+Run-Trusted -command $capabilityconsentstoragedb
+
+# Disable memorycompression
+## powershell -noexit -command "get-mmagent"
+Disable-MMAgent -MemoryCompression -ErrorAction SilentlyContinue | Out-Null
+
+# Disable bitlocker
+## control /name microsoft.bitlockerdriveencryption
+Get-BitLockerVolume |
+Where-Object {
+$_.ProtectionStatus -eq "On" -or $_.VolumeStatus -ne "FullyDecrypted"
+} |
+ForEach-Object {
+Disable-BitLocker -MountPoint $_.MountPoint -ErrorAction SilentlyContinue | Out-Null
+}
+
+# Disable defragment and optimize your drives scheduled task
+## powershell -noexit -command "get-scheduledtask -taskname "scheduleddefrag" | select-object taskname, state"
+## dfrgui
+Get-ScheduledTask | Where-Object {$_.TaskName -match 'ScheduledDefrag'} | Disable-ScheduledTask | Out-Null
+
+# Disable network adapter powersaving & wake on all connected devices
+$basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}"
+$adapterKeys = Get-ChildItem -Path $basePath -ErrorAction SilentlyContinue
+foreach ($key in $adapterKeys) {
+if ($key.PSChildName -match '^\d{4}$') {
+$regPath = $key.Name
+# Disable adapter powersaving & wake
+cmd /c "reg add `"$regPath`" /v `"PnPCapabilities`" /t REG_DWORD /d `"24`" /f >nul 2>&1"
+# Disable advanced energy efficient ethernet
+cmd /c "reg add `"$regPath`" /v `"AdvancedEEE`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+# Disable energy-efficient ethernet
+cmd /c "reg add `"$regPath`" /v `"*EEE`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"EEELinkAdvertisement`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+# System idle power saver
+cmd /c "reg add `"$regPath`" /v `"SipsEnabled`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+# Ultra low power mode
+cmd /c "reg add `"$regPath`" /v `"ULPMode`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+# Disable gigabit lite
+cmd /c "reg add `"$regPath`" /v `"GigaLite`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+# Disable green ethernet
+cmd /c "reg add `"$regPath`" /v `"EnableGreenEthernet`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+# Disable power saving mode
+cmd /c "reg add `"$regPath`" /v `"PowerSavingMode`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+# Disable all wake
+cmd /c "reg add `"$regPath`" /v `"S5WakeOnLan`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"*WakeOnMagicPacket`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"*ModernStandbyWoLMagicPacket`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"*WakeOnPattern`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"WakeOnLink`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"*ModernStandbyWoLMagicPacket`" /t REG_SZ /d `"0`" /f >nul 2>&1"
+}
+}
+
+# Disable hid power savings on all connected devices
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\HID" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "Device Parameters" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"EnhancedPowerManagementEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"SelectiveSuspendEnabled`" /t REG_BINARY /d `"00`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"SelectiveSuspendOn`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\HID" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "WDF" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"IdleInWorkingState`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# Disable pci power savings on all connected devices
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\PCI" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "Device Parameters" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"EnhancedPowerManagementEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"SelectiveSuspendEnabled`" /t REG_BINARY /d `"00`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"SelectiveSuspendOn`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\PCI" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "WDF" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"IdleInWorkingState`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# Disable usb power savings on all connected devices
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\USB" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "Device Parameters" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"EnhancedPowerManagementEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"SelectiveSuspendEnabled`" /t REG_BINARY /d `"00`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"SelectiveSuspendOn`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\USB" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "WDF" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"IdleInWorkingState`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# Disable hid wake on all connected devices
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\HID" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "Device Parameters" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"WaitWakeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# Disable pci wake on all connected devices
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\PCI" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "Device Parameters" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"WaitWakeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# Disable usb wake on all connected devices
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\USB" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "Device Parameters" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"WaitWakeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# Import notepad settings
+        ## notepad
+# Stop notepad running
+Stop-Process -Name "Notepad" -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
+
+# Create reg file
+$NotepadSettings = @'
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\Settings\LocalState]
+"OpenFile"=hex(5f5e104):01,00,00,00,d1,55,24,57,d1,84,db,01
+"GhostFile"=hex(5f5e10b):00,42,60,f1,5a,d1,84,db,01
+"RewriteEnabled"=hex(5f5e10b):00,12,4a,7f,5f,d1,84,db,01
+`'@
+Set-Content -Path "$env:SystemRoot\Temp\NotepadSettings.reg" -Value $NotepadSettings -Force
+$SettingsDat = "$env:LocalAppData\Packages\Microsoft.WindowsNotepad_8wekyb3d8bbwe\Settings\settings.dat"
+$RegFileNotepadSettings = "$env:SystemRoot\Temp\NotepadSettings.reg"
+
+# Load hive
+reg load "HKLM\Settings" $SettingsDat >$null 2>&1
+
+# Import reg file
+if ($LASTEXITCODE -eq 0) {
+reg import $RegFileNotepadSettings >$null 2>&1
+
+# Unload hive
+[gc]::Collect()
+Start-Sleep -Seconds 2
+reg unload "HKLM\Settings" >$null 2>&1
+}
+
+# Remove include in library
+cmd /c "reg delete `"HKCR\Folder\ShellEx\ContextMenuHandlers\Library Location`" /f >nul 2>&1"
+
 
 # Disables telemetry trough gpdedit
 Reg.exe add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\DataCollection' /v 'AllowTelemetry' /t REG_DWORD /d '0' /f
@@ -3574,11 +4312,11 @@ else {
 </Actions>
 </Task>
 "@
-  Set-Content -Path "$env:TEMP\UpdateTaskTray" -Value $content -Force
+  Set-Content -Path "$env:SystemRoot\Temp\UpdateTaskTray" -Value $content -Force
 
-  schtasks /Create /XML "$env:TEMP\UpdateTaskTray" /TN '\UpdateTaskTray' /F | Out-Null 
+  schtasks /Create /XML "$env:SystemRoot\Temp\UpdateTaskTray" /TN '\UpdateTaskTray' /F | Out-Null 
 
-  Remove-Item -Path "$env:TEMP\UpdateTaskTray" -Force -ErrorAction SilentlyContinue
+  Remove-Item -Path "$env:SystemRoot\Temp\UpdateTaskTray" -Force -ErrorAction SilentlyContinue
   Write-Host 'Update Task Tray Created...New Apps Will Be Shown Upon Restarting' -ForegroundColor Green
 
 
@@ -4263,9 +5001,9 @@ namespace WindowsService
         {
             base.OnStart(args);
             ReadProcessList();
-            NtQueryTimerResolution(out this.MininumResolution, out this.MaximumResolution, out this.DefaultResolution);
+            NtQueryTimerResolution(out this.MinimumResolution, out this.MaximumResolution, out this.DefaultResolution);
             if(null != this.EventLog)
-                try { this.EventLog.WriteEntry(String.Format("Minimum={0}; Maximum={1}; Default={2}; Processes='{3}'", this.MininumResolution, this.MaximumResolution, this.DefaultResolution, null != this.ProcessesNames ? String.Join("','", this.ProcessesNames) : "")); }
+                try { this.EventLog.WriteEntry(String.Format("Minimum={0}; Maximum={1}; Default={2}; Processes='{3}'", this.MinimumResolution, this.MaximumResolution, this.DefaultResolution, null != this.ProcessesNames ? String.Join("','", this.ProcessesNames) : "")); }
                 catch {}
             if(null == this.ProcessesNames)
             {
@@ -4376,7 +5114,7 @@ namespace WindowsService
         [DllImport("ntdll.dll", SetLastError=true)]
         static extern int NtQueryTimerResolution(out uint MinimumResolution, out uint MaximumResolution, out uint ActualResolution);
         uint DefaultResolution = 0;
-        uint MininumResolution = 0;
+        uint MinimumResolution = 0;
         uint MaximumResolution = 0;
         long processCounter = 0;
         void SetMaximumResolution()
@@ -4427,11 +5165,27 @@ namespace WindowsService
 Set-Content -Path "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -Value $MultilineComment -Force
 # Compile/create service
 Start-Process -Wait "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" -ArgumentList "-out:C:\Windows\SetTimerResolutionService.exe C:\Windows\SetTimerResolutionService.cs" -WindowStyle Hidden
+
+# Remove cs file
 Remove-Item "$env:SystemDrive\Windows\SetTimerResolutionService.cs" -ErrorAction SilentlyContinue | Out-Null
-# Install and start service
+
+# Remove old service if exists
+if (Get-Service -Name "Set Timer Resolution Service" -ErrorAction SilentlyContinue) {
+    sc.exe delete "Set Timer Resolution Service" | Out-Null
+    Start-Sleep -Seconds 2
+}
+
+# install and start service
 New-Service -Name "Set Timer Resolution Service" -BinaryPathName "$env:SystemDrive\Windows\SetTimerResolutionService.exe" -ErrorAction SilentlyContinue | Out-Null
 Set-Service -Name "Set Timer Resolution Service" -StartupType Auto -ErrorAction SilentlyContinue | Out-Null
 Set-Service -Name "Set Timer Resolution Service" -Status Running -ErrorAction SilentlyContinue | Out-Null
+
+# Enable global timer resolution requests
+cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel`" /v `"GlobalTimerResolutionRequests`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+
+# Rebuild performance counters
+cmd /c "cd /d %systemroot%\system32 && lodctr /R >nul 2>&1"
+cmd /c "cd /d %systemroot%\sysWOW64 && lodctr /R >nul 2>&1"
 # Start Task Manager
 Start-Process taskmgr.exe
 Start-Menu
@@ -5140,7 +5894,7 @@ function Write-Status {
   
       
   }
-  $packageRemovalPath = "$env:TEMP\aiPackageRemoval.ps1"
+  $packageRemovalPath = "$env:SystemRoot\Temp\aiPackageRemoval.ps1"
   if (!(test-path $packageRemovalPath)) {
       New-Item $packageRemovalPath -Force | Out-Null
   }
@@ -5224,7 +5978,7 @@ foreach ($choice in $aipackages) {
 
 
   Write-Status -msg 'Removing AI Appx Packages...'
-  $command = "&$env:TEMP\aiPackageRemoval.ps1"
+  $command = "&$env:SystemRoot\Temp\aiPackageRemoval.ps1"
   Start-Trusted -command $command
   
   do {
@@ -5233,7 +5987,7 @@ foreach ($choice in $aipackages) {
       foreach ($package in $packages) {
           if ($package.PackageUserInformation -like '*pending removal*') {
               $ProgressPreference = 'SilentlyContinue'
-              &$env:TEMP\aiPackageRemoval.ps1 *>$null
+              &$env:SystemRoot\Temp\aiPackageRemoval.ps1 *>$null
           }
       }
       
@@ -5340,11 +6094,11 @@ Windows Registry Editor Version 5.00
 [HKEY_USERS\TEMP\LocalState]
 "RewriteEnabled"=hex(5f5e10b):00,e0,d1,c5,7f,ee,83,db,01
 '@
-  New-Item "$env:TEMP\DisableRewrite.reg" -Value $regContent -Force | Out-Null
-  regedit.exe /s "$env:TEMP\DisableRewrite.reg"
+  New-Item "$env:SystemRoot\Temp\DisableRewrite.reg" -Value $regContent -Force | Out-Null
+  regedit.exe /s "$env:SystemRoot\Temp\DisableRewrite.reg"
   Start-Sleep 1
   reg unload HKU\TEMP >$null
-  Remove-Item "$env:TEMP\DisableRewrite.reg" -Force -ErrorAction SilentlyContinue
+  Remove-Item "$env:SystemRoot\Temp\DisableRewrite.reg" -Force -ErrorAction SilentlyContinue
   Reg.exe add 'HKLM\SOFTWARE\Policies\WindowsNotepad' /v 'DisableAIFeatures' /t REG_DWORD /d '1' /f *>$null
   
   Write-Status -msg 'Removing Any Screenshots By Recall...'
@@ -6405,7 +7159,7 @@ function Initialize-DiskCleanup {
       if ($checkBox3.Checked) {
           Write-Host 'Clearing TEMP Files...'
           $temp1 = 'C:\Windows\Temp'
-          $temp2 = $env:TEMP
+          $temp2 = '$env:SystemRoot\Temp'
           $tempFiles = (Get-ChildItem -Path $temp1 , $temp2 -Recurse -Force).FullName
           foreach ($file in $tempFiles) {
               Remove-Item -Path $file -Recurse -Force -ErrorAction SilentlyContinue
@@ -6923,7 +7677,7 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell]
 "ExecutionPolicy"="Unrestricted"
 "@
-Set-Content -Path "$env:TEMP\SecurityOff.reg" -Value $MultilineComment -Force
+Set-Content -Path "$env:SystemRoot\Temp\SecurityOff.reg" -Value $MultilineComment -Force
 # Disable scheduled tasks
 schtasks /Change /TN "Microsoft\Windows\ExploitGuard\ExploitGuard MDM policy Refresh" /Disable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cache Maintenance" /Disable | Out-Null
@@ -6964,11 +7718,11 @@ Pause
 Clear-Host
 Write-Host "Step: Two. Please wait ..." -ForegroundColor Cyan
 # Import reg file
-Regedit.exe /S "$env:TEMP\SecurityOff.reg"
+Regedit.exe /S "$env:SystemRoot\Temp\SecurityOff.reg"
 Timeout /T 5 | Out-Null
 # Import reg file RunAsTI
 $SecurityOff = @'
-Regedit.exe /S "$env:TEMP\SecurityOff.reg"
+Regedit.exe /S "$env:SystemRoot\Temp\SecurityOff.reg"
 '@
 RunAsTI powershell "-nologo -windowstyle hidden -command $SecurityOff"
 Timeout /T 5 | Out-Null
@@ -7425,7 +8179,7 @@ Windows Registry Editor Version 5.00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PowerShell\1\ShellIds\Microsoft.PowerShell]
 "ExecutionPolicy"="Restricted"
 "@
-Set-Content -Path "$env:TEMP\SecurityOn.reg" -Value $MultilineComment -Force
+Set-Content -Path "$env:SystemRoot\Temp\SecurityOn.reg" -Value $MultilineComment -Force
 # Enable scheduled tasks
 schtasks /Change /TN "Microsoft\Windows\ExploitGuard\ExploitGuard MDM policy Refresh" /Enable | Out-Null
 schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Cache Maintenance" /Enable | Out-Null
@@ -7447,11 +8201,11 @@ exit
 Clear-Host
 Write-Host "Step: Two. Please wait ..." -ForegroundColor Cyan
 # Import reg file
-Regedit.exe /S "$env:TEMP\SecurityOn.reg"
+Regedit.exe /S "$env:SystemRoot\Temp\SecurityOn.reg"
 Timeout /T 5 | Out-Null
 # Import reg file RunAsTI
 $SecurityOn = @'
-Regedit.exe /S "$env:TEMP\SecurityOn.reg"
+Regedit.exe /S "$env:SystemRoot\Temp\SecurityOn.reg"
 '@
 RunAsTI powershell "-nologo -windowstyle hidden -command $SecurityOn"
 Timeout /T 5 | Out-Null
@@ -7612,16 +8366,16 @@ cmd /c "reg delete `"HKLM\SOFTWARE\Microsoft\EdgeUpdate`" /f >nul 2>&1"
 # Remove allow Edge uninstall regedit
 cmd /c "reg delete `"HKLM\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdateDev`" /f >nul 2>&1"
 # Download Edge installer
-Get-FileFromWeb -URL "https://go.microsoft.com/fwlink/?linkid=2109047&Channel=Stable&language=en&brand=M100" -File "$env:TEMP\Edge.exe"
+Get-FileFromWeb -URL "https://go.microsoft.com/fwlink/?linkid=2109047&Channel=Stable&language=en&brand=M100" -File "$env:SystemRoot\Temp\Edge.exe"
 # Start Edge installer
-Start-Process -wait "$env:TEMP\Edge.exe"
+Start-Process -wait "$env:SystemRoot\Temp\Edge.exe"
 # Stop Edge running
 $stop = "MicrosoftEdgeUpdate", "OneDrive", "WidgetService", "Widgets", "msedge", "Resume", "CrossDeviceResume", "msedgewebview2"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
 # Download Edge webview installer
-Get-FileFromWeb -URL "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/304fddef-b073-4e0a-b1ff-c2ea02584017/MicrosoftEdgeWebview2Setup.exe" -File "$env:TEMP\EdgeWebView.exe"
+Get-FileFromWeb -URL "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/304fddef-b073-4e0a-b1ff-c2ea02584017/MicrosoftEdgeWebview2Setup.exe" -File "$env:SystemRoot\Temp\EdgeWebView.exe"
 # Start Edge webview installer
-Start-Process -wait "$env:TEMP\EdgeWebView.exe"
+Start-Process -wait "$env:SystemRoot\Temp\EdgeWebView.exe"
 # Stop Edge running
 $stop = "MicrosoftEdgeUpdate", "OneDrive", "WidgetService", "Widgets", "msedge", "msedgewebview2"
 $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
@@ -7683,7 +8437,7 @@ function Start-Menu {
         Write-Host "1.  Windows Activation" -ForegroundColor Yellow
         Write-Host "2.  Run CTT WinUtil" -ForegroundColor Yellow
         Write-Host "3.  Install DDU" -ForegroundColor Yellow
-        Write-Host "4.  Install NVIDIA driver" -ForegroundColor Yellow
+        Write-Host "4.  Install GPU driver" -ForegroundColor Yellow
         Write-Host "5.  Install dependencies" -ForegroundColor Yellow
         Write-Host "6.  Run basic tweaks" -ForegroundColor Yellow
         Write-Host "7.  Optimize power plan" -ForegroundColor Yellow
@@ -7727,7 +8481,7 @@ function Start-Menu {
             '1'  { Invoke-Activation }
             '2'  { Invoke-WinUtil }
             '3'  { Install-DDU }
-            '4'  { Install-NvidiaDriver }
+            '4'  { Install-GPUDriver }
             '5'  { Install-Dependencies }
             '6'  { Optimize-BasicTweaks }
             '7'  { Optimize-PowerPlan }
@@ -7766,6 +8520,5 @@ function Start-Menu {
 }
 
 Start-Menu
-
 
 
