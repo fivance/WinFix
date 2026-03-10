@@ -259,18 +259,17 @@ $MultilineComment = @"
   Set-ItemProperty -Path "$env:SystemRoot\Temp\DDU\Settings\Settings.xml" -Name IsReadOnly -Value $true
    
   # Create DDU ps1 file
-  $DDU = @'
+  
   # Remove WinLogon
     cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`" /v `"Userinit`" /t REG_SZ /d `"C:\WINDOWS\system32\userinit.exe,`" /f >nul 2>&1"
   
   # remove safe mode boot
   cmd /c "bcdedit /deletevalue {current} safeboot >nul 2>&1"
   
-          Write-Host "DDU`n"
   
   # Uninstall Soundblaster Realtek Intel AMD Nvidia drivers & restart
   Start-Process "$env:SystemRoot\Temp\DDU\Display Driver Uninstaller.exe" -ArgumentList "-CleanSoundBlaster -CleanRealtek -CleanAllGpus -Restart" -Wait
-  '@
+  
   Set-Content -Path "$env:SystemRoot\Temp\DDU.ps1" -Value $DDU -Force
   
   # install Winlogon 
