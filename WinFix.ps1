@@ -355,7 +355,7 @@ Write-Host "4. Exit"
   
 while ($true) {
     $choice = Read-Host " "
-    if ($choice -match '^[1-3]$') {
+    if ($choice -match '^[1-4]$') {
         switch ($choice) {
             1 {
                 Clear-Host
@@ -8806,4 +8806,5 @@ function Start-Menu {
 
 
 Start-Menu
+
 
