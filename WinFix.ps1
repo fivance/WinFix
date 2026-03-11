@@ -276,7 +276,7 @@ function Install-DDU {
   Start-Sleep -Seconds 3
 
   Get-FileFromWeb -URL "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.4.2_setup.exe" -File "$env:SystemRoot\Temp\DDU.exe"
-  Expand-Archive "$env:SystemRoot\Temp\DDU.zip" -DestinationPath "$env:SystemRoot\Temp\DDU" -ErrorAction SilentlyContinue
+  Expand-Archive "$env:SystemRoot\Temp\DDU.zip" -DestinationPath "$env:SystemRoot\Temp\DDU\" -ErrorAction SilentlyContinue
 
 $MultilineComment = @"
 <?xml version="1.0" encoding="utf-8"?>
@@ -8806,5 +8806,6 @@ function Start-Menu {
 
 
 Start-Menu
+
 
 
