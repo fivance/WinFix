@@ -986,7 +986,7 @@ while ($true) {
         }   
         }
     } else {
-        Write-Host "Invalid input. Please select a valid option (1-3)."
+        Write-Host "Invalid input. Please select a valid option (1-4)."
     }
 }
 }
@@ -8806,3 +8806,4 @@ function Start-Menu {
 
 
 Start-Menu
+
