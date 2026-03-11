@@ -351,6 +351,7 @@ Clear-Host
 Write-Host "1. Nvidia" -ForegroundColor Green
 Write-Host "2. AMD" -ForegroundColor Red
 Write-Host "3. Intel" -ForegroundColor Blue
+Write-Host "0. Exit"
   
 while ($true) {
     $choice = Read-Host " "
@@ -978,6 +979,11 @@ while ($true) {
                 Start-Menu
                 break
             }
+            
+        0 {
+            Start-Menu
+                break
+        }   
         }
     } else {
         Write-Host "Invalid input. Please select a valid option (1-3)."
