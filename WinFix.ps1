@@ -2105,8 +2105,8 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 
 ; This registry value tells the windows scheduler how much cpu time a process should get. While there is lots of options outside of the two "Adjust for best performance: programs or background services" in legacy control panel, the default value when using "Programs" gives the scheduler the ideal cpu time for boosting foreground apps (longer cpu time). NOTE This will not affect input lag in anyway as I/O are received as interrupts and take cpu priority
 ; Adjust for best performance of programs
-;[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl]
-;"Win32PrioritySeparation"=dword:00000026
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\PriorityControl]
+"Win32PrioritySeparation"=dword:00000026
 
 ; Disable remote assistance
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Remote Assistance]
@@ -8794,6 +8794,7 @@ function Start-Menu {
 
 
 Start-Menu
+
 
 
 
