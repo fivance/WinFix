@@ -3619,7 +3619,7 @@ Start-Process "msiexec.exe" -ArgumentList "/x $guid /qn /norestart" -Wait -NoNew
 # Stop Onedrive running
 Stop-Process -Force -Name OneDrive -ErrorAction SilentlyContinue | Out-Null
 
-# Uninstall onedrive
+# Uninstall Onedrive
 cmd /c "C:\Windows\System32\OneDriveSetup.exe -uninstall >nul 2>&1"
 # Uninstall Office 365 onedrive
 Get-ChildItem -Path "C:\Program Files*\Microsoft OneDrive", "$env:LOCALAPPDATA\Microsoft\OneDrive" -Filter "OneDriveSetup.exe" -Recurse -ErrorAction SilentlyContinue |
@@ -3628,25 +3628,6 @@ ForEach-Object { Start-Process -Wait $_.FullName -ArgumentList "/uninstall /allu
 cmd /c "C:\Windows\SysWOW64\OneDriveSetup.exe -uninstall >nul 2>&1"
 # Windows 10 remove Onedrive scheduled tasks
 Get-ScheduledTask | Where-Object {$_.Taskname -match 'OneDrive'} | Unregister-ScheduledTask -Confirm:$false
-
-# Uninstall Remote Desktop Connection
-try {
-Start-Process "mstsc" -ArgumentList "/Uninstall"
-} catch { }
-# Silent window for remote desktop connection
-$processExists = Get-Process -Name mstsc -ErrorAction SilentlyContinue
-if ($processExists) {
-$running = $true
-do {
-$mstscProcess = Get-Process -Name mstsc -ErrorAction SilentlyContinue
-if ($mstscProcess -and $mstscProcess.MainWindowHandle -ne 0) {
-Stop-Process -Force -Name mstsc -ErrorAction SilentlyContinue | Out-Null
-$running = $false
-}
-Start-Sleep -Milliseconds 100
-} while ($running)
-}
-Start-Sleep -Seconds 1
 
 # Windows 10 uninstall old snipping tool
 try {
@@ -8813,6 +8794,7 @@ function Start-Menu {
 
 
 Start-Menu
+
 
 
 
