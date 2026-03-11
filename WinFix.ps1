@@ -271,12 +271,14 @@ function Invoke-WinUtil {
 }
 
 function Install-DDU {
+
   Clear-Host
   Write-Host "Installing: DDU..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
 
   Get-FileFromWeb -URL "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.4.2_setup.exe" -File "$env:SystemRoot\Temp\DDU.exe"
-  Expand-Archive "$env:SystemRoot\Temp\DDU.zip" -DestinationPath "$env:SystemRoot\Temp\DDU\" -ErrorAction SilentlyContinue
+  & "C:\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\DDU.exe" -o"$env:SystemRoot\Temp\DDU" -y | Out-Null
+
 
 $MultilineComment = @"
 <?xml version="1.0" encoding="utf-8"?>
@@ -344,6 +346,7 @@ $MultilineComment = @"
   else {
       Write-Host "Restart supressed." -ForegroundColor Cyan
   }
+
 }
 
 function Install-GPUDriver {
@@ -3377,6 +3380,9 @@ E0,F6,C5,D5,0E,CA,50,00,00
 
 ; Remove home
 [-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}]
+[HKEY_CURRENT_USER\Software\Classes\CLSID\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}]
+@="CLSID_MSGraphHomeFolder"
+"System.IsPinnedToNameSpaceTree"=dword:00000000
 
 ; Remove gallery
 [HKEY_CURRENT_USER\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}]
@@ -6586,6 +6592,7 @@ Start-Sleep -Seconds 3
 }
 
 function Enable-VirtualizationSecurityFeatures {
+  Clear-Host
   Write-Host "Please note that enabling virtualization security features may induce performance hit in certain games." -ForegroundColor Yellow
   Start-Sleep -Seconds 3
   # Enable VBS
