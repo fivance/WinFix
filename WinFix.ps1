@@ -346,39 +346,48 @@ $MultilineComment = @"
   }
 }
 
-function Install-NvidiaDriver {
-  Clear-Host
-  Write-Host "Installing latest Nvidia Driver..." -ForegroundColor Cyan
-  Start-Sleep -Seconds 3
+function Install-GPUDriver {
+Clear-Host
+Write-Host "1. Nvidia" -ForegroundColor Green
+Write-Host "2. AMD" -ForegroundColor Red
+Write-Host "3. Intel" -ForegroundColor Blue
+  
+while ($true) {
+    $choice = Read-Host " "
+    if ($choice -match '^[1-3]$') {
+        switch ($choice) {
+            1 {
+                Clear-Host
+                Write-Host "Installing latest Nvidia Driver..." -ForegroundColor Cyan
+                Start-Sleep -Seconds 3
 
-  Remove-Item -Recurse -Force "$env:SystemRoot\Temp\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
-  Remove-Item -Recurse -Force "$env:SystemRoot\Temp\NvidiaDriver" -ErrorAction SilentlyContinue | Out-Null
-  Remove-Item -Recurse -Force "$env:SystemRoot\Temp\7-Zip.exe" -ErrorAction SilentlyContinue | Out-Null
-  $uri = 'https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=120&pfid=929&osID=57&languageCode=1033&isWHQL=1&dch=1&sort1=0&numberOfResults=1'
-  $response = Invoke-WebRequest -Uri $uri -Method GET -UseBasicParsing
-  $payload = $response.Content | ConvertFrom-Json
-  $version =  $payload.IDS[0].downloadInfo.Version
-  $windowsVersion = if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {"win10-win11"} else {"win8-win7"}
-  $windowsArchitecture = if ([Environment]::Is64BitOperatingSystem) {"64bit"} else {"32bit"}
-  $url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-dch-whql.exe"
-  Write-Output "Downloading: Nvidia Driver $version..."
-  Get-FileFromWeb -URL $url -File "$env:SystemRoot\Temp\NvidiaDriver.exe"
-  Clear-Host
-  Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:SystemRoot\Temp\7-Zip.exe"
-  
-  # Set config for 7zip
-  cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
-  cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"CascadedMenu`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-  
-Start-Process -wait "$env:SystemRoot\Temp\7-Zip.exe" /S
-  cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\NvidiaDriver.exe" -o"$env:SystemRoot\Temp\NvidiaDriver" -y | Out-Null
-  Start-Process "$env:SystemRoot\Temp\NvidiaDriver\setup.exe"
-  Clear-Host
-  Read-Host 'Press any key to continue (only press after driver is installed)'
-  Write-Host "Installing: NvidiaProfileInspector..." -ForegroundColor Cyan
-  Get-FileFromWeb -URL "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.31/nvidiaProfileInspector.zip" -File "$env:SystemRoot\Temp\Inspector.zip"
-  Expand-Archive "$env:SystemRoot\Temp\Inspector.zip" -DestinationPath "$env:SystemRoot\Temp\Inspector" -ErrorAction SilentlyContinue
-$MultilineComment = @"
+                Remove-Item -Recurse -Force "$env:SystemRoot\Temp\NvidiaDriver.exe" -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item -Recurse -Force "$env:SystemRoot\Temp\NvidiaDriver" -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item -Recurse -Force "$env:SystemRoot\Temp\7-Zip.exe" -ErrorAction SilentlyContinue | Out-Null
+                $uri = 'https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=120&pfid=929&osID=57&languageCode=1033&isWHQL=1&dch=1&sort1=0&numberOfResults=1'
+                $response = Invoke-WebRequest -Uri $uri -Method GET -UseBasicParsing
+                $payload = $response.Content | ConvertFrom-Json
+                $version = $payload.IDS[0].downloadInfo.Version
+                $windowsVersion = if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {"win10-win11"} else {"win8-win7"}
+                $windowsArchitecture = if ([Environment]::Is64BitOperatingSystem) {"64bit"} else {"32bit"}
+                $url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-dch-whql.exe"
+                Write-Output "Downloading: Nvidia Driver $version..."
+                Get-FileFromWeb -URL $url -File "$env:SystemRoot\Temp\NvidiaDriver.exe"
+                Clear-Host
+                Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2501-x64.exe" -File "$env:SystemRoot\Temp\7-Zip.exe"
+
+                cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"ContextMenu`" /t REG_DWORD /d `"259`" /f >nul 2>&1"
+                cmd /c "reg add `"HKEY_CURRENT_USER\Software\7-Zip\Options`" /v `"CascadedMenu`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+                Start-Process -wait "$env:SystemRoot\Temp\7-Zip.exe" /S
+                cmd /c "C:\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\NvidiaDriver.exe" -o"$env:SystemRoot\Temp\NvidiaDriver" -y | Out-Null
+                Start-Process "$env:SystemRoot\Temp\NvidiaDriver\setup.exe"
+                Clear-Host
+                Read-Host 'Press any key to continue (only press after driver is installed)'
+                Write-Host "Installing: NvidiaProfileInspector..." -ForegroundColor Cyan
+                Get-FileFromWeb -URL "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.31/nvidiaProfileInspector.zip" -File "$env:SystemRoot\Temp\Inspector.zip"
+                Expand-Archive "$env:SystemRoot\Temp\Inspector.zip" -DestinationPath "$env:SystemRoot\Temp\Inspector" -ErrorAction SilentlyContinue
+                $MultilineComment = @"
 <?xml version="1.0" encoding="utf-16"?>
 <ArrayOfProfile>
   <Profile>
@@ -535,7 +544,7 @@ $MultilineComment = @"
         <SettingValue>0</SettingValue>
         <ValueType>Dword</ValueType>
       </ProfileSetting>
-	  <ProfileSetting>
+      <ProfileSetting>
         <SettingNameInfo>CUDA - Sysmem Fallback Policy</SettingNameInfo>
         <SettingID>283962569</SettingID>
         <SettingValue>1</SettingValue>
@@ -575,158 +584,406 @@ $MultilineComment = @"
   </Profile>
 </ArrayOfProfile>
 "@
-  Set-Content -Path "$env:SystemRoot\Temp\Inspector\Inspector.nip" -Value $MultilineComment -Force
-  Start-Process -wait "$env:SystemRoot\Temp\Inspector\nvidiaProfileInspector.exe" -ArgumentList "$env:SystemRoot\Temp\Inspector\Inspector.nip"
-  
-  (Get-ChildItem -Path "$env:windir\System32\DriverStore\FileRepository\nv_dispi*" -Directory).FullName | ForEach-Object { 
-    takeown /f "$_\NvTelemetry64.dll" *>$null
-    icacls "$_\NvTelemetry64.dll" /grant administrators:F /t *>$null
-    Remove-Item "$_\NvTelemetry64.dll" -Force 
-  }
-  
-# Debloat NVIDIA driver
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\Display.Nview" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\FrameViewSDK" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\HDAudio" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\MSVCRT" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp.MessageBus" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvBackend" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvContainer" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvCpl" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvDLISR" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NVPCF" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvTelemetry" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvVAD" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\PhysX" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\PPC" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\ShadowPlay" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\CEF" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\osc" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\Plugins" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\UpgradeConsent" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\www" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\7z.dll" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\7z.exe" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\DarkModeCheck.exe" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\InstallerExtension.dll" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvApp.nvi" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvAppApi.dll" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvAppExt.dll" -Force -ErrorAction SilentlyContinue | Out-Null
-Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvConfigGenerator.dll" -Force -ErrorAction SilentlyContinue | Out-Null  
-  
-  
-# Turn on no scaling for all displays
-$configKeys = Get-ChildItem -Path "HKLM:\System\ControlSet001\Control\GraphicsDrivers\Configuration" -Recurse -ErrorAction SilentlyContinue
-foreach ($key in $configKeys) {
-$scalingValue = Get-ItemProperty -Path $key.PSPath -Name "Scaling" -ErrorAction SilentlyContinue
-if ($scalingValue) {
-$regPath = $key.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
-Run-Trusted -command "reg add `"$regPath`" /v `"Scaling`" /t REG_DWORD /d `"2`" /f"
-}
-}
+                Set-Content -Path "$env:SystemRoot\Temp\Inspector\Inspector.nip" -Value $MultilineComment -Force
+                Start-Process -wait "$env:SystemRoot\Temp\Inspector\nvidiaProfileInspector.exe" -ArgumentList "$env:SystemRoot\Temp\Inspector\Inspector.nip"
 
+                (Get-ChildItem -Path "$env:windir\System32\DriverStore\FileRepository\nv_dispi*" -Directory).FullName | ForEach-Object {
+                    takeown /f "$_\NvTelemetry64.dll" *>$null
+                    icacls "$_\NvTelemetry64.dll" /grant administrators:F /t *>$null
+                    Remove-Item "$_\NvTelemetry64.dll" -Force
+                }
 
-# Disable HDCP
-$subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
-foreach($key in $subkeys){
-if ($key -notlike '*Configuration'){
-reg add "$key" /v "RMHdcpKeyglobZero" /t REG_DWORD /d "1" /f | Out-Null
-}
-}
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\Display.Nview" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\FrameViewSDK" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\HDAudio" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\MSVCRT" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp.MessageBus" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvBackend" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvContainer" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvCpl" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvDLISR" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NVPCF" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvTelemetry" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvVAD" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\PhysX" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\PPC" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\ShadowPlay" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\CEF" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\osc" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\Plugins" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\UpgradeConsent" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\www" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\7z.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\7z.exe" -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\DarkModeCheck.exe" -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\InstallerExtension.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvApp.nvi" -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvAppApi.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvAppExt.dll" -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemRoot\Temp\NvidiaDriver\NvApp\NvConfigGenerator.dll" -Force -ErrorAction SilentlyContinue | Out-Null
 
-# Unblock DRS files
-$path = "C:\ProgramData\NVIDIA Corporation\Drs"
-Get-ChildItem -Path $path -Recurse | Unblock-File
+                $configKeys = Get-ChildItem -Path "HKLM:\System\ControlSet001\Control\GraphicsDrivers\Configuration" -Recurse -ErrorAction SilentlyContinue
+                foreach ($key in $configKeys) {
+                    $scalingValue = Get-ItemProperty -Path $key.PSPath -Name "Scaling" -ErrorAction SilentlyContinue
+                    if ($scalingValue) {
+                        $regPath = $key.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
+                        Run-Trusted -command "reg add `"$regPath`" /v `"Scaling`" /t REG_DWORD /d `"2`" /f"
+                    }
+                }
 
-# Set PhysX to GPU
-cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"NvCplPhysxAuto`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                $subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
+                foreach ($key in $subkeys) {
+                    if ($key -notlike '*Configuration') {
+                        reg add "$key" /v "RMHdcpKeyglobZero" /t REG_DWORD /d "1" /f | Out-Null
+                    }
+                }
 
-# Enable developer settings
-cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"NvDevToolsVisible`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+                $path = "C:\ProgramData\NVIDIA Corporation\Drs"
+                Get-ChildItem -Path $path -Recurse | Unblock-File
 
-# Allow access to the GPU performance counters to all users
-$subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
-foreach($key in $subkeys){
-if ($key -notlike '*Configuration'){
-reg add "$key" /v "RmProfilingAdminOnly" /t REG_DWORD /d "0" /f | Out-Null
-}
-}
-cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"RmProfilingAdminOnly`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"NvCplPhysxAuto`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"NvDevToolsVisible`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
 
-# Disable show notification tray icon
-cmd /c "reg add `"HKCU\Software\NVIDIA Corporation\NvTray`" /v `"StartOnLogin`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                $subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
+                foreach ($key in $subkeys) {
+                    if ($key -notlike '*Configuration') {
+                        reg add "$key" /v "RmProfilingAdminOnly" /t REG_DWORD /d "0" /f | Out-Null
+                    }
+                }
+                cmd /c "reg add `"HKLM\System\ControlSet001\Services\nvlddmkm\Parameters\Global\NVTweak`" /v `"RmProfilingAdminOnly`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 
-# Enable nvidia legacy sharpen
-cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\NVIDIA Corporation\NvTray`" /v `"StartOnLogin`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 
-# Turn on no scaling for all displays
-$configKeys = Get-ChildItem -Path "HKLM:\System\ControlSet001\Control\GraphicsDrivers\Configuration" -Recurse -ErrorAction SilentlyContinue
-foreach ($key in $configKeys) {
-$scalingValue = Get-ItemProperty -Path $key.PSPath -Name "Scaling" -ErrorAction SilentlyContinue
-if ($scalingValue) {
-$regPath = $key.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
-Run-Trusted -command "reg add `"$regPath`" /v `"Scaling`" /t REG_DWORD /d `"2`" /f"
-}
-}
+                cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Services\nvlddmkm\Parameters\FTS`" /v `"EnableGR535`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 
-# Turn on override the scaling mode set by games and programs for all displays
-# Perform scaling on display
-$displayDbPath = "HKLM:\System\ControlSet001\Services\nvlddmkm\State\DisplayDatabase"
-if (Test-Path $displayDbPath) {
-$displays = Get-ChildItem -Path $displayDbPath -ErrorAction SilentlyContinue
-foreach ($display in $displays) {
-$regPath = $display.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
-Run-Trusted -command "reg add `"$regPath`" /v `"ScalingConfig`" /t REG_BINARY /d `"DB02000010000000200100000E010000`" /f"
-}
-}
+                $configKeys = Get-ChildItem -Path "HKLM:\System\ControlSet001\Control\GraphicsDrivers\Configuration" -Recurse -ErrorAction SilentlyContinue
+                foreach ($key in $configKeys) {
+                    $scalingValue = Get-ItemProperty -Path $key.PSPath -Name "Scaling" -ErrorAction SilentlyContinue
+                    if ($scalingValue) {
+                        $regPath = $key.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
+                        Run-Trusted -command "reg add `"$regPath`" /v `"Scaling`" /t REG_DWORD /d `"2`" /f"
+                    }
+                }
 
-# Enable MSI mode for all gpus
-$gpuDevices = Get-PnpDevice -Class Display
-foreach ($gpu in $gpuDevices) {
-$instanceID = $gpu.InstanceId
-cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Enum\$instanceID\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties`" /v `"MSISupported`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
-}
-  
-  Get-ScheduledTask -TaskName '*NvDriverUpdateCheckDaily*' | Disable-ScheduledTask 
-  Get-ScheduledTask -TaskName '*NVIDIA GeForce Experience SelfUpdate*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvProfileUpdaterDaily*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvProfileUpdaterOnLogon*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvTmRep_CrashReport1*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvTmRep_CrashReport2*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvTmRep_CrashReport3*' | Disable-ScheduledTask
-  Get-ScheduledTask -TaskName '*NvTmRep_CrashReport4*' | Disable-ScheduledTask
-  Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\FvSvc' /v 'Start' /t REG_DWORD /d '4' /f
-  
-$response = Read-Host "Do you want to enable P0 state for GPU? (yes/no)"
+                $displayDbPath = "HKLM:\System\ControlSet001\Services\nvlddmkm\State\DisplayDatabase"
+                if (Test-Path $displayDbPath) {
+                    $displays = Get-ChildItem -Path $displayDbPath -ErrorAction SilentlyContinue
+                    foreach ($display in $displays) {
+                        $regPath = $display.PSPath.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
+                        Run-Trusted -command "reg add `"$regPath`" /v `"ScalingConfig`" /t REG_BINARY /d `"DB02000010000000200100000E010000`" /f"
+                    }
+                }
 
-if ($response -match '^(y|yes)$') {
-    Write-Host "Enabling P0 state for GPU..." -ForegroundColor Cyan
-    Start-Sleep -Seconds 3
-    
-  Clear-Host
-  $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
-  foreach($key in $subkeys){
-  if ($key -notlike '*Configuration'){
-  reg add "$key" /v "DisableDynamicPstate" /t REG_DWORD /d "1" /f | Out-Null
-}
-}
-Clear-Host
-Write-Host "P0 State: On ..."  -ForegroundColor Cyan
-  $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
-  foreach($key in $subkeys){
-  if ($key -notlike '*Configuration'){
-  Get-ItemProperty -Path "Registry::$key" -Name 'DisableDynamicPstate'
-}
-}
+                $gpuDevices = Get-PnpDevice -Class Display
+                foreach ($gpu in $gpuDevices) {
+                    $instanceID = $gpu.InstanceId
+                    cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Enum\$instanceID\Device Parameters\Interrupt Management\MessageSignaledInterruptProperties`" /v `"MSISupported`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+                }
 
-} else {
-    Write-Host "Skipping GPU P0 state enable." -ForegroundColor Cyan
-}   
-  Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
-}
+                Get-ScheduledTask -TaskName '*NvDriverUpdateCheckDaily*' | Disable-ScheduledTask
+                Get-ScheduledTask -TaskName '*NVIDIA GeForce Experience SelfUpdate*' | Disable-ScheduledTask
+                Get-ScheduledTask -TaskName '*NvProfileUpdaterDaily*' | Disable-ScheduledTask
+                Get-ScheduledTask -TaskName '*NvProfileUpdaterOnLogon*' | Disable-ScheduledTask
+                Get-ScheduledTask -TaskName '*NvTmRep_CrashReport1*' | Disable-ScheduledTask
+                Get-ScheduledTask -TaskName '*NvTmRep_CrashReport2*' | Disable-ScheduledTask
+                Get-ScheduledTask -TaskName '*NvTmRep_CrashReport3*' | Disable-ScheduledTask
+                Get-ScheduledTask -TaskName '*NvTmRep_CrashReport4*' | Disable-ScheduledTask
+                Reg.exe add 'HKLM\SYSTEM\CurrentControlSet\Services\FvSvc' /v 'Start' /t REG_DWORD /d '4' /f
 
+                $response = Read-Host "Do you want to enable P0 state for GPU? (yes/no)"
+                if ($response -match '^(y|yes)$') {
+                    Write-Host "Enabling P0 state for GPU..." -ForegroundColor Cyan
+                    Start-Sleep -Seconds 3
+                    Clear-Host
+                    $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
+                    foreach ($key in $subkeys) {
+                        if ($key -notlike '*Configuration') {
+                            reg add "$key" /v "DisableDynamicPstate" /t REG_DWORD /d "1" /f | Out-Null
+                        }
+                    }
+                    Clear-Host
+                    Write-Host "P0 State: On ..." -ForegroundColor Cyan
+                    $subkeys = (Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue).Name
+                    foreach ($key in $subkeys) {
+                        if ($key -notlike '*Configuration') {
+                            Get-ItemProperty -Path "Registry::$key" -Name 'DisableDynamicPstate'
+                        }
+                    }
+                } else {
+                    Write-Host "Skipping GPU P0 state enable." -ForegroundColor Cyan
+                }
+
+                Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
+
+                Write-Host "`nNVIDIA setup complete." -ForegroundColor Green
+                Read-Host "Press Enter to return to the menu"
+                Start-Menu
+                break
+            }
+
+            2 {
+                Clear-Host
+                Write-Host "Download AMD GPU driver`n" -ForegroundColor Yellow
+
+                Start-Sleep -Seconds 5
+                Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" "https://www.amd.com/en/support/download/drivers.html"
+                Wait-Process -Name chrome
+
+                Write-Host "Select downloaded driver`n" -ForegroundColor Yellow
+
+                Start-Sleep -Seconds 5
+                $InstallFile = Show-ModernFilePicker -Mode File
+
+                Write-Host "Debloating driver`n"
+
+                & "C:\Program Files\7-Zip\7z.exe" x "$InstallFile" -o"$env:SystemRoot\Temp\AmdDriver" -y | Out-Null
+
+                $path = "$env:SystemRoot\Temp\AmdDriver\Packages\Drivers\Display\WT6A_INF"
+                Get-ChildItem $path -Directory | Where-Object {
+                    $_.Name -notlike "B*" -and
+                    $_.Name -ne "amdvlk" -and
+                    $_.Name -ne "amdogl" -and
+                    $_.Name -ne "amdocl"
+                } | Remove-Item -Recurse -Force
+
+                $xmlFiles = @(
+                    "$env:SystemRoot\Temp\AmdDriver\Config\AMDAUEPInstaller.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\AMDCOMPUTE.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\AMDLinkDriverUpdate.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\AMDRELAUNCHER.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\AMDScoSupportTypeUpdate.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\AMDUpdater.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\AMDUWPLauncher.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\EnableWindowsDriverSearch.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\InstallUEP.xml"
+                    "$env:SystemRoot\Temp\AmdDriver\Config\ModifyLinkUpdate.xml"
+                )
+                foreach ($file in $xmlFiles) {
+                    if (Test-Path $file) {
+                        $content = Get-Content $file -Raw
+                        $content = $content -replace '<Enabled>true</Enabled>', '<Enabled>false</Enabled>'
+                        $content = $content -replace '<Hidden>true</Hidden>', '<Hidden>false</Hidden>'
+                        Set-Content $file -Value $content -NoNewline
+                    }
+                }
+
+                $jsonFiles = @(
+                    "$env:SystemRoot\Temp\AmdDriver\Config\InstallManifest.json"
+                    "$env:SystemRoot\Temp\AmdDriver\Bin64\cccmanifest_64.json"
+                )
+                foreach ($file in $jsonFiles) {
+                    if (Test-Path $file) {
+                        $content = Get-Content $file -Raw
+                        $content = $content -replace '"InstallByDefault"\s*:\s*"Yes"', '"InstallByDefault" : "No"'
+                        Set-Content $file -Value $content -NoNewline
+                    }
+                }
+
+                Write-Host "Installing driver`n"
+
+                Start-Process -Wait "$env:SystemRoot\Temp\AmdDriver\Bin64\ATISetup.exe" -ArgumentList "-INSTALL -VIEW:2" -WindowStyle Hidden
+
+                cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\Run`" /v `"AMDNoiseSuppression`" /f >nul 2>&1"
+                cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce`" /v `"StartRSX`" /f >nul 2>&1"
+                Unregister-ScheduledTask -TaskName "StartCN" -Confirm:$false -ErrorAction SilentlyContinue
+                cmd /c "sc stop `"amdacpbus`" >nul 2>&1"
+                cmd /c "sc delete `"amdacpbus`" >nul 2>&1"
+                cmd /c "sc stop `"AMDSAFD`" >nul 2>&1"
+                cmd /c "sc delete `"AMDSAFD`" >nul 2>&1"
+                cmd /c "sc stop `"AtiHDAudioService`" >nul 2>&1"
+                cmd /c "sc delete `"AtiHDAudioService`" >nul 2>&1"
+
+                Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\AMD Bug Report Tool" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemDrive\Windows\SysWOW64\AMDBugReportTool.exe" -Force -ErrorAction SilentlyContinue | Out-Null
+
+                $findamdinstallmanager = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                $amdinstallmanager = Get-ItemProperty $findamdinstallmanager -ErrorAction SilentlyContinue |
+                    Where-Object { $_.DisplayName -like "*AMD Install Manager*" }
+                if ($amdinstallmanager) {
+                    $guid = $amdinstallmanager.PSChildName
+                    Start-Process "msiexec.exe" -ArgumentList "/x $guid /qn /norestart" -Wait -NoNewWindow
+                }
+
+                Remove-Item "$InstallFile" -Force -ErrorAction SilentlyContinue | Out-Null
+
+                $folderName = "AMD Software$([char]0xA789) Adrenalin Edition"
+                Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\$folderName\$folderName.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue
+                Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\$folderName" -Recurse -Force -ErrorAction SilentlyContinue
+
+                Remove-Item "$env:SystemDrive\AMD" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+
+                80..0 | % { Write-Host "`rImporting settings $_   " -NoNewline; Start-Sleep 1 }; Write-Host "`n"
+
+                Start-Process "C:\Program Files\AMD\CNext\CNext\RadeonSoftware.exe"
+                Start-Sleep -Seconds 30
+                Stop-Process -Name "RadeonSoftware" -Force -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 2
+
+                $subkeys = Get-ChildItem -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}" -Force -ErrorAction SilentlyContinue
+                foreach ($key in $subkeys) {
+                    if ($key -notlike '*Configuration') {
+                        reg add "$key" /v "EnableUlps" /t REG_DWORD /d "0" /f | Out-Null
+                    }
+                }
+
+                cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"AutoUpdate`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"WizardProfile`" /t REG_SZ /d `"PROFILE_CUSTOM`" /f >nul 2>&1"
+
+                $basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+                $allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+                $optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "UMD" }
+                foreach ($key in $optionKeys) {
+                    $regPath = $key.Name
+                    cmd /c "reg add `"$regPath`" /v `"VSyncControl`" /t REG_BINARY /d `"3000`" /f >nul 2>&1"
+                    cmd /c "reg add `"$regPath`" /v `"TFQ`" /t REG_BINARY /d `"3200`" /f >nul 2>&1"
+                    cmd /c "reg add `"$regPath`" /v `"Tessellation`" /t REG_BINARY /d `"3100`" /f >nul 2>&1"
+                    cmd /c "reg add `"$regPath`" /v `"Tessellation_OPTION`" /t REG_BINARY /d `"3200`" /f >nul 2>&1"
+                }
+
+                cmd /c "reg add `"HKCU\Software\AMD\CN\CustomResolutions`" /v `"EulaAccepted`" /t REG_SZ /d `"true`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\AMD\CN\DisplayOverride`" /v `"EulaAccepted`" /t REG_SZ /d `"true`" /f >nul 2>&1"
+
+                $basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+                $allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+                $edidKeysWithSuffix = $allKeys | Where-Object { $_.PSChildName -match '^EDID_[A-F0-9]+_[A-F0-9]+_[A-F0-9]+$' }
+                foreach ($edidKey in $edidKeysWithSuffix) {
+                    if ($edidKey.PSChildName -match '^(EDID_[A-F0-9]+_[A-F0-9]+)_[A-F0-9]+$') {
+                        $baseEdidName = $matches[1]
+                        $parentPath = Split-Path $edidKey.PSPath
+                        $baseEdidPath = Join-Path $parentPath $baseEdidName
+                        if (!(Test-Path $baseEdidPath)) {
+                            New-Item -Path $baseEdidPath -Force -ErrorAction SilentlyContinue | Out-Null
+                        }
+                        $optionPathNew = Join-Path $baseEdidPath "Option"
+                        if (!(Test-Path $optionPathNew)) {
+                            New-Item -Path $optionPathNew -Force -ErrorAction SilentlyContinue | Out-Null
+                        }
+                        $regPath = $optionPathNew.Replace('Microsoft.PowerShell.Core\Registry::', '').Replace('HKEY_LOCAL_MACHINE', 'HKLM')
+                        cmd /c "reg add `"$regPath`" /v `"All_nodes`" /t REG_BINARY /d `"50726F74656374696F6E436F6E74726F6C00`" /f >nul 2>&1"
+                        cmd /c "reg add `"$regPath`" /v `"default`" /t REG_BINARY /d `"64`" /f >nul 2>&1"
+                        cmd /c "reg add `"$regPath`" /v `"ProtectionControl`" /t REG_BINARY /d `"0100000001000000`" /f >nul 2>&1"
+                    }
+                }
+
+                $basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+                $allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+                $optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "power_v1" }
+                foreach ($key in $optionKeys) {
+                    $regPath = $key.Name
+                    cmd /c "reg add `"$regPath`" /v `"abmlevel`" /t REG_BINARY /d `"00000000`" /f >nul 2>&1"
+                }
+
+                cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"SystemTray`" /t REG_SZ /d `"false`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"CN_Hide_Toast_Notification`" /t REG_SZ /d `"true`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\AMD\CN`" /v `"AnimationEffect`" /t REG_SZ /d `"false`" /f >nul 2>&1"
+                cmd /c "reg delete `"HKCU\Software\AMD\CN\Notification`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\AMD\CN\Notification`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\AMD\CN\FreeSync`" /v `"AlreadyNotified`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\AMD\CN\OverlayNotification`" /v `"AlreadyNotified`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+                cmd /c "reg add `"HKCU\Software\AMD\CN\VirtualSuperResolution`" /v `"AlreadyNotified`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+
+                Write-Host "`nAMD setup complete." -ForegroundColor Green
+                Read-Host "Press Enter to return to the menu"
+                Start-Menu
+                break
+            }
+
+            3 {
+                Clear-Host
+                Write-Host "Download Intel GPU driver`n" -ForegroundColor Yellow
+
+                Start-Sleep -Seconds 5
+                Start-Process "C:\Program Files\Google\Chrome\Application\chrome.exe" "https://www.intel.com/content/www/us/en/search.html#sortCriteria=%40lastmodifieddt%20descending&f-operatingsystem_en=Windows%2011%20Family*&f-downloadtype=Drivers&cf-tabfilter=Downloads&cf-downloadsppth=Graphics"
+                Wait-Process -Name chrome
+
+                Write-Host "Select downloaded driver`n" -ForegroundColor Yellow
+
+                Start-Sleep -Seconds 5
+                $InstallFile = Show-ModernFilePicker -Mode File
+
+                Write-Host "Debloating driver`n"
+
+                & "C:\Program Files\7-Zip\7z.exe" x "$InstallFile" -o"$env:SystemDrive\IntelDriver" -y | Out-Null
+
+                Write-Host "Installing driver`n"
+
+                Start-Process "cmd.exe" -ArgumentList "/c `"$env:SystemDrive\IntelDriver\Installer.exe`" -f --noExtras --terminateProcesses -s" -WindowStyle Hidden -Wait
+
+                $IntelGraphicsSoftware = Get-ChildItem "$env:SystemDrive\IntelDriver\Resources\Extras\IntelGraphicsSoftware_*.exe" | Select-Object -First 1 -ExpandProperty Name
+                if ($IntelGraphicsSoftware) {
+                    Start-Process "$env:SystemDrive\IntelDriver\Resources\Extras\$IntelGraphicsSoftware" -ArgumentList "/s" -Wait -NoNewWindow
+                }
+
+                $FileName = "Intel$([char]0xAE) Graphics Software"
+                cmd /c "reg delete `"HKLM\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Run`" /v `"$FileName`" /f >nul 2>&1"
+                cmd /c "sc stop `"IntelGFXFWupdateTool`" >nul 2>&1"
+                cmd /c "sc delete `"IntelGFXFWupdateTool`" >nul 2>&1"
+                cmd /c "sc stop `"cplspcon`" >nul 2>&1"
+                cmd /c "sc delete `"cplspcon`" >nul 2>&1"
+                cmd /c "sc stop `"CtaChildDriver`" >nul 2>&1"
+                cmd /c "sc delete `"CtaChildDriver`" >nul 2>&1"
+                cmd /c "sc stop `"GSCAuxDriver`" >nul 2>&1"
+                cmd /c "sc delete `"GSCAuxDriver`" >nul 2>&1"
+                cmd /c "sc stop `"GSCx64`" >nul 2>&1"
+                cmd /c "sc delete `"GSCx64`" >nul 2>&1"
+
+                $stop = "IntelGraphicsSoftware", "PresentMonService"
+                $stop | ForEach-Object { Stop-Process -Name $_ -Force -ErrorAction SilentlyContinue }
+                Start-Sleep -Seconds 2
+
+                Remove-Item "$env:SystemDrive\Program Files\Intel\Intel Graphics Software\PresentMonService.exe" -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$InstallFile" -Force -ErrorAction SilentlyContinue | Out-Null
+
+                $FileName = "Intel$([char]0xAE) Graphics Software"
+                Move-Item -Path "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Intel\Intel Graphics Software\$FileName.lnk" -Destination "$env:ProgramData\Microsoft\Windows\Start Menu\Programs" -Force -ErrorAction SilentlyContinue
+                Remove-Item "$env:ProgramData\Microsoft\Windows\Start Menu\Programs\Intel" -Recurse -Force -ErrorAction SilentlyContinue
+
+                Remove-Item "$env:SystemDrive\Intel" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+                Remove-Item "$env:SystemDrive\IntelDriver" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+
+                Write-Host "Importing settings`n"
+
+                $basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+                $adapterKeys = Get-ChildItem -Path $basePath -ErrorAction SilentlyContinue
+                foreach ($key in $adapterKeys) {
+                    if ($key.PSChildName -match '^\d{4}$') {
+                        $regPath = $key.Name
+                        cmd /c "reg add `"$regPath\3DKeys`" /f >nul 2>&1"
+                    }
+                }
+
+                $basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+                $allKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue
+                $optionKeys = $allKeys | Where-Object { $_.PSChildName -eq "3DKeys" }
+                foreach ($key in $optionKeys) {
+                    $regPath = $key.Name
+                    cmd /c "reg add `"$regPath`" /v `"Global_VRRWindowedBLT`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
+                    cmd /c "reg add `"$regPath`" /v `"Global_AsyncFlipMode`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
+                    cmd /c "reg add `"$regPath`" /v `"Global_LowLatency`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+                }
+
+                $basePath = "HKLM:\System\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+                $adapterKeys = Get-ChildItem -Path $basePath -ErrorAction SilentlyContinue
+                foreach ($key in $adapterKeys) {
+                    if ($key.PSChildName -match '^\d{4}$') {
+                        $regPath = $key.Name
+                        cmd /c "reg add `"$regPath`" /v `"AdaptiveVsyncEnableUserSetting`" /t REG_BINARY /d `"00000000`" /f >nul 2>&1"
+                    }
+                }
+
+                Write-Host "`nIntel setup complete." -ForegroundColor Green
+                Read-Host "Press Enter to return to the menu"
+                Start-Menu
+                break
+            }
+        }
+    } else {
+        Write-Host "Invalid input. Please select a valid option (1-3)."
+    }
+}
+}
 
 
 function Install-Dependencies {
@@ -8459,7 +8716,7 @@ function Start-Menu {
         Write-Host "1.  Windows Activation" -ForegroundColor Yellow
         Write-Host "2.  Run CTT WinUtil" -ForegroundColor Yellow
         Write-Host "3.  Install DDU" -ForegroundColor Yellow
-        Write-Host "4.  Install NVIDIA driver" -ForegroundColor Yellow
+        Write-Host "4.  Install GPU drivers" -ForegroundColor Yellow
         Write-Host "5.  Install dependencies" -ForegroundColor Yellow
         Write-Host "6.  Run basic tweaks" -ForegroundColor Yellow
         Write-Host "7.  Optimize power plan" -ForegroundColor Yellow
@@ -8503,7 +8760,7 @@ function Start-Menu {
             '1'  { Invoke-Activation }
             '2'  { Invoke-WinUtil }
             '3'  { Install-DDU }
-            '4'  { Install-NvidiaDriver }
+            '4'  { Install-GPUDriver }
             '5'  { Install-Dependencies }
             '6'  { Optimize-BasicTweaks }
             '7'  { Optimize-PowerPlan }
