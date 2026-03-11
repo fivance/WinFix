@@ -351,7 +351,7 @@ Clear-Host
 Write-Host "1. Nvidia" -ForegroundColor Green
 Write-Host "2. AMD" -ForegroundColor Red
 Write-Host "3. Intel" -ForegroundColor Blue
-Write-Host "0. Exit"
+Write-Host "4. Exit"
   
 while ($true) {
     $choice = Read-Host " "
@@ -980,7 +980,7 @@ while ($true) {
                 break
             }
             
-        0 {
+        4 {
             Start-Menu
                 break
         }   
@@ -8803,5 +8803,6 @@ function Start-Menu {
 
     } while ($choice -ne '0')
 }
+
 
 Start-Menu
