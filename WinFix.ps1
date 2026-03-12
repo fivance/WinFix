@@ -276,8 +276,11 @@ function Install-DDU {
   Write-Host "Installing: DDU..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
 
-  Get-FileFromWeb -URL "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.4.2_setup.exe" -File "$env:SystemRoot\Temp\DDU.exe"
-  & "C:\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\DDU.exe" -o"$env:SystemRoot\Temp\DDU" -y | Out-Null
+Get-FileFromWeb -URL "https://www.7-zip.org/a/7z2600-x64.exe" -File "$env:SystemRoot\Temp\7 Zip.exe"
+Start-Process -Wait "$env:SystemRoot\Temp\7 Zip.exe" -ArgumentList "/S"
+  
+Get-FileFromWeb -URL "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.4.2_setup.exe" -File "$env:SystemRoot\Temp\DDU.exe"
+& "C:\Program Files\7-Zip\7z.exe" x "$env:SystemRoot\Temp\DDU.exe" -o"$env:SystemRoot\Temp\DDU" -y | Out-Null
 
 
 $MultilineComment = @"
@@ -8794,8 +8797,3 @@ function Start-Menu {
 
 
 Start-Menu
-
-
-
-
-
