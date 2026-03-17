@@ -6690,6 +6690,7 @@ function Enable-VirtualizationSecurityFeatures {
       New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" -Force | Out-Null
       Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" `
                        -Name "Enabled" -Value 1 -Type DWord
+    reg add HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity /v "WasEnabledBy" /t REG_DWORD /d 2 /f
       Write-Host "[] HVCI (Memory Integrity) enabled." -ForegroundColor Green
   Start-Sleep -Seconds 2
   Write-Host ""
@@ -7798,11 +7799,12 @@ Windows Registry Editor Version 5.00
 
 ; DISABLE OTHER
 ; Windows Defender firewall
-[HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\PublicProfile]
-"EnableFirewall"=dword:00000001
+; Locks out option for user to turn on/off Windows Firewall
+;[HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\PublicProfile]
+;"EnableFirewall"=dword:00000001
 
-[HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile]
-"EnableFirewall"=dword:00000001
+;[HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile]
+;"EnableFirewall"=dword:00000001
 
 ; UAC
 ;[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
@@ -8300,11 +8302,12 @@ Windows Registry Editor Version 5.00
 
 ; ENABLE OTHER
 ; Windows Defender firewall
-[HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\PublicProfile]
-"EnableFirewall"=dword:00000001
+; Locks out option to enable/disable firewall
+;[HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\PublicProfile]
+;"EnableFirewall"=dword:00000001
 
-[HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile]
-"EnableFirewall"=dword:00000001
+;[HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile]
+;"EnableFirewall"=dword:00000001
 
 ; UAC
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System]
