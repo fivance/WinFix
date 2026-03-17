@@ -54,9 +54,11 @@ function Get-Admin {
   Exit}
   $Host.UI.RawUI.WindowTitle = "Winfix" + " (Administrator)"
   $Host.UI.RawUI.BackgroundColor = "Black"
-$Host.PrivateData.ProgressBackgroundColor = "Black"
+  $Host.PrivateData.ProgressBackgroundColor = "Black"
   $Host.PrivateData.ProgressForegroundColor = "White"
+  $progresspreference = 'silentlycontinue'
   Clear-Host
+  
 }
 
 function Show-Progress {
@@ -133,15 +135,29 @@ function Get-FileFromWeb {
 }
 
 function Run-Trusted([String]$command) {
-        Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
-        $service = Get-WmiObject -Class Win32_Service -Filter "Name='TrustedInstaller'"
+        try {
+    	Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
+  		}
+  		catch {
+    	taskkill /im trustedinstaller.exe /f >$null
+  		}
+        $service = Get-CimInstance -ClassName Win32_Service -Filter "Name='TrustedInstaller'"
         $DefaultBinPath = $service.PathName
+  		$trustedInstallerPath = "$env:SystemRoot\servicing\TrustedInstaller.exe"
+  		if ($DefaultBinPath -ne $trustedInstallerPath) {
+    	$DefaultBinPath = $trustedInstallerPath
+  		}
         $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
         $base64Command = [Convert]::ToBase64String($bytes)
         sc.exe config TrustedInstaller binPath= "cmd.exe /c powershell.exe -encodedcommand $base64Command" | Out-Null
         sc.exe start TrustedInstaller | Out-Null
         sc.exe config TrustedInstaller binpath= "`"$DefaultBinPath`"" | Out-Null
-        Stop-Service -Name TrustedInstaller -Force -ErrorAction SilentlyContinue
+        try {
+    	Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
+  		}
+  		catch {
+    	taskkill /im trustedinstaller.exe /f >$null
+  		}
         }
  
     	function Show-ModernFilePicker {
@@ -1532,10 +1548,27 @@ function Optimize-Powerplan {
   cmd /c "reg add `"HKLM\Software\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings`" /v `"ShowLockOption`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
   cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings`" /v `"ShowSleepOption`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
   cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Power`" /v `"HiberbootEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-  cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583`" /v `"ValueMax`" /t REG_DWORD /d `"100`" /f >nul 2>&1"
+  cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583`" /v `"ValueMax`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
   cmd /c "reg add `"HKLM\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling`" /v `"PowerThrottlingOff`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
-  cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\0853a681-27c8-4100-a2fd-82013e970683`" /v `"Attributes`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
-  cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\d4e98f31-5ffe-4ce1-be31-1b38b384c009`" /v `"Attributes`" /t REG_DWORD /d `"2`" /f >nul 2>&1"
+  cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\0853a681-27c8-4100-a2fd-82013e970683`" /v `"Attributes`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+  cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\2a737441-1930-4402-8d77-b2bebba308a3\d4e98f31-5ffe-4ce1-be31-1b38b384c009`" /v `"Attributes`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+# Unhide processor performance core parking min cores
+cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583`" /v `"Attributes`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# Unpark cpu cores
+# Processor performance core parking min cores 100%
+powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 0cc5b647-c1df-4637-891a-dec35c318583 0x00000064 2>$null
+powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 0cc5b647-c1df-4637-891a-dec35c318583 0x00000064 2>$null
+
+# Unhide processor performance core parking max cores
+cmd /c "reg add `"HKLM\System\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\ea062031-0e34-4ff1-9b6d-eb1059334028`" /v `"Attributes`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# Unpark cpu cores
+# Processor performance core parking max cores 100%
+powercfg /setacvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 ea062031-0e34-4ff1-9b6d-eb1059334028 0x00000064 2>$null
+powercfg /setdcvalueindex 99999999-9999-9999-9999-999999999999 54533251-82be-4824-96c1-47b60b740d00 ea062031-0e34-4ff1-9b6d-eb1059334028 0x00000064 2>$null
+  
+  
   
 # Modify desktop & laptop settings
 # Hard disk turn off hard disk after 0%
@@ -2064,7 +2097,7 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 ; Disable slide open combo boxes
 ; Disable smooth-scroll list boxes
 [HKEY_CURRENT_USER\Control Panel\Desktop]
-"UserPreferencesMask"=hex(2):90,12,03,80,10,00,00,00
+"UserPreferencesMask"=hex(2):90,12,03,80,12,00,00,00
 
 ; Disable animate windows when minimizing and maximizing
 ;[HKEY_CURRENT_USER\Control Panel\Desktop\WindowMetrics]
@@ -3301,8 +3334,8 @@ E0,F6,C5,D5,0E,CA,50,00,00
 "GlobalTimerResolutionRequests"=dword:00000001
 
 ; unpark cpu cores
-[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583]
-"ValueMax"=dword:00000064
+;[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583]
+;"ValueMax"=dword:00000064
 
 ; Disable power throttling
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling]
@@ -3540,7 +3573,7 @@ function Remove-UWPApps {
   Start-Sleep -Seconds 3
   $progresspreference = 'silentlycontinue'
   # CBS needed for Windows 11 Explorer
-  Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*Terminal*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
+  Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*windows.immersivecontrolpanel*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*Terminal*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
   Timeout /T 2 | Out-Null
   Get-AppXPackage -AllUsers *Microsoft.HEVCVideoExtension* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
   Timeout /T 2 | Out-Null
@@ -3556,8 +3589,18 @@ function Remove-UWPApps {
   Timeout /T 2 | Out-Null
   Get-AppXPackage -AllUsers *Microsoft.Microsoft.StorePurchaseApp* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
   Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator * | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+  Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+  
+  Get-AppXPackage -AllUsers *Microsoft.SecHealthUI* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
   Timeout /T 2 | Out-Null
+  
+  Get-AppXPackage -AllUsers *Microsoft.Windows.ShellExperienceHost* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+  Timeout /T 2 | Out-Null
+  
+  Get-AppXPackage -AllUsers *Microsoft.Windows.StartMenuExperienceHost* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
+  Timeout /T 2 | Out-Null
+  
+  
   Clear-Host
   Write-Host "UWP Apps removed." -ForegroundColor Green
 }
@@ -3573,11 +3616,12 @@ $_.Name -notlike '*Microsoft.Windows.Notepad*' -and
 $_.Name -notlike '*Microsoft.Windows.Notepad.System*' -and
 $_.Name -notlike '*Microsoft.Windows.Wifi*' -and
 $_.Name -notlike '*NetFX3*' -and
-# Windows 11 breaks msi installers if removed
+# Windows 11 breaks MSI installers if removed
 $_.Name -notlike '*VBSCRIPT*' -and
 $_.Name -notlike '*WMIC*' -and
-# Windows 10 breaks uwp snippingtool if removed
+# Windows 10 breaks UWP snippingtool if removed
 $_.Name -notlike '*Windows.Client.ShellComponents*'
+$_.Name -notlike '*OpenSSH.Client*'
 } | ForEach-Object {
 try {
 Remove-WindowsCapability -Online -Name $_.Name | Out-Null
@@ -3591,12 +3635,31 @@ function Remove-LegacyFeatures {
   Clear-Host
   Write-Host "Uninstalling Legacy Features..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
-  Get-WindowsOptionalFeature -Online | Where-Object {
-$_.FeatureName -notlike '*NetFx3*' -and
-$_.FeatureName -notlike '*LegacyComponents*' -and
+Get-WindowsOptionalFeature -Online | Where-Object {
 $_.FeatureName -notlike '*DirectPlay*' -and
+$_.FeatureName -notlike '*LegacyComponents*' -and
+$_.FeatureName -notlike '*NetFx3*' -and
+# Breaks Windows Server turn windows features on or off
+$_.FeatureName -notlike '*NetFx4*' -and
 $_.FeatureName -notlike '*NetFx4-AdvSrvs*' -and
-$_.FeatureName -notlike '*SearchEngine-Client-Package*'
+# Breaks windows Server turn windows features on or off
+$_.FeatureName -notlike '*NetFx4ServerFeatures*' -and
+# Breaks Search
+$_.FeatureName -notlike '*SearchEngine-Client-Package*' -and
+# Breaks Windows Server desktop
+$_.FeatureName -notlike '*Server-Shell*' -and
+# Breaks Windows Server Defender
+$_.FeatureName -notlike '*Windows-Defender*' -and
+# Breaks Windows Server internet
+$_.FeatureName -notlike '*Server-Drivers-General*' -and
+# Breaks Windows Server internet
+$_.FeatureName -notlike '*ServerCore-Drivers-General*' -and
+# Breaks Windows Server internet
+$_.FeatureName -notlike '*ServerCore-Drivers-General-WOW64*' -and
+# Breaks Windows Server turn windows features on or off
+$_.FeatureName -notlike '*Server-Gui-Mgmt*' -and
+# Breaks Windows Server NVIDIA app
+$_.FeatureName -notlike '*WirelessNetworking*'
 } | ForEach-Object {
 try {
 Disable-WindowsOptionalFeature -Online -FeatureName $_.FeatureName -NoRestart -WarningAction SilentlyContinue | Out-Null
@@ -3670,8 +3733,16 @@ Start-Process "msiexec.exe" -ArgumentList "/x $guid /qn /norestart" -Wait -NoNew
 }
 cmd /c "reg delete `"HKLM\SYSTEM\ControlSet001\Services\uhssvc`" /f >nul 2>&1"
 Unregister-ScheduledTask -TaskName PLUGScheduler -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
-  Clear-Host
-  Write-Host "Legacy Apps uninstalled." -ForegroundColor Green
+
+# Uninstall Voice Clarity driver
+$device = Get-PnpDevice | Where-Object { $_.FriendlyName -like "*Voice Clarity*" }
+if ($device) {
+$device | Disable-PnpDevice -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+pnputil /remove-device $device.InstanceId 2>$null | Out-Null
+}
+
+Clear-Host
+Write-Host "Legacy Apps uninstalled." -ForegroundColor Green
 }
 
 function Optimize-Network {
@@ -4228,6 +4299,30 @@ function Optimize-AdvancedTweaks {
   Clear-Host
   Start-Sleep -Seconds 3
 
+# Disable ACPI power savings on all connected devices
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\ACPI" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "Device Parameters" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"EnhancedPowerManagementEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"SelectiveSuspendEnabled`" /t REG_BINARY /d `"00`" /f >nul 2>&1"
+cmd /c "reg add `"$regPath`" /v `"SelectiveSuspendOn`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\ACPI" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "WDF" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"IdleInWorkingState`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# Disable ACPI wake on all connected devices
+$usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\ACPI" -Recurse -ErrorAction SilentlyContinue |
+Where-Object { $_.PSChildName -eq "Device Parameters" }
+foreach ($key in $usbKeys) {
+$regPath = $key.Name
+cmd /c "reg add `"$regPath`" /v `"WaitWakeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}  
+  
 # Disable memorycompression
 Disable-MMAgent -MemoryCompression -ErrorAction SilentlyContinue | Out-Null
 
@@ -7568,7 +7663,8 @@ Windows Registry Editor Version 5.00
 
 ; Firewall notifications
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Notifications]
-"DisableEnhancedNotifications"=dword:00000001
+"DisableEnhancedNotifications"=dword:00000000
+"DisableNotifications"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection]
 "NoActionNotificationDisabled"=dword:00000001
@@ -8070,6 +8166,7 @@ Windows Registry Editor Version 5.00
 ; Firewall notifications
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Notifications]
 "DisableEnhancedNotifications"=dword:00000000
+"DisableNotifications"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection]
 "NoActionNotificationDisabled"=dword:00000000
