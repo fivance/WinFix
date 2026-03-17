@@ -6801,7 +6801,6 @@ param(
     [switch]$ValidationReport
 )
 
-
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Windows Security Hardening Script" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
@@ -7357,7 +7356,37 @@ try {
     Write-Log "`nScript completed at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -Level Info
 }
 #endregion
+$valueName = "EnableFirewall"
+$anyError = $false
+ 
+foreach ($path in $registryPaths) {
+ 
+    # Check if the registry path exists
+    if (-not (Test-Path -Path $path)) {
+        Write-Host "  [SKIP] Path does not exist: $path" -ForegroundColor Yellow
+        continue
+    }
+ 
+    # Check if the value exists
+    $existingValue = Get-ItemProperty -Path $path -Name $valueName -ErrorAction SilentlyContinue
+ 
+    if ($null -eq $existingValue) {
+        Write-Host "  [SKIP] Value '$valueName' not found in this path." -ForegroundColor Yellow
+        continue
+    }
+ 
+    # Delete the value
+    try {
+        Remove-ItemProperty -Path $path -Name $valueName -Force -ErrorAction Stop
+        Write-Host "  [OK] Successfully deleted '$valueName'." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "  [ERROR] Failed to delete '$valueName': $_" -ForegroundColor Red
+        $anyError = $true
+    }
+}
 
+reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v RunAsPPL /f
 Write-Host "Applied Privacy, AI and Security Policies successfully!" -ForegroundColor Green
 Write-Host "Please restart your computer to ensure all changes take effect." -ForegroundColor Yellow
   
