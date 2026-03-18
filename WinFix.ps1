@@ -1435,7 +1435,7 @@ $MultilineComment = @"
 Clear-Host
 
 ######
-$response = Read-Host "Install Chrome and its policies and tweaks? (Y/N)"
+$response = Read-Host "Install Chrome + appy policies and tweaks? (Y/N)"
 
 if ($response -eq 'Y' -or $response -eq 'y') {
     try {
@@ -1474,7 +1474,6 @@ Get-ScheduledTask | Where-Object {$_.Taskname -match 'GoogleUpdaterTaskSystem'} 
 } else {
     Write-Host "Skipped." -ForegroundColor Yellow
 }
-
 
 $MultilineComment = @"
 Windows Registry Editor Version 5.00
@@ -7378,7 +7377,6 @@ foreach ($path in $registryPaths) {
     # Delete the value
     try {
         Remove-ItemProperty -Path $path -Name $valueName -Force -ErrorAction Stop
-        Write-Host "  [OK] Successfully deleted '$valueName'." -ForegroundColor Green
     }
     catch {
         Write-Host "  [ERROR] Failed to delete '$valueName': $_" -ForegroundColor Red
