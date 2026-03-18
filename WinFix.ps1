@@ -3536,21 +3536,6 @@ C0,CC,0C,00,00,00,00,00,\
   Start-Process explorer
   Clear-Host
   
-#Fix mouse pointer size
-$CursorSizePath = "HKCU:\Software\Microsoft\Accessibility"
-
-$code = @"
-[DllImport("user32.dll")]
-public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, uint pvParam, uint fWinIni);
-"@
-$type = Add-Type -MemberDefinition $code -Name "WinAPI" -Namespace "Win32" -PassThru
-
-Set-ItemProperty -Path $CursorSizePath -Name "CursorSize" -Value 2
-$type::SystemParametersInfo(0x0057, 0, 0, 0x03) | Out-Null
-
-Set-ItemProperty -Path $CursorSizePath -Name "CursorSize" -Value 1
-$type::SystemParametersInfo(0x0057, 0, 0, 0x03) | Out-Null
-  
   Write-Host "Removing OneDrive..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   taskkill.exe /F /IM "OneDrive.exe"
@@ -6702,7 +6687,7 @@ function Enable-VirtualizationSecurityFeatures {
   Clear-Host
   Write-Host "Please note that enabling virtualization security features may induce performance hit in certain games." -ForegroundColor Yellow
   Start-Sleep -Seconds 3
-  Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
+  #Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
   # Enable VBS
   New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" -Force | Out-Null
   Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" `
@@ -7383,35 +7368,14 @@ try {
 } finally {
     Write-Log "`nScript completed at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -Level Info
 }
-#endregion
-$valueName = "EnableFirewall"
-$anyError = $false
- 
-foreach ($path in $registryPaths) {
- 
-    # Check if the registry path exists
-    if (-not (Test-Path -Path $path)) {
-        Write-Host "  [SKIP] Path does not exist: $path" -ForegroundColor Yellow
-        continue
-    }
- 
-    # Check if the value exists
-    $existingValue = Get-ItemProperty -Path $path -Name $valueName -ErrorAction SilentlyContinue
- 
-    if ($null -eq $existingValue) {
-        Write-Host "  [SKIP] Value '$valueName' not found in this path." -ForegroundColor Yellow
-        continue
-    }
- 
-    # Delete the value
-    try {
-        Remove-ItemProperty -Path $path -Name $valueName -Force -ErrorAction Stop
-    }
-    catch {
-        Write-Host "  [ERROR] Failed to delete '$valueName': $_" -ForegroundColor Red
-        $anyError = $true
-    }
+
+# Delete EnableFirewall key from all profiles to be able to change firewall state from UI
+$profiles = "DomainProfile", "PrivateProfile", "PublicProfile"
+foreach ($profile in $profiles) {
+    $path = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\$profile"
+    Remove-ItemProperty -Path $path -Name "EnableFirewall" -ErrorAction SilentlyContinue
 }
+
 
 reg delete "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v RunAsPPL /f
 Write-Host "Applied Privacy, AI and Security Policies successfully!" -ForegroundColor Green
