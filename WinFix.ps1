@@ -1454,7 +1454,13 @@ cmd /c "reg add `"HKLM\SOFTWARE\Policies\Google\Chrome`" /v `"BackgroundModeEnab
 cmd /c "reg add `"HKLM\SOFTWARE\Policies\Google\Chrome`" /v `"HighEfficiencyModeEnabled`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
 
 # Remove logon chrome
-cmd /c "reg delete `"HKLM\Software\Microsoft\Active Setup\Installed Components\{8A69D345-D564-463c-AFF1-A69D9E530F96}`" /f >nul 2>&1"
+$basePath = "HKLM:\Software\Microsoft\Active Setup\Installed Components"
+Get-ChildItem $basePath | ForEach-Object {
+$val = (Get-ItemProperty $_.PsPath)."(default)"
+if ($val -like "*Chrome*") {
+Remove-Item $_.PsPath -Force -ErrorAction SilentlyContinue
+}
+}
 
 # Remove Chrome services
 $services = Get-Service | Where-Object { $_.Name -match 'Google' }
@@ -1997,9 +2003,9 @@ Windows Registry Editor Version 5.00
 "TaskFrequency"=dword:00000004
 "Volumes"=" "
 
-; Disable core isolation (turned it off for default settings)
-;[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
-;"Enabled"=dword:00000000
+; Disable core isolation
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity]
+"Enabled"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard]
 "EnableVirtualizationBasedSecurity"=dword:00000000
@@ -2075,7 +2081,7 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 "LocationSyncEnabled"=dword:00000000
 
 
- Disable Data Collection 
+; Disable Data Collection 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection]
 "AllowTelemetry"=dword:00000001
 "MaxTelemetryAllowed"=dword:00000001
@@ -2206,9 +2212,9 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CPSS\Store\UserLocationOverridePrivacySetting]
 "Value"=dword:00000000
 
-; Enable camera
+; Disable camera
 [HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam]
-"Value"="Allow"
+"Value"="Deny"
 
 ; Enable microphone 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone]
@@ -2441,8 +2447,8 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 "IsVoiceTypingKeyEnabled"=dword:00000000
 
 ; Disable capitalize the first letter of each sentence
-; Disable play key sounds as i type
-; Disable add a period after i double-tap the spacebar
+; Disable play key sounds as I type
+; Disable add a period after I double-tap the spacebar
 [HKEY_CURRENT_USER\Software\Microsoft\TabletTip\1.7]
 "EnableAutoShiftEngage"=dword:00000000
 "EnableKeyAudioFeedback"=dword:00000000
@@ -2639,8 +2645,8 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 "EnableAutoTray"=dword:00000000
 
 ; Remove security taskbar icon
-[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run]
-"SecurityHealth"=hex(3):07,00,00,00,05,DB,8A,69,8A,49,D9,01
+;[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run]
+;"SecurityHealth"=hex(3):07,00,00,00,05,DB,8A,69,8A,49,D9,01
 
 ; Disable use dynamic lighting on my devices
 [HKEY_CURRENT_USER\Software\Microsoft\Lighting]
@@ -2702,7 +2708,7 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 
 
 ; DEVICES
-; Disable usb issues notify
+; Disable USB issues notify
 [HKEY_CURRENT_USER\Software\Microsoft\Shell\USB]
 "NotifyOnUsbErrors"=dword:00000000
 
@@ -2780,6 +2786,14 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\UserProfileEngagement]
 "ScoobeSystemSettingEnabled"=dword:00000000
 
+; Enable Windows Security / Defender notifications
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.SecurityAndMaintenance]
+"Enabled"=dword:00000001
+
+; Enable Windows Firewall notifications
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings\Windows.SystemToast.WindowsFirewall]
+"Enabled"=dword:00000001
+
 ; Disable suggested actions
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SmartActionPlatform\SmartClipboard]
 "Disabled"=dword:00000001
@@ -2836,7 +2850,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\StorageSense]
 "AllowStorageSenseGlobal"=dword:00000000
 
-; Disable keep windows running smoothly
+; Disable keep Windows running smoothly
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\StorageSense]
 
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters]
@@ -2848,7 +2862,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 "04"=dword:00000000
 ; Don't auto delete temp files
 "2048"=dword:00000000
-; don't auto empty recycle bin
+; Don't auto empty recycle bin
 "08"=dword:00000000
 ; Don't auto delete downloads
 "256"=dword:00000000
@@ -3114,7 +3128,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Device Installer]
 "DisableCoInstallers"=dword:00000001
 
-; Disable Hardware Accel Steam
+; Disable hardware acceleration Steam
 [HKEY_CURRENT_USER\SOFTWARE\Valve\Steam]
 "GPUAccelWebViewsV2"=dword:00000000
 "H264HWAccel"=dword:00000000
@@ -3241,7 +3255,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 
 
 ; NVIDIA
-; Disable nvidia tray icon
+; Disable NVIDIA tray icon
 [HKEY_CURRENT_USER\Software\NVIDIA Corporation\NvTray]
 "EnabledState"=dword:00000002
 "EnabledStateOptions"=dword:00000000
@@ -3282,7 +3296,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy]
 "LetAppsRunInBackground"=dword:00000002
 
-; Disable background apps win 11
+; Disable background apps Windows 11
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications]
 "GlobalUserDisabled"=dword:00000001
 
@@ -3312,7 +3326,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 
 
 ; NVIDIA
-; Enable old nvidia legacy sharpening
+; Enable old NVIDIA legacy sharpening
 ; Old location
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\nvlddmkm\FTS]
 "EnableGR535"=dword:00000000
@@ -3332,7 +3346,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel]
 "GlobalTimerResolutionRequests"=dword:00000001
 
-; unpark cpu cores
+; Unpark cpu cores
 ;[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Power\PowerSettings\54533251-82be-4824-96c1-47b60b740d00\0cc5b647-c1df-4637-891a-dec35c318583]
 ;"ValueMax"=dword:00000064
 
@@ -3404,7 +3418,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 
 
 ; OTHER
-; Remove 3d objects
+; Remove 3D objects
 [-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}]
 
 [-HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}]
@@ -3522,7 +3536,7 @@ C0,CC,0C,00,00,00,00,00,\
   Start-Process explorer
   Clear-Host
   
-  #Fix mouse pointer size
+#Fix mouse pointer size
 $CursorSizePath = "HKCU:\Software\Microsoft\Accessibility"
 
 $code = @"
