@@ -4172,6 +4172,54 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit 1
 }
 
+# Take Ownership
+$regContent = @'
+Windows Registry Editor Version 5.00
+
+[-HKEY_CLASSES_ROOT\*\shell\TakeOwnership]
+[-HKEY_CLASSES_ROOT\*\shell\runas]
+
+[HKEY_CLASSES_ROOT\*\shell\TakeOwnership]
+@="Take Ownership"
+"Extended"=-
+"HasLUAShield"=""
+"NoWorkingDirectory"=""
+"NeverDefault"=""
+
+[HKEY_CLASSES_ROOT\*\shell\TakeOwnership\command]
+@="PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l & pause' -Verb runAs\""
+"IsolatedCommand"="PowerShell -windowstyle hidden -command \"Start-Process cmd -ArgumentList '/c takeown /f \\\"%1\\\" && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l & pause' -Verb runAs\""
+
+[HKEY_CLASSES_ROOT\Directory\shell\TakeOwnership]
+@="Take Ownership"
+"AppliesTo"="NOT (System.ItemPathDisplay:=\"C:\\Users\" OR System.ItemPathDisplay:=\"C:\\ProgramData\" OR System.ItemPathDisplay:=\"C:\\Windows\" OR System.ItemPathDisplay:=\"C:\\Windows\\System32\" OR System.ItemPathDisplay:=\"C:\\Program Files\" OR System.ItemPathDisplay:=\"C:\\Program Files (x86)\")"
+"Extended"=-
+"HasLUAShield"=""
+"NoWorkingDirectory"=""
+"Position"="middle"
+
+[HKEY_CLASSES_ROOT\Directory\shell\TakeOwnership\command]
+@="PowerShell -windowstyle hidden -command \"$Y = ($null | choice).Substring(1,1); Start-Process cmd -ArgumentList ('/c takeown /f \\\"%1\\\" /r /d ' + $Y + ' && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l /q & pause') -Verb runAs\""
+"IsolatedCommand"="PowerShell -windowstyle hidden -command \"$Y = ($null | choice).Substring(1,1); Start-Process cmd -ArgumentList ('/c takeown /f \\\"%1\\\" /r /d ' + $Y + ' && icacls \\\"%1\\\" /grant *S-1-3-4:F /t /c /l /q & pause') -Verb runAs\""
+
+[HKEY_CLASSES_ROOT\Drive\shell\runas]
+@="Take Ownership"
+"Extended"=-
+"HasLUAShield"=""
+"NoWorkingDirectory"=""
+"Position"="middle"
+"AppliesTo"="NOT (System.ItemPathDisplay:=\"C:\\\")"
+
+[HKEY_CLASSES_ROOT\Drive\shell\runas\command]
+@="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c & Pause"
+"IsolatedCommand"="cmd.exe /c takeown /f \"%1\\\" /r /d y && icacls \"%1\\\" /grant *S-1-3-4:F /t /c & Pause"
+'@
+
+$tempFile = "$env:TEMP\takeownership.reg"
+$regContent | Out-File -FilePath $tempFile -Encoding unicode
+reg import $tempFile
+Remove-Item $tempFile
+
 $repoBase = "https://raw.githubusercontent.com/fivance/contextmenu/main"
 
 $regFiles = @(
@@ -4575,6 +4623,7 @@ Reg.exe add 'HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy' /v 'Tailore
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Personalization\Settings' /v 'AcceptedPrivacyPolicy' /t REG_DWORD /d '0' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\Bluetooth' /v 'AllowAdvertising' /t REG_DWORD /d '0' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\System' /v 'AllowExperimentation' /t REG_DWORD /d '0' /f
+Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\System' /v 'AllowExperimentation' /t REG_DWORD /d '0' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\Wifi\AllowAutoConnectToWiFiSenseHotspots' /v 'value' /t REG_DWORD /d '0' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\PolicyManager\default\Wifi\AllowWiFiHotSpotReporting' /v 'value' /t REG_DWORD /d '0' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\WcmSvc\wifinetworkmanager\config' /v 'AutoConnectAllowedOEM' /t REG_DWORD /d '0' /f
@@ -4931,7 +4980,7 @@ function Disable-UnnecessaryServices {
   Write-Host "Disabling unnecessary services..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
     $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    Write-Host "$ts - Beginning service deactivation ritual..." -ForegroundColor Cyan
+    Write-Host "$ts - Beginning service deactivation..." -ForegroundColor Cyan
     Write-Host ""
 
     foreach ($svc in $ServiceList) {
@@ -5103,7 +5152,7 @@ function Remove-BloatwarePackages {
   Write-Host "Removing packages..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-  Write-Host "$ts - Initiating interstellar purge of Windows bloatware..." -ForegroundColor Cyan
+  Write-Host "$ts - Initiating purge of Windows bloatware..." -ForegroundColor Cyan
   Write-Host ""
 
   foreach ($App in $AppsList) {
@@ -6924,7 +6973,7 @@ if ($response -eq 'Y' -or $response -eq 'y') {
                     $disabledRules++
                 }
             }
-        }
+        }    
         
         Write-Host "`nRisky Firewall Ports Disabled: $disabledRules rules" -ForegroundColor Green
         Write-Host "  - LLMNR (5355)" -ForegroundColor Gray
