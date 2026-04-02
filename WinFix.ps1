@@ -8869,12 +8869,6 @@ Start-Menu
 }
 
 function Update-AppSettings {
- # ============================================================
-#  settings-apply.ps1
-#  Applies per-app settings pulled from GitHub repos
-# ============================================================
-
-# --- Config: add/edit apps here ---
 $apps = @(
     @{
         Name        = "Sublime Text"
@@ -8927,27 +8921,10 @@ $apps = @(
             "Action : Overwrite existing wincmd.ini"
         )
     }
-    # Add more apps here, e.g.:
-    # @{
-    #     Name        = "Windows Terminal"
-    #     RepoUrl     = "https://github.com/fivance/terminal-settings"
-    #     ApplyFn     = "Apply-WindowsTerminal"
-    #     Description = "Copies settings.json from GitHub"
-    #     WingetId    = "Microsoft.WindowsTerminal"
-    #     DetectPath  = "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe"
-    #     Settings    = @(
-    #         "Source : github.com/fivance/terminal-settings -> settings.json",
-    #         "Target : ...\LocalState\settings.json",
-    #         "Action : Overwrite existing settings"
-    #     )
-    # }
 )
 
 $TempDir = "$env:TEMP\settings-apply"
 
-# ============================================================
-#  Helper: check if a command exists in PATH
-# ============================================================
 function Test-Command {
     param([string]$Command)
     return ($null -ne (Get-Command $Command -ErrorAction SilentlyContinue))
@@ -8987,6 +8964,8 @@ function Assert-Winget {
     return $true
 }
 
+winget upgrade Microsoft.AppInstaller --accept-source-agreements --accept-package-agreements
+
 # ============================================================
 #  Helper: clone or update a repo into a local temp folder
 # ============================================================
@@ -9006,9 +8985,6 @@ function Get-Repo {
     }
 }
 
-# ============================================================
-#  Helper: show what will be applied, then prompt Y/N
-# ============================================================
 function Confirm-App {
     param(
         [string]$Name,
@@ -9026,10 +9002,6 @@ function Confirm-App {
     $r = Read-Host "  Apply $Name settings? (Y/N)"
     return $r -match '^[Yy]$'
 }
-
-# ============================================================
-#  Helper: safely copy folder contents
-# ============================================================
 function Copy-FolderContents {
     param(
         [string]$Source,
@@ -9044,10 +9016,6 @@ function Copy-FolderContents {
     Copy-Item -Path "$Source\*" -Destination $Destination -Recurse -Force
     Write-Host "  Copied: $Source -> $Destination" -ForegroundColor Green
 }
-
-# ============================================================
-#  App: Sublime Text
-# ============================================================
 function Apply-SublimeText {
     param([string]$RepoFolder)
 
@@ -9067,10 +9035,6 @@ function Apply-SublimeText {
     Copy-FolderContents -Source $source -Destination $destination
     Write-Host "  Overwrite complete." -ForegroundColor Green
 }
-
-# ============================================================
-#  App: PowerShell Profile
-# ============================================================
 function Apply-PowerShellProfile {
     param([string]$RepoFolder)
 
@@ -9093,10 +9057,6 @@ function Apply-PowerShellProfile {
     Copy-Item -Path $sourceFile -Destination $destFile -Force
     Write-Host "  Overwrite complete." -ForegroundColor Green
 }
-
-# ============================================================
-#  App: Firefox
-# ============================================================
 function Apply-Firefox {
     param([string]$RepoFolder)
 
@@ -9116,10 +9076,6 @@ function Apply-Firefox {
 
     Write-Host "  Firefox settings applied." -ForegroundColor Green
 }
-
-# ============================================================
-#  App: Total Commander
-# ============================================================
 function Apply-TotalCommander {
     param([string]$RepoFolder)
 
@@ -9143,28 +9099,12 @@ function Apply-TotalCommander {
     Write-Host "  Overwrite complete." -ForegroundColor Green
 }
 
-# ============================================================
-#  -- Add more Apply-* functions below for each new app --
-#
-# function Apply-WindowsTerminal {
-#     param([string]$RepoFolder)
-#     $source      = "$RepoFolder\settings.json"
-#     $destination = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_...\LocalState\settings.json"
-#     Copy-Item -Path $source -Destination $destination -Force
-# }
-# ============================================================
-
-
-# ============================================================
-#  Startup checks
-# ============================================================
 Write-Host ""
 Write-Host "==============================" -ForegroundColor Magenta
 Write-Host "  Settings Apply Script" -ForegroundColor Magenta
 Write-Host "==============================" -ForegroundColor Magenta
 Write-Host ""
 
-# Check for git - required for cloning repos
 if (-not (Test-Command "git")) {
     Write-Host "  git is not installed or not in PATH." -ForegroundColor Yellow
     $installGit = Read-Host "  Install git via winget now? (Y/N)"
@@ -9183,16 +9123,12 @@ if (-not (Test-Command "git")) {
 
 New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
 
-# ============================================================
-#  Main loop
-# ============================================================
 foreach ($app in $apps) {
     Write-Host ""
     Write-Host "----------------------------------------" -ForegroundColor DarkGray
     Write-Host "  $($app.Name)" -ForegroundColor White
     Write-Host "----------------------------------------" -ForegroundColor DarkGray
 
-    # --- App installed check ---
     $appInstalled = $true
     if ($app.DetectPath) {
         if (-not (Test-Path $app.DetectPath)) {
@@ -9216,7 +9152,6 @@ foreach ($app in $apps) {
         }
     }
 
-    # --- Settings prompt ---
     if (-not (Confirm-App -Name $app.Name -Description $app.Description -Settings $app.Settings)) {
         Write-Host "  Skipped." -ForegroundColor Yellow
         continue
