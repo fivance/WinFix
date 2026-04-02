@@ -9164,6 +9164,7 @@ function Start-Menu {
         Write-Host ""
         
         Write-Host "27. Apply app settings" -ForegroundColor Yellow
+        Write-Host ""
         
         Write-Host "0.  Exit" -ForegroundColor Red
         Write-Host "==================================" -ForegroundColor Red
