@@ -8869,13 +8869,20 @@ Start-Menu
 }
 
 function Update-AppSettings {
-    # --- Config
+ # ============================================================
+#  settings-apply.ps1
+#  Applies per-app settings pulled from GitHub repos
+# ============================================================
+
+# --- Config: add/edit apps here ---
 $apps = @(
     @{
         Name        = "Sublime Text"
         RepoUrl     = "https://github.com/fivance/sublime"
         ApplyFn     = "Apply-SublimeText"
         Description = "Copies Packages/ folder contents from GitHub"
+        WingetId    = "SublimeHQ.SublimeText.4"
+        DetectPath  = "$env:ProgramFiles\Sublime Text\sublime_text.exe"
         Settings    = @(
             "Source : github.com/fivance/sublime -> Packages/",
             "Target : $env:APPDATA\Sublime Text\Packages",
@@ -8887,6 +8894,8 @@ $apps = @(
         RepoUrl     = "https://github.com/fivance/Powershell"
         ApplyFn     = "Apply-PowerShellProfile"
         Description = "Replaces your PowerShell profile script from GitHub"
+        WingetId    = $null
+        DetectPath  = $null
         Settings    = @(
             "Source : github.com/fivance/Powershell -> Microsoft.PowerShell_profile.ps1",
             "Target : $HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1",
@@ -8898,6 +8907,8 @@ $apps = @(
         RepoUrl     = "https://github.com/fivance/firefox"
         ApplyFn     = "Apply-Firefox"
         Description = "Applies Firefox user.js settings via the repo's own import.ps1"
+        WingetId    = "Mozilla.Firefox"
+        DetectPath  = "$env:ProgramFiles\Mozilla Firefox\firefox.exe"
         Settings    = @(
             "Source : github.com/fivance/firefox -> import.ps1",
             "Action : Runs import.ps1 -Force (overwrites existing files)"
@@ -8908,16 +8919,77 @@ $apps = @(
         RepoUrl     = "https://github.com/fivance/totalcmd"
         ApplyFn     = "Apply-TotalCommander"
         Description = "Replaces wincmd.ini with the version from GitHub"
+        WingetId    = "Ghisler.TotalCommander"
+        DetectPath  = "$env:APPDATA\GHISLER\wincmd.ini"
         Settings    = @(
             "Source : github.com/fivance/totalcmd -> wincmd.ini",
             "Target : $env:APPDATA\GHISLER\wincmd.ini",
             "Action : Overwrite existing wincmd.ini"
         )
     }
+    # Add more apps here, e.g.:
+    # @{
+    #     Name        = "Windows Terminal"
+    #     RepoUrl     = "https://github.com/fivance/terminal-settings"
+    #     ApplyFn     = "Apply-WindowsTerminal"
+    #     Description = "Copies settings.json from GitHub"
+    #     WingetId    = "Microsoft.WindowsTerminal"
+    #     DetectPath  = "$env:LOCALAPPDATA\Microsoft\WindowsApps\wt.exe"
+    #     Settings    = @(
+    #         "Source : github.com/fivance/terminal-settings -> settings.json",
+    #         "Target : ...\LocalState\settings.json",
+    #         "Action : Overwrite existing settings"
+    #     )
+    # }
 )
 
 $TempDir = "$env:TEMP\settings-apply"
 
+# ============================================================
+#  Helper: check if a command exists in PATH
+# ============================================================
+function Test-Command {
+    param([string]$Command)
+    return ($null -ne (Get-Command $Command -ErrorAction SilentlyContinue))
+}
+
+# ============================================================
+#  Helper: install a package via winget
+# ============================================================
+function Install-ViaWinget {
+    param([string]$WingetId, [string]$AppName, [string]$Override = "")
+
+    Write-Host "  Installing $AppName via winget..." -ForegroundColor Cyan
+
+    if ($Override) {
+        winget install --id $WingetId --silent --accept-source-agreements --accept-package-agreements --override $Override
+    } else {
+        winget install --id $WingetId --silent --accept-source-agreements --accept-package-agreements
+    }
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "winget failed to install $AppName (id: $WingetId)"
+    }
+
+    Write-Host "  $AppName installed successfully." -ForegroundColor Green
+}
+
+# ============================================================
+#  Helper: check winget is available
+# ============================================================
+function Assert-Winget {
+    if (-not (Test-Command "winget")) {
+        Write-Host ""
+        Write-Host "  ERROR: winget is not available on this system." -ForegroundColor Red
+        Write-Host "  Install App Installer from the Microsoft Store to get winget." -ForegroundColor Yellow
+        return $false
+    }
+    return $true
+}
+
+# ============================================================
+#  Helper: clone or update a repo into a local temp folder
+# ============================================================
 function Get-Repo {
     param([string]$RepoUrl, [string]$DestFolder)
 
@@ -8955,6 +9027,9 @@ function Confirm-App {
     return $r -match '^[Yy]$'
 }
 
+# ============================================================
+#  Helper: safely copy folder contents
+# ============================================================
 function Copy-FolderContents {
     param(
         [string]$Source,
@@ -8972,8 +9047,6 @@ function Copy-FolderContents {
 
 # ============================================================
 #  App: Sublime Text
-#  Repo: https://github.com/fivance/sublime
-#  Copies Packages/ contents -> %APPDATA%\Sublime Text\Packages
 # ============================================================
 function Apply-SublimeText {
     param([string]$RepoFolder)
@@ -8997,8 +9070,6 @@ function Apply-SublimeText {
 
 # ============================================================
 #  App: PowerShell Profile
-#  Repo: https://github.com/fivance/Powershell
-#  Copies Microsoft.PowerShell_profile.ps1 -> ~\Documents\PowerShell\
 # ============================================================
 function Apply-PowerShellProfile {
     param([string]$RepoFolder)
@@ -9025,8 +9096,6 @@ function Apply-PowerShellProfile {
 
 # ============================================================
 #  App: Firefox
-#  Repo: https://github.com/fivance/firefox
-#  Runs the repo's own import.ps1 with -Force to overwrite
 # ============================================================
 function Apply-Firefox {
     param([string]$RepoFolder)
@@ -9050,8 +9119,6 @@ function Apply-Firefox {
 
 # ============================================================
 #  App: Total Commander
-#  Repo: https://github.com/fivance/totalcmd
-#  Overwrites wincmd.ini -> %APPDATA%\GHISLER\wincmd.ini
 # ============================================================
 function Apply-TotalCommander {
     param([string]$RepoFolder)
@@ -9076,22 +9143,87 @@ function Apply-TotalCommander {
     Write-Host "  Overwrite complete." -ForegroundColor Green
 }
 
+# ============================================================
+#  -- Add more Apply-* functions below for each new app --
+#
+# function Apply-WindowsTerminal {
+#     param([string]$RepoFolder)
+#     $source      = "$RepoFolder\settings.json"
+#     $destination = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_...\LocalState\settings.json"
+#     Copy-Item -Path $source -Destination $destination -Force
+# }
+# ============================================================
+
+
+# ============================================================
+#  Startup checks
+# ============================================================
 Write-Host ""
 Write-Host "==============================" -ForegroundColor Magenta
 Write-Host "  Settings Apply Script" -ForegroundColor Magenta
 Write-Host "==============================" -ForegroundColor Magenta
+Write-Host ""
+
+# Check for git - required for cloning repos
+if (-not (Test-Command "git")) {
+    Write-Host "  git is not installed or not in PATH." -ForegroundColor Yellow
+    $installGit = Read-Host "  Install git via winget now? (Y/N)"
+    if ($installGit -match '^[Yy]$') {
+        if (Assert-Winget) {
+            Install-ViaWinget -WingetId "Git.Git" -AppName "Git" -Override '/VERYSILENT /NORESTART /COMPONENTS="!shellext,!gitlfs,!assoc,!assoc_sh"'
+            # Refresh PATH so git is available in this session
+            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" +
+                        [System.Environment]::GetEnvironmentVariable("PATH", "User")
+        }
+    } else {
+        Write-Host "  git is required to clone settings repos. Exiting." -ForegroundColor Red
+        exit 1
+    }
+}
 
 New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
 
+# ============================================================
+#  Main loop
+# ============================================================
 foreach ($app in $apps) {
     Write-Host ""
     Write-Host "----------------------------------------" -ForegroundColor DarkGray
     Write-Host "  $($app.Name)" -ForegroundColor White
     Write-Host "----------------------------------------" -ForegroundColor DarkGray
 
+    # --- App installed check ---
+    $appInstalled = $true
+    if ($app.DetectPath) {
+        if (-not (Test-Path $app.DetectPath)) {
+            $appInstalled = $false
+            Write-Host ""
+            Write-Host "  $($app.Name) does not appear to be installed." -ForegroundColor Yellow
+
+            if ($app.WingetId -and (Assert-Winget)) {
+                $doInstall = Read-Host "  Install $($app.Name) via winget first? (Y/N)"
+                if ($doInstall -match '^[Yy]$') {
+                    try {
+                        Install-ViaWinget -WingetId $app.WingetId -AppName $app.Name
+                        $appInstalled = $true
+                    } catch {
+                        Write-Host "  ERROR during install: $_" -ForegroundColor Red
+                    }
+                }
+            } else {
+                Write-Host "  No winget ID configured for $($app.Name) - please install it manually." -ForegroundColor Red
+            }
+        }
+    }
+
+    # --- Settings prompt ---
     if (-not (Confirm-App -Name $app.Name -Description $app.Description -Settings $app.Settings)) {
         Write-Host "  Skipped." -ForegroundColor Yellow
         continue
+    }
+
+    if (-not $appInstalled) {
+        Write-Host "  WARNING: Applying settings but $($app.Name) may not be installed." -ForegroundColor Yellow
     }
 
     $repoFolder = "$TempDir\$($app.Name -replace '\s','_')"
