@@ -8868,6 +8868,250 @@ Start-Menu
 
 }
 
+function Update-AppSettings {
+    # --- Config
+$apps = @(
+    @{
+        Name        = "Sublime Text"
+        RepoUrl     = "https://github.com/fivance/sublime"
+        ApplyFn     = "Apply-SublimeText"
+        Description = "Copies Packages/ folder contents from GitHub"
+        Settings    = @(
+            "Source : github.com/fivance/sublime -> Packages/",
+            "Target : $env:APPDATA\Sublime Text\Packages",
+            "Action : Overwrite all existing files"
+        )
+    }
+    @{
+        Name        = "PowerShell Profile"
+        RepoUrl     = "https://github.com/fivance/Powershell"
+        ApplyFn     = "Apply-PowerShellProfile"
+        Description = "Replaces your PowerShell profile script from GitHub"
+        Settings    = @(
+            "Source : github.com/fivance/Powershell -> Microsoft.PowerShell_profile.ps1",
+            "Target : $HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1",
+            "Action : Overwrite existing profile"
+        )
+    }
+    @{
+        Name        = "Firefox"
+        RepoUrl     = "https://github.com/fivance/firefox"
+        ApplyFn     = "Apply-Firefox"
+        Description = "Applies Firefox user.js settings via the repo's own import.ps1"
+        Settings    = @(
+            "Source : github.com/fivance/firefox -> import.ps1",
+            "Action : Runs import.ps1 -Force (overwrites existing files)"
+        )
+    }
+    @{
+        Name        = "Total Commander"
+        RepoUrl     = "https://github.com/fivance/totalcmd"
+        ApplyFn     = "Apply-TotalCommander"
+        Description = "Replaces wincmd.ini with the version from GitHub"
+        Settings    = @(
+            "Source : github.com/fivance/totalcmd -> wincmd.ini",
+            "Target : $env:APPDATA\GHISLER\wincmd.ini",
+            "Action : Overwrite existing wincmd.ini"
+        )
+    }
+)
+
+$TempDir = "$env:TEMP\settings-apply"
+
+function Get-Repo {
+    param([string]$RepoUrl, [string]$DestFolder)
+
+    if (Test-Path "$DestFolder\.git") {
+        Write-Host "  Updating existing clone..." -ForegroundColor Cyan
+        git -C $DestFolder pull --quiet
+    } else {
+        Write-Host "  Cloning $RepoUrl..." -ForegroundColor Cyan
+        git clone --quiet $RepoUrl $DestFolder
+    }
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "git failed for $RepoUrl"
+    }
+}
+
+# ============================================================
+#  Helper: show what will be applied, then prompt Y/N
+# ============================================================
+function Confirm-App {
+    param(
+        [string]$Name,
+        [string]$Description,
+        [string[]]$Settings
+    )
+
+    Write-Host ""
+    Write-Host "  $Description" -ForegroundColor White
+    Write-Host ""
+    foreach ($line in $Settings) {
+        Write-Host "    $line" -ForegroundColor DarkCyan
+    }
+    Write-Host ""
+    $r = Read-Host "  Apply $Name settings? (Y/N)"
+    return $r -match '^[Yy]$'
+}
+
+function Copy-FolderContents {
+    param(
+        [string]$Source,
+        [string]$Destination
+    )
+
+    if (-not (Test-Path $Source)) {
+        throw "Source folder not found: $Source"
+    }
+
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    Copy-Item -Path "$Source\*" -Destination $Destination -Recurse -Force
+    Write-Host "  Copied: $Source -> $Destination" -ForegroundColor Green
+}
+
+# ============================================================
+#  App: Sublime Text
+#  Repo: https://github.com/fivance/sublime
+#  Copies Packages/ contents -> %APPDATA%\Sublime Text\Packages
+# ============================================================
+function Apply-SublimeText {
+    param([string]$RepoFolder)
+
+    $source      = "$RepoFolder\Packages"
+    $destination = "$env:APPDATA\Sublime Text\Packages"
+
+    if (-not (Test-Path $source)) {
+        throw "Packages/ folder not found in repo. Check repo structure at github.com/fivance/sublime"
+    }
+
+    if (Test-Path $destination) {
+        Write-Host "  Packages folder exists - overwriting with GitHub version..." -ForegroundColor Yellow
+    } else {
+        Write-Host "  Packages folder not found - creating fresh..." -ForegroundColor Cyan
+    }
+
+    Copy-FolderContents -Source $source -Destination $destination
+    Write-Host "  Overwrite complete." -ForegroundColor Green
+}
+
+# ============================================================
+#  App: PowerShell Profile
+#  Repo: https://github.com/fivance/Powershell
+#  Copies Microsoft.PowerShell_profile.ps1 -> ~\Documents\PowerShell\
+# ============================================================
+function Apply-PowerShellProfile {
+    param([string]$RepoFolder)
+
+    $sourceFile = "$RepoFolder\Microsoft.PowerShell_profile.ps1"
+    $destDir    = "$HOME\Documents\PowerShell"
+    $destFile   = "$destDir\Microsoft.PowerShell_profile.ps1"
+
+    if (-not (Test-Path $sourceFile)) {
+        throw "Microsoft.PowerShell_profile.ps1 not found in repo at github.com/fivance/Powershell"
+    }
+
+    New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+
+    if (Test-Path $destFile) {
+        Write-Host "  Profile exists - overwriting with GitHub version..." -ForegroundColor Yellow
+    } else {
+        Write-Host "  No existing profile found - creating fresh..." -ForegroundColor Cyan
+    }
+
+    Copy-Item -Path $sourceFile -Destination $destFile -Force
+    Write-Host "  Overwrite complete." -ForegroundColor Green
+}
+
+# ============================================================
+#  App: Firefox
+#  Repo: https://github.com/fivance/firefox
+#  Runs the repo's own import.ps1 with -Force to overwrite
+# ============================================================
+function Apply-Firefox {
+    param([string]$RepoFolder)
+
+    $importScript = "$RepoFolder\import.ps1"
+
+    if (-not (Test-Path $importScript)) {
+        throw "import.ps1 not found in repo at github.com/fivance/firefox"
+    }
+
+    Write-Host "  Running import.ps1 from repo..." -ForegroundColor Cyan
+
+    & powershell.exe -ExecutionPolicy Bypass -File $importScript -Force
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "import.ps1 exited with code $LASTEXITCODE"
+    }
+
+    Write-Host "  Firefox settings applied." -ForegroundColor Green
+}
+
+# ============================================================
+#  App: Total Commander
+#  Repo: https://github.com/fivance/totalcmd
+#  Overwrites wincmd.ini -> %APPDATA%\GHISLER\wincmd.ini
+# ============================================================
+function Apply-TotalCommander {
+    param([string]$RepoFolder)
+
+    $sourceFile = "$RepoFolder\wincmd.ini"
+    $destDir    = "$env:APPDATA\GHISLER"
+    $destFile   = "$destDir\wincmd.ini"
+
+    if (-not (Test-Path $sourceFile)) {
+        throw "wincmd.ini not found in repo at github.com/fivance/totalcmd"
+    }
+
+    New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+
+    if (Test-Path $destFile) {
+        Write-Host "  wincmd.ini exists - overwriting with GitHub version..." -ForegroundColor Yellow
+    } else {
+        Write-Host "  No existing wincmd.ini found - creating fresh..." -ForegroundColor Cyan
+    }
+
+    Copy-Item -Path $sourceFile -Destination $destFile -Force
+    Write-Host "  Overwrite complete." -ForegroundColor Green
+}
+
+Write-Host ""
+Write-Host "==============================" -ForegroundColor Magenta
+Write-Host "  Settings Apply Script" -ForegroundColor Magenta
+Write-Host "==============================" -ForegroundColor Magenta
+
+New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
+
+foreach ($app in $apps) {
+    Write-Host ""
+    Write-Host "----------------------------------------" -ForegroundColor DarkGray
+    Write-Host "  $($app.Name)" -ForegroundColor White
+    Write-Host "----------------------------------------" -ForegroundColor DarkGray
+
+    if (-not (Confirm-App -Name $app.Name -Description $app.Description -Settings $app.Settings)) {
+        Write-Host "  Skipped." -ForegroundColor Yellow
+        continue
+    }
+
+    $repoFolder = "$TempDir\$($app.Name -replace '\s','_')"
+
+    try {
+        Get-Repo -RepoUrl $app.RepoUrl -DestFolder $repoFolder
+        & $app.ApplyFn -RepoFolder $repoFolder
+        Write-Host "  Done!" -ForegroundColor Green
+    } catch {
+        Write-Host "  ERROR: $_" -ForegroundColor Red
+    }
+}
+
+Write-Host ""
+Write-Host "==============================" -ForegroundColor Magenta
+Write-Host "  All done." -ForegroundColor Magenta
+Write-Host "==============================" -ForegroundColor Magenta
+ 
+}
+
 Get-Admin
 Save-Script
 
@@ -8918,7 +9162,9 @@ function Start-Menu {
         Write-Host "25. Remove Edge" -ForegroundColor Yellow
         Write-Host "26. Disk cleanup" -ForegroundColor Yellow
         Write-Host ""
-
+        
+        Write-Host "27. Apply app settings" -ForegroundColor Yellow
+        
         Write-Host "0.  Exit" -ForegroundColor Red
         Write-Host "==================================" -ForegroundColor Red
 
@@ -8951,6 +9197,7 @@ function Start-Menu {
             '24' { Remove-Defender }
             '25' { Remove-Edge }            
             '26' { Initialize-DiskCleanup }
+            '27' { Update-AppSettings }
             '0'  { exit }
             default {
                 Write-Host "`nInvalid selection. Press Enter to try again..." -ForegroundColor Red
