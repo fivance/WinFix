@@ -7789,14 +7789,14 @@ Windows Registry Editor Version 5.00
 "DisableNotifications"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection]
-"NoActionNotificationDisabled"=dword:00000001
-"SummaryNotificationDisabled"=dword:00000001
-"FilesBlockedNotificationDisabled"=dword:00000001
+"NoActionNotificationDisabled"=dword:00000000
+"SummaryNotificationDisabled"=dword:00000000
+"FilesBlockedNotificationDisabled"=dword:00000000
 
 [HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows Defender Security Center\Account protection]
-"DisableNotifications"=dword:00000001
-"DisableDynamiclockNotifications"=dword:00000001
-"DisableWindowsHelloNotifications"=dword:00000001
+"DisableNotifications"=dword:00000000
+"DisableDynamiclockNotifications"=dword:00000000
+"DisableWindowsHelloNotifications"=dword:00000000
 
 [HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Epoch]
 "Epoch"=dword:000004cf
