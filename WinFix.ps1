@@ -301,7 +301,7 @@ Get-FileFromWeb -URL "https://www.wagnardsoft.com/DDU/download/DDU%20v18.1.4.2_s
 
 $MultilineComment = @"
 <?xml version="1.0" encoding="utf-8"?>
-<DisplayDriverUninstaller Version="18.0.7.8">
+<DisplayDriverUninstaller Version="18.1.4.2">
 <Settings>
 <SelectedLanguage>en-US</SelectedLanguage>
 <RemoveMonitors>True</RemoveMonitors>
@@ -415,7 +415,7 @@ while ($true) {
 <ArrayOfProfile>
   <Profile>
     <ProfileName>Base Profile</ProfileName>
-    <Executeables />
+    <Executables/>
     <Settings>
       <ProfileSetting>
         <SettingNameInfo>Frame Rate Limiter V3</SettingNameInfo>
@@ -3371,7 +3371,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_CURRENT_USER\Control Panel\Mouse]
 "RawMouseThrottleEnabled"=dword:00000000
 
-; Enable new nvme driver
+; Enable new NVMe driver
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Policies\Microsoft\FeatureManagement\Overrides]
 "735209102"=dword:00000001
 "1853569164"=dword:00000001
@@ -3584,34 +3584,37 @@ function Remove-UWPApps {
   Clear-Host
   Write-Host "Removing UWP Apps..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
-  $progresspreference = 'silentlycontinue'
-  # CBS needed for Windows 11 Explorer
-  Get-AppXPackage -AllUsers | Where-Object { $_.Name -notlike '*NVIDIA*' -and $_.Name -notlike '*windows.immersivecontrolpanel*' -and $_.Name -notlike '*CBS*' -and $_.Name -notlike '*Terminal*' } | Remove-AppxPackage -ErrorAction SilentlyContinue
-  Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.HEVCVideoExtension* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.HEIFImageExtension* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.Paint* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.Windows.Photos* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.WindowsNotepad* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.WindowsStore* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.Microsoft.StorePurchaseApp* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  Get-AppXPackage -AllUsers *Microsoft.WindowsCalculator* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
   
-  Get-AppXPackage -AllUsers *Microsoft.SecHealthUI* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  
-  Get-AppXPackage -AllUsers *Microsoft.Windows.ShellExperienceHost* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
-  
-  Get-AppXPackage -AllUsers *Microsoft.Windows.StartMenuExperienceHost* | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register -ErrorAction SilentlyContinue "$($_.InstallLocation)\AppXManifest.xml"}
-  Timeout /T 2 | Out-Null
+  Get-AppXPackage -AllUsers | Where-Object {
+
+    # Breaks File Explorer
+$_.Name -notlike '*CBS*' -and
+$_.Name -notlike '*Microsoft.AV1VideoExtension*' -and
+$_.Name -notlike '*Microsoft.AVCEncoderVideoExtension*' -and
+$_.Name -notlike '*Microsoft.HEIFImageExtension*' -and
+$_.Name -notlike '*Microsoft.HEVCVideoExtension*' -and
+$_.Name -notlike '*Microsoft.MPEG2VideoExtension*' -and
+$_.Name -notlike '*Microsoft.Paint*' -and
+$_.Name -notlike '*Microsoft.RawImageExtension*' -and
+# Breaks Windows Server Defender
+$_.Name -notlike '*Microsoft.SecHealthUI*' -and
+$_.Name -notlike '*Microsoft.VP9VideoExtensions*' -and
+$_.Name -notlike '*Microsoft.WebMediaExtensions*' -and
+$_.Name -notlike '*Microsoft.WebpImageExtension*' -and
+$_.Name -notlike '*Microsoft.Windows.Photos*' -and
+# Breaks Windows Server task bar
+$_.Name -notlike '*Microsoft.Windows.ShellExperienceHost*' -and
+# Breaks Windows Server Start menu
+$_.Name -notlike '*Microsoft.Windows.StartMenuExperienceHost*' -and
+$_.Name -notlike '*Microsoft.WindowsNotepad*' -and
+$_.Name -notlike '*Microsoft.WindowsStore*' -and
+$_.Name -notlike '*NVIDIACorp.NVIDIAControlPanel*' -and
+# Breaks Windows Server immersive control panel
+$_.Name -notlike '*windows.immersivecontrolpanel*' -and
+$_.Name -notlike '*Terminal*' -and
+$_.Name -notlike '*Microsoft.WindowsCalculator*'
+
+} | Remove-AppxPackage -ErrorAction SilentlyContinue
   
   
   Clear-Host
@@ -3686,7 +3689,15 @@ function Remove-LegacyApps {
   Clear-Host
   Write-Host "Uninstalling Legacy Apps..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
-# Uninstall microsoft gameinput
+ 
+# Uninstall brlapi
+cmd /c "sc stop `"brlapi`" >nul 2>&1"
+cmd /c "sc delete `"brlapi`" >nul 2>&1"
+cmd /c "takeown /f `"$env:SystemRoot\brltty`" /r /d y >nul 2>&1"
+cmd /c "icacls `"$env:SystemRoot\brltty`" /grant *S-1-5-32-544:F /t >nul 2>&1"
+Remove-Item "$env:SystemRoot\brltty" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+  
+# Uninstall Microsoft Game input
 $findmicrosoftgameinput = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
 $microsoftgameinput = Get-ItemProperty $findmicrosoftgameinput -ErrorAction SilentlyContinue |
 Where-Object { $_.DisplayName -like "*Microsoft GameInput*" }
@@ -4384,17 +4395,19 @@ $regPath = $key.Name
 cmd /c "reg add `"$regPath`" /v `"WaitWakeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 }  
   
-# Disable memorycompression
+# Disable Memory compression
 Disable-MMAgent -MemoryCompression -ErrorAction SilentlyContinue | Out-Null
 
 # Disable Bitlocker
+try {
 Get-BitLockerVolume |
 Where-Object {
 $_.ProtectionStatus -eq "On" -or $_.VolumeStatus -ne "FullyDecrypted"
 } |
 ForEach-Object {
 Disable-BitLocker -MountPoint $_.MountPoint -ErrorAction SilentlyContinue | Out-Null
-}  
+}
+} catch { }
 
 #Disable defragmentation
 Get-ScheduledTask | Where-Object {$_.TaskName -match 'ScheduledDefrag'} | Disable-ScheduledTask | Out-Null
@@ -4479,7 +4492,7 @@ $regPath = $key.Name
 cmd /c "reg add `"$regPath`" /v `"IdleInWorkingState`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 }
 
-# Disable pci power savings on all connected devices
+# Disable PCI power savings on all connected devices
 $usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\PCI" -Recurse -ErrorAction SilentlyContinue |
 Where-Object { $_.PSChildName -eq "Device Parameters" }
 foreach ($key in $usbKeys) {
@@ -4495,7 +4508,7 @@ $regPath = $key.Name
 cmd /c "reg add `"$regPath`" /v `"IdleInWorkingState`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 }
 
-# Disable usb power savings on all connected devices
+# Disable USB power savings on all connected devices
 $usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\USB" -Recurse -ErrorAction SilentlyContinue |
 Where-Object { $_.PSChildName -eq "Device Parameters" }
 foreach ($key in $usbKeys) {
@@ -4511,7 +4524,7 @@ $regPath = $key.Name
 cmd /c "reg add `"$regPath`" /v `"IdleInWorkingState`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 }
 
-# Disable hid wake on all connected devices
+# Disable HID wake on all connected devices
 $usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\HID" -Recurse -ErrorAction SilentlyContinue |
 Where-Object { $_.PSChildName -eq "Device Parameters" }
 foreach ($key in $usbKeys) {
@@ -4519,7 +4532,7 @@ $regPath = $key.Name
 cmd /c "reg add `"$regPath`" /v `"WaitWakeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
 }
 
-# Disable pci wake on all connected devices
+# Disable PCI wake on all connected devices
 $usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\PCI" -Recurse -ErrorAction SilentlyContinue |
 Where-Object { $_.PSChildName -eq "Device Parameters" }
 foreach ($key in $usbKeys) {
@@ -4533,6 +4546,20 @@ Where-Object { $_.PSChildName -eq "Device Parameters" }
 foreach ($key in $usbKeys) {
 $regPath = $key.Name
 cmd /c "reg add `"$regPath`" /v `"WaitWakeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+}
+
+# Turn off Windows write-cache buffer flushing on the device on all connected SCSI devices
+$basePath = "HKLM:\SYSTEM\ControlSet001\Enum\SCSI"
+Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -eq "Device Parameters" } | ForEach-Object {
+$diskPath = Join-Path $_.PSPath "Disk"
+cmd /c "reg add `"$(($diskPath -replace 'Microsoft.PowerShell.Core\\Registry::',''))`" /v `"CacheIsPowerProtected`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+}
+
+# Turn off Windows write-cache buffer flushing on the device on all connected nvme devices
+$basePath = "HKLM:\SYSTEM\ControlSet001\Enum\NVME"
+Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -eq "Device Parameters" } | ForEach-Object {
+$diskPath = Join-Path $_.PSPath "Disk"
+cmd /c "reg add `"$(($diskPath -replace 'Microsoft.PowerShell.Core\\Registry::',''))`" /v `"CacheIsPowerProtected`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
 }
 
 Stop-Process -Name "Notepad" -Force -ErrorAction SilentlyContinue
@@ -4568,7 +4595,24 @@ reg unload "HKLM\Settings" >$null 2>&1
 cmd /c "reg delete HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Taskband /f >nul 2>&1"
 Remove-Item -Recurse -Force "$env:USERPROFILE\AppData\Roaming\Microsoft\Internet Explorer\Quick Launch" -ErrorAction SilentlyContinue | Out-Null
 	
-  
+# Remove context menu items 
+# Remove customize this folder
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer`" /v `"NoCustomizeThisFolder`" /t REG_DWORD /d `"1`" /f >nul 2>&1"
+
+# Remove troubleshoot compatibility
+cmd /c "reg delete `"HKCR\exefile\shellex\ContextMenuHandlers\Compatibility`" /f >nul 2>&1"
+
+# Remove scan with defender
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked`" /v `"{09A47860-11B0-4DA5-AFA5-26D86198A780}`" /t REG_SZ /d `"`" /f >nul 2>&1"
+
+# Remove share
+cmd /c "reg delete `"HKCR\AllFilesystemObjects\shellex\ContextMenuHandlers\ModernSharing`" /f >nul 2>&1"
+
+# Remove send to
+cmd /c "reg delete `"HKCR\AllFilesystemObjects\shellex\ContextMenuHandlers\SendTo`" /f >nul 2>&1"
+cmd /c "reg delete `"HKCR\UserLibraryFolder\shellex\ContextMenuHandlers\SendTo`" /f >nul 2>&1"
+ 
+
 # Remove startup apps
 cmd /c "reg delete `"HKCU\Software\Microsoft\Windows\CurrentVersion\RunNotification`" /f >nul 2>&1"
 cmd /c "reg add `"HKCU\Software\Microsoft\Windows\CurrentVersion\RunNotification`" /f >nul 2>&1"
@@ -7620,6 +7664,12 @@ function Initialize-DiskCleanup {
       Write-Host "Used space on $($drive.Name):\ $usedInGB GB" -ForegroundColor Green
       
   }
+# Delete folders & files
+Remove-Item "$env:SystemDrive\inetpub" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemDrive\PerfLogs" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+Remove-Item "$env:SystemDrive\XboxGames" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+#Remove-Item "$env:SystemDrive\Windows.old" -Recurse -Force -ErrorAction SilentlyContinue | Out-Null -- Might contain users previous Windows install
+Remove-Item "$env:SystemDrive\DumpStack.log" -Force -ErrorAction SilentlyContinue | Out-Null
 }
 
 function Remove-Defender {
@@ -8868,6 +8918,22 @@ Start-Menu
 
 }
 
+function Update-WinUpdates {
+    
+$pause = (Get-Date).AddDays(365)
+$today = Get-Date
+$today = $today.ToUniversalTime().ToString( "yyyy-MM-ddTHH:mm:ssZ" )
+$pause = $pause.ToUniversalTime().ToString( "yyyy-MM-ddTHH:mm:ssZ" )
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "PauseUpdatesExpiryTime" -Value $pause -Force >$null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "PauseFeatureUpdatesEndTime" -Value $pause -Force >$null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "PauseFeatureUpdatesStartTime" -Value $today -Force >$null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "PauseQualityUpdatesEndTime" -Value $pause -Force >$null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "PauseQualityUpdatesStartTime" -Value $today -Force >$null
+Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "PauseUpdatesStartTime" -Value $today -Force >$null
+
+# open settings
+Start-Process ms-settings:windowsupdate
+}
 function Update-AppSettings {
 $apps = @(
     @{
@@ -9231,6 +9297,7 @@ function Start-Menu {
         Write-Host ""
         
         Write-Host "27. Apply app settings (SublimeText, Total Commander, Firefox, Powershell (7) Profile )" -ForegroundColor Yellow
+        Write-Host "28. Pause Windows updates"
         Write-Host ""
         
         Write-Host "0.  Exit" -ForegroundColor Red
@@ -9266,6 +9333,7 @@ function Start-Menu {
             '25' { Remove-Edge }            
             '26' { Initialize-DiskCleanup }
             '27' { Update-AppSettings }
+            '28' { Update-WinUpdates }
             '0'  { exit }
             default {
                 Write-Host "`nInvalid selection. Press Enter to try again..." -ForegroundColor Red
