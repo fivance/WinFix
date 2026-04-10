@@ -9297,7 +9297,7 @@ function Start-Menu {
         Write-Host ""
         
         Write-Host "27. Apply app settings (SublimeText, Total Commander, Firefox, Powershell (7) Profile )" -ForegroundColor Yellow
-        Write-Host "28. Pause Windows updates"
+        Write-Host "28. Pause Windows updates" -ForegroundColor Yellow
         Write-Host ""
         
         Write-Host "0.  Exit" -ForegroundColor Red
