@@ -3584,7 +3584,7 @@ function Remove-UWPApps {
   Clear-Host
   Write-Host "Removing UWP Apps..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
-  
+  $ProgressPreference = 'SilentlyContinue'
   Get-AppXPackage -AllUsers | Where-Object {
 
     # Breaks File Explorer
@@ -3625,8 +3625,10 @@ function Remove-UWPFeatures {
   Clear-Host
   Write-Host "Removing UWP Features..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
+  $ProgressPreference = 'SilentlyContinue'
+  
 Get-WindowsCapability -Online | Where-Object {
-    $_.Name -notlike '*Microsoft.Windows.Ethernet*' -and
+$_.Name -notlike '*Microsoft.Windows.Ethernet*' -and
 $_.Name -notlike '*Microsoft.Windows.MSPaint*' -and
 $_.Name -notlike '*Microsoft.Windows.Notepad*' -and
 $_.Name -notlike '*Microsoft.Windows.Notepad.System*' -and
@@ -3651,6 +3653,8 @@ function Remove-LegacyFeatures {
   Clear-Host
   Write-Host "Uninstalling Legacy Features..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
+  $ProgressPreference = 'SilentlyContinue'
+
 Get-WindowsOptionalFeature -Online | Where-Object {
 $_.FeatureName -notlike '*DirectPlay*' -and
 $_.FeatureName -notlike '*LegacyComponents*' -and
@@ -3689,7 +3693,8 @@ function Remove-LegacyApps {
   Clear-Host
   Write-Host "Uninstalling Legacy Apps..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
- 
+  $ProgressPreference = 'SilentlyContinue'
+
 # Uninstall brlapi
 cmd /c "sc stop `"brlapi`" >nul 2>&1"
 cmd /c "sc delete `"brlapi`" >nul 2>&1"
