@@ -5429,6 +5429,135 @@ function Enable-WSL {
     Write-Host "$ts - WSL configuration completed. A reboot is recommended." -ForegroundColor Yellow
 }
 
+function Set-DefenderGaming {
+function Run-Trusted([String]$command) {
+        try {
+    	Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
+  		}
+  		catch {
+    	taskkill /im trustedinstaller.exe /f >$null
+  		}
+        $service = Get-CimInstance -ClassName Win32_Service -Filter "Name='TrustedInstaller'"
+        $DefaultBinPath = $service.PathName
+  		$trustedInstallerPath = "$env:SystemRoot\servicing\TrustedInstaller.exe"
+  		if ($DefaultBinPath -ne $trustedInstallerPath) {
+    	$DefaultBinPath = $trustedInstallerPath
+  		}
+        $bytes = [System.Text.Encoding]::Unicode.GetBytes($command)
+        $base64Command = [Convert]::ToBase64String($bytes)
+        sc.exe config TrustedInstaller binPath= "cmd.exe /c powershell.exe -encodedcommand $base64Command" | Out-Null
+        sc.exe start TrustedInstaller | Out-Null
+        sc.exe config TrustedInstaller binpath= "`"$DefaultBinPath`"" | Out-Null
+        try {
+    	Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
+  		}
+  		catch {
+    	taskkill /im trustedinstaller.exe /f >$null
+  		}
+        }
+$windowssecuritysettings = @(
+# Virus & Threat protection - manage settings
+# Real time protection - needs safe boot as trusted installer - Windows turns this back on automatically
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Real-Time Protection`" /v `"DisableRealtimeMonitoring`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# Dev drive protection - needs safe boot as trusted installer
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Real-Time Protection`" /v `"DisableAsyncScanOnOpen`" /t REG_DWORD /d `"1`" /f >nul 2>&1"',
+
+# Cloud delivered protection - needs safe boot as trusted installer
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Spynet`" /v `"SpyNetReporting`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# Automatic sample submission
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Spynet`" /v `"SubmitSamplesConsent`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# Tamper protection - needs safe boot as trusted installer
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Features`" /v `"TamperProtection`" /t REG_DWORD /d `"4`" /f >nul 2>&1"',
+
+# Virus & threat protection - manage ransomware protection
+# Controlled folder access
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender\Windows Defender Exploit Guard\Controlled Folder Access`" /v `"EnableControlledFolderAccess`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# Firewall & network protection - firewall notification settings - manage notifications
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Notifications`" /v `"DisableEnhancedNotifications`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection`" /v `"NoActionNotificationDisabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection`" /v `"SummaryNotificationDisabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender Security Center\Virus and threat protection`" /v `"FilesBlockedNotificationDisabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows Defender Security Center\Account protection`" /v `"DisableNotifications`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows Defender Security Center\Account protection`" /v `"DisableDynamiclockNotifications`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows Defender Security Center\Account protection`" /v `"DisableWindowsHelloNotifications`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Epoch`" /v `"Epoch`" /t REG_DWORD /d `"1231`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\DomainProfile`" /v `"DisableNotifications`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\PublicProfile`" /v `"DisableNotifications`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Services\SharedAccess\Parameters\FirewallPolicy\StandardProfile`" /v `"DisableNotifications`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# App & browser control - Smart app control settings
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender`" /v `"VerifiedAndReputableTrustModeEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender`" /v `"SmartLockerMode`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender`" /v `"PUAProtection`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\AppID\Configuration\SMARTLOCKER`" /v `"START_PENDING`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\AppID\Configuration\SMARTLOCKER`" /v `"ENABLED`" /t REG_BINARY /d `"0000000000000000`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\CI\Policy`" /v `"VerifiedAndReputablePolicyState`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# App & browser control - Reputation based protection settings
+# Check apps and files
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer`" /v `"SmartScreenEnabled`" /t REG_SZ /d `"Off`" /f >nul 2>&1"',
+
+# Smartscreen for Microsoft Edge - needs normal boot as admin
+'cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Edge\SmartScreenEnabled`" /ve /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Edge\SmartScreenPuaEnabled`" /ve /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# Phishing protection
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components`" /v `"CaptureThreatWindow`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components`" /v `"NotifyMalicious`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components`" /v `"NotifyPasswordReuse`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components`" /v `"NotifyUnsafeApp`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\WTDS\Components`" /v `"ServiceEnabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# Potentially unwanted app blocking
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Defender`" /v `"PUAProtection`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# Smartscreen for Microsoft Store apps - needs normal boot as admin
+'cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost`" /v `"EnableWebContentEvaluation`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# App & browser control - exploit protection settings
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\Session Manager\kernel`" /v `"MitigationOptions`" /t REG_BINARY /d `"222222000002000000020000000000000000000000000000`" /f >nul 2>&1"',
+
+# Device security - Core isolation details
+# Memory integrity
+'cmd /c "reg delete `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity`" /v `"ChangedInBootCycle`" /f >nul 2>&1"',
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity`" /v `"Enabled`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+'cmd /c "reg delete `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity`" /v `"WasEnabledBy`" /f >nul 2>&1"',
+
+# Turn off VBS virtualization based security
+# FACEIT anti cheat forces this on - even after uninstall
+'cmd /c "bcdedit /deletevalue allowedinmemorysettings >nul 2>&1"',
+'cmd /c "bcdedit /deletevalue isolatedcontext >nul 2>&1"',
+'cmd /c "bcdedit /deletevalue hypervisorlaunchtype >nul 2>&1"',
+'cmd /c "reg delete `"HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard`" /v `"EnableVirtualizationBasedSecurity`" /f >nul 2>&1"',
+
+# Local security authority protection
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa`" /v `"RunAsPPL`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
+
+# Microsoft vulnerable driver blocklist
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\CI\Config`" /v `"VulnerableDriverBlocklistEnable`" /t REG_DWORD /d `"0`" /f >nul 2>&1"'
+)
+
+# Run $windowssecuritysettings as function with trusted installer
+foreach ($command in $windowssecuritysettings) {
+    Run-Trusted $command
+}
+
+# run $windowssecuritysettings as admin
+foreach ($command in $windowssecuritysettings) {
+    Invoke-Expression $command
+}
+
+# disable uac
+cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`" /v `"EnableLUA`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+# remove safe mode boot
+cmd /c "bcdedit /deletevalue {current} safeboot >nul 2>&1"
+       
+}
 function Install-TimerResolution {
     Clear-Host
     Write-Host "1. Timer Resolution: On" -ForegroundColor Cyan
@@ -9288,16 +9417,17 @@ function Start-Menu {
         Write-Host "19. Hardening - Virtualisation Security Features" -ForegroundColor Yellow
         Write-Host "20. Hardening - Defender configuration" -ForegroundColor Yellow
         Write-Host "21. Hardening - Windows 11 Security & Privacy" -ForegroundColor Yellow
+        Write-Host "22. Defender/Security - Gaming defaults" -ForegroundColor Yellow
         
-        Write-Host "22. Enable WSL" -ForegroundColor Yellow
-        Write-Host "23. Install Timer Resolution" -ForegroundColor Yellow
-        Write-Host "24. Disable Defender/Security" -ForegroundColor Yellow
-        Write-Host "25. Remove Edge" -ForegroundColor Yellow
-        Write-Host "26. Disk cleanup" -ForegroundColor Yellow
+        Write-Host "23. Enable WSL" -ForegroundColor Yellow
+        Write-Host "24. Install Timer Resolution" -ForegroundColor Yellow
+        Write-Host "25. Disable Defender/Security" -ForegroundColor Yellow
+        Write-Host "26. Remove Edge" -ForegroundColor Yellow
+        Write-Host "27. Disk cleanup" -ForegroundColor Yellow
         Write-Host ""
         
-        Write-Host "27. Apply app settings (SublimeText, Total Commander, Firefox, Powershell (7) Profile )" -ForegroundColor Yellow
-        Write-Host "28. Pause Windows updates" -ForegroundColor Yellow
+        Write-Host "28. Apply app settings (SublimeText, Total Commander, Firefox, Powershell (7) Profile )" -ForegroundColor Yellow
+        Write-Host "29. Pause Windows updates" -ForegroundColor Yellow
         Write-Host ""
         
         Write-Host "0.  Exit" -ForegroundColor Red
@@ -9327,13 +9457,14 @@ function Start-Menu {
             '19' { Enable-VirtualizationSecurityFeatures }
             '20' { Set-DefenderConfig }
             '21' { Invoke-Security }
-            '22' { Enable-WSL }
-            '23' { Install-TimerResolution }
-            '24' { Remove-Defender }
-            '25' { Remove-Edge }            
-            '26' { Initialize-DiskCleanup }
-            '27' { Update-AppSettings }
-            '28' { Update-WinUpdates }
+            '22' { Set-DefenderGaming }
+            '23' { Enable-WSL }
+            '24' { Install-TimerResolution }
+            '25' { Remove-Defender }
+            '26' { Remove-Edge }            
+            '27' { Initialize-DiskCleanup }
+            '28' { Update-AppSettings }
+            '29' { Update-WinUpdates }
             '0'  { exit }
             default {
                 Write-Host "`nInvalid selection. Press Enter to try again..." -ForegroundColor Red
