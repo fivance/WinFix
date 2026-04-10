@@ -4319,9 +4319,6 @@ New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsA
 Reg.exe add 'HKCR\*\shell\runas' /ve /t REG_SZ /d 'Take Ownership' /f
 Reg.exe add 'HKCR\*\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" && icacls \"%1\" /grant administrators:F' /f
 Reg.exe add 'HKCR\*\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" && icacls \"%1\" /grant administrators:F' /f
-Reg.exe add 'HKCR\Directory\shell\runas' /ve /t REG_SZ /d 'Take Ownership' /f
-Reg.exe add 'HKCR\Directory\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /f
-Reg.exe add 'HKCR\Directory\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" /r /d y && icacls \"%1\" /grant administrators:F /t' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked' /v '{9F156763-7844-4DC4-B2B1-901F640F5155}' /t REG_SZ /d `"`" /f
 }
 
