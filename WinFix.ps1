@@ -4272,54 +4272,13 @@ foreach ($file in $regFiles) {
   New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath' -Name 'VerbName' -Value 'copyaspath' -PropertyType String -Force | Out-Null
   New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Allfilesystemobjects\shell\windows.copyaspath' -Name 'Icon' -Value 'imageres.dll,-5302' -PropertyType String -Force | Out-Null
   Write-Host "Explorer: 'Copy as Path' - Right Click Context Menu [ADDED]" -ForegroundColor Green
-  
-  $pwshPath = "C:\Program Files\PowerShell\7\pwsh.exe"
-
-if (-not (Test-Path $pwshPath)) {
-    Write-Host "PowerShell 7 not found. Installing with winget..." -ForegroundColor Yellow
-    Start-Process "winget" -ArgumentList "install --id Microsoft.Powershell --source winget --silent --accept-package-agreements --accept-source-agreements" -Wait -NoNewWindow
-}
-
-$keys = @(
-    "HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin",
-    "HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin\command",
-    "HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin",
-    "HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin\command",
-    "HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin",
-    "HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin\command"
-)
-
-foreach ($key in $keys) {
-    if (-not (Test-Path $key)) {
-        New-Item $key -Force | Out-Null
-    }
-}
-
-Remove-Item -LiteralPath "HKLM:\SOFTWARE\Classes\LibraryFolder\Background\shell\PowerShell7AsAdmin" -Force -ErrorAction SilentlyContinue | Out-Null
-
-$menuName = "Open with PowerShell 7 (Admin)"
-$command = 'powershell -WindowStyle Hidden -NoProfile -Command "Start-Process -Verb RunAs pwsh.exe -ArgumentList ''-NoExit'',''-Command'',''Push-Location \"\"%V\"\"''"'
-
-
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name '(default)' -Value $menuName -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value '' -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'pwsh.exe' -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\Background\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value $command -Force | Out-Null
-
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name '(default)' -Value $menuName -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value '' -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'pwsh.exe' -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Directory\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value $command -Force | Out-Null
-
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name '(default)' -Value $menuName -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name 'HasLUAShield' -Value '' -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin' -Name 'Icon' -Value 'pwsh.exe' -Force | Out-Null
-New-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Classes\Drive\shell\PowerShell7AsAdmin\command' -Name '(default)' -Value $command -Force | Out-Null
 
 Reg.exe add 'HKCR\*\shell\runas' /ve /t REG_SZ /d 'Take Ownership' /f
 Reg.exe add 'HKCR\*\shell\runas\command' /ve /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" && icacls \"%1\" /grant administrators:F' /f
 Reg.exe add 'HKCR\*\shell\runas\command' /v 'IsolatedCommand' /t REG_SZ /d 'cmd.exe /c takeown /f \"%1\" && icacls \"%1\" /grant administrators:F' /f
 Reg.exe add 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked' /v '{9F156763-7844-4DC4-B2B1-901F640F5155}' /t REG_SZ /d `"`" /f
+Write-Host "Explorer: 'Take Ownership' - Right Click Context Menu [ADDED]" -ForegroundColor Green
+
 }
 
 function Set-ServicesManual {
