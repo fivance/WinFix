@@ -5391,6 +5391,18 @@ function Enable-WSL {
 }
 
 function Set-DefenderGaming {
+    
+    Write-Host "This script should be started from safe mode!"
+    $response = Read-Host "Do you want to restart into Safe Mode now? (Y/N)"
+
+  if ($response -match '^[Yy]') {
+      Write-Host "Restarting into Safe Mode..." -ForegroundColor Cyan
+      cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
+      shutdown -r -t 00
+  }
+  else {
+      Write-Host "Restart supressed." -ForegroundColor Cyan
+  }
 function Run-Trusted([String]$command) {
         try {
     	Stop-Service -Name TrustedInstaller -Force -ErrorAction Stop -WarningAction Stop
@@ -5514,6 +5526,17 @@ foreach ($command in $windowssecuritysettings) {
 
 # disable uac
 cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`" /v `"EnableLUA`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+$response = Read-Host "Do you want to restart into Safe Mode now? (Y/N)"
+
+  if ($response -match '^[Yy]') {
+      Write-Host "Restarting into Safe Mode..." -ForegroundColor Cyan
+      cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
+      shutdown -r -t 00
+  }
+  else {
+      Write-Host "Restart supressed." -ForegroundColor Cyan
+  }
 
 # remove safe mode boot
 cmd /c "bcdedit /deletevalue {current} safeboot >nul 2>&1"
