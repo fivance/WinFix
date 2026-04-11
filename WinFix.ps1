@@ -5392,6 +5392,7 @@ function Enable-WSL {
 
 function Set-DefenderGaming {
     
+    Clear-Host
     Write-Host "This script should be started from safe mode!"
     $response = Read-Host "Do you want to restart into Safe Mode now? (Y/N)"
 
