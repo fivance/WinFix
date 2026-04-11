@@ -5394,6 +5394,7 @@ function Set-DefenderGaming {
     
     Clear-Host
     Write-Host "This script should be started from safe mode!"
+    Write-Host "Re-run this script from safe mode!"
     $response = Read-Host "Do you want to restart into Safe Mode now? (Y/N)"
 
   if ($response -match '^[Yy]') {
@@ -5492,8 +5493,8 @@ $windowssecuritysettings = @(
 # Smartscreen for Microsoft Store apps - needs normal boot as admin
 'cmd /c "reg add `"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\AppHost`" /v `"EnableWebContentEvaluation`" /t REG_DWORD /d `"0`" /f >nul 2>&1"',
 
-# App & browser control - exploit protection settings
-'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\Session Manager\kernel`" /v `"MitigationOptions`" /t REG_BINARY /d `"222222000002000000020000000000000000000000000000`" /f >nul 2>&1"',
+# App & browser control - exploit protection settings - enable Control Flow guard ON for Vanguard anticheat
+'cmd /c "reg add `"HKEY_LOCAL_MACHINE\System\ControlSet001\Control\Session Manager\kernel`" /v `"MitigationOptions`" /t REG_BINARY /d `"222222000001000000000000000000000000000000000000`" /f >nul 2>&1"',
 
 # Device security - Core isolation details
 # Memory integrity
@@ -5527,17 +5528,6 @@ foreach ($command in $windowssecuritysettings) {
 
 # disable uac
 cmd /c "reg add `"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`" /v `"EnableLUA`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
-
-$response = Read-Host "Do you want to restart into Safe Mode now? (Y/N)"
-
-  if ($response -match '^[Yy]') {
-      Write-Host "Restarting into Safe Mode..." -ForegroundColor Cyan
-      cmd /c "bcdedit /set {current} safeboot minimal >nul 2>&1"
-      shutdown -r -t 00
-  }
-  else {
-      Write-Host "Restart supressed." -ForegroundColor Cyan
-  }
 
 # remove safe mode boot
 cmd /c "bcdedit /deletevalue {current} safeboot >nul 2>&1"
