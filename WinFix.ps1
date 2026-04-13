@@ -1116,6 +1116,9 @@ Run-Trusted -command $capabilityconsentstoragedb
 cmd /c "reg add `"HKLM\SYSTEM\ControlSet001\Services\CDPUserSvc`" /v `"Start`" /t REG_DWORD /d `"4`" /f >nul 2>&1"
 Set-Content -Path "$env:SystemRoot\Temp\DDU\Settings\Settings.xml" -Value $storesettings -Force
 
+# Disable gamebarpresencewriter.exe
+Run-Trusted -command "reg add `"HKLM\SOFTWARE\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Gaming.GameBar.PresenceServer.Internal.PresenceWriter`" /v `"ActivationType`" /t REG_DWORD /d `"0`" /f"
+
   Write-Host "Enabling MSI mode..." -ForegroundColor Cyan
   Start-Sleep -Seconds 3
   Clear-Host
@@ -1434,7 +1437,10 @@ $MultilineComment = @"
   
 Clear-Host
 
-######
+# Allow password sign in
+cmd /c "reg add `"HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device`" /v `"DevicePasswordLessBuildVersion`" /t REG_DWORD /d `"0`" /f >nul 2>&1"
+
+
 $response = Read-Host "Install Chrome + appy policies and tweaks? (Y/N)"
 
 if ($response -eq 'Y' -or $response -eq 'y') {
@@ -3728,7 +3734,7 @@ Get-ScheduledTask | Where-Object {$_.Taskname -match 'OneDrive'} | Unregister-Sc
 try {
 Start-Process "C:\Windows\System32\SnippingTool.exe" -ArgumentList "/Uninstall"
 } catch { }
-# Silent window for uninstall old snipping tool
+# Silent window for uninstall old Snipping tool
 $processExists = Get-Process -Name SnippingTool -ErrorAction SilentlyContinue
 if ($processExists) {
 $running = $true
@@ -3743,7 +3749,7 @@ Start-Sleep -Milliseconds 100
 }
 Start-Sleep -Seconds 1
 
-# Windows 10 uninstall update for windows 10 for x64-based systems
+# Windows 10 uninstall update for Windows 10 for x64-based systems
 $findupdateforwindows = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
 $updateforwindows = Get-ItemProperty $findupdateforwindows -ErrorAction SilentlyContinue |
 Where-Object { $_.DisplayName -like "*Update for x64-based Windows Systems*" }
@@ -3752,7 +3758,7 @@ $guid = $updateforwindows.PSChildName
 Start-Process "msiexec.exe" -ArgumentList "/x $guid /qn /norestart" -Wait -NoNewWindow
 }
 
-# Windows 10 uninstall microsoft update health tools
+# Windows 10 uninstall Microsoft update health tools
 $findupdatehealthtools = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
 $updatehealthtools = Get-ItemProperty $findupdatehealthtools -ErrorAction SilentlyContinue |
 Where-Object { $_.DisplayName -like "*Microsoft Update Health Tools*" }
@@ -4369,6 +4375,17 @@ ForEach-Object {
 Disable-BitLocker -MountPoint $_.MountPoint -ErrorAction SilentlyContinue | Out-Null
 }
 } catch { }
+
+# Block all Windows driver updates
+reg add "HKLM\Software\Policies\Microsoft\Windows\Device Metadata" /v "PreventDeviceMetadataFromNetwork" /t REG_DWORD /d 1 /f | Out-Null
+reg add "HKLM\Software\Policies\Microsoft\Windows\DeviceInstall\Settings" /v "DisableSendGenericDriverNotFoundToWER" /t REG_DWORD /d 1 /f | Out-Null
+reg add "HKLM\Software\Policies\Microsoft\Windows\DeviceInstall\Settings" /v "DisableSendRequestAdditionalSoftwareToWER" /t REG_DWORD /d 1 /f | Out-Null
+reg add "HKLM\Software\Policies\Microsoft\Windows\DriverSearching" /v "SearchOrderConfig" /t REG_DWORD /d 0 /f | Out-Null
+reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" /v "SetAllowOptionalContent" /t REG_DWORD /d 0 /f | Out-Null
+reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" /v "AllowTemporaryEnterpriseFeatureControl" /t REG_DWORD /d 0 /f | Out-Null
+reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate" /v "ExcludeWUDriversInQualityUpdate" /t REG_DWORD /d 1 /f | Out-Null
+reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "IncludeRecommendedUpdates" /t REG_DWORD /d 0 /f | Out-Null
+reg add "HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "EnableFeaturedSoftware" /t REG_DWORD /d 0 /f | Out-Null
 
 #Disable defragmentation
 Get-ScheduledTask | Where-Object {$_.TaskName -match 'ScheduledDefrag'} | Disable-ScheduledTask | Out-Null
