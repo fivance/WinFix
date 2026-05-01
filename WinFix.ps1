@@ -739,6 +739,7 @@ while ($true) {
                 }
 
                 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
+                
 
                 Write-Host "`nNVIDIA setup complete." -ForegroundColor Green
                 Read-Host "Press Enter to return to the menu"
@@ -2195,6 +2196,10 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 [HKEY_USERS\S-1-5-20\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings]
 "DownloadMode"=dword:00000000
 
+; Set bandwith reserve for Windows update to 0
+[HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Psched]
+"NonBestEffortLimit"=dword:00000000
+
 
 
 
@@ -3390,6 +3395,9 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot\Minimal\{75416E63-5912-4DFA-AE8F-3EFACCAFFB14}]
 @="Storage disks"
 
+; Disable modern standby
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power]
+"PlatformAoAcOverride"=dword:00000000
 
 
 
@@ -3546,6 +3554,7 @@ C0,CC,0C,00,00,00,00,00,\
   Start-Sleep -Seconds 3
   taskkill.exe /F /IM "OneDrive.exe"
   taskkill.exe /F /IM "explorer.exe"
+  
   
   if (Test-Path "$env:systemroot\System32\OneDriveSetup.exe") {
       & "$env:systemroot\System32\OneDriveSetup.exe" /uninstall
@@ -4929,6 +4938,7 @@ else {
   reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "UploadUserActivities" /t REG_DWORD /d 0 /f
   reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "PublishUserActivities" /t REG_DWORD /d 0 /f
   reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "AllowClipboardHistory" /t REG_DWORD /d 0 /f
+  reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\System" /v "EnableCdp" /t REG_DWORD /d 0 /f
   
   auditpol /set /subcategory:"Special Logon" /success:disable
   auditpol /set /subcategory:"Audit Policy Change" /success:disable
@@ -5287,7 +5297,7 @@ function Remove-BloatwarePackages {
                   Write-Host "Failed to optimize $drive. Error: $_" -ForegroundColor Red
               }
           }
-  Disable-UnnecessaryServices -ServiceList @("WerSvc", "OneSyncSvc", "PcaSvc", "MessagingService", "RetailDemo", "diagnosticshub.standardcollector.service", "lfsvc", "AJRouter", "RemoteRegistry", "DUSMsvc", "DiagTrack", "MapsBroker", "XblAuthManager", "XblGameSave", "XboxNetApiSvc", "XboxGipSvc", "dmwappushservice", "DiagSvc", "wisvc", "PhoneSvc", "UnistoreSvc")
+  Disable-UnnecessaryServices -ServiceList @("WerSvc", "WMPNetworkSvc", "OneSyncSvc", "PcaSvc", "MessagingService", "RetailDemo", "diagnosticshub.standardcollector.service", "lfsvc", "AJRouter", "RemoteRegistry", "DUSMsvc", "DiagTrack", "MapsBroker", "XblAuthManager", "XblGameSave", "XboxNetApiSvc", "XboxGipSvc", "dmwappushservice", "DiagSvc", "wisvc", "PhoneSvc", "UnistoreSvc")
   
   Disable-UnwantedScheduledTasks -TaskList @("Microsoft\Windows\AppID\SmartScreenSpecific", "Microsoft\Windows\Application Experience\AitAgent", "Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser", "Microsoft\Windows\Application Experience\ProgramDataUpdater", "Microsoft\Windows\Application Experience\StartupAppTask", "Microsoft\Windows\Autochk\Proxy", "Microsoft\Windows\CloudExperienceHost\CreateObjectTask", "Microsoft\Windows\Customer Experience Improvement Program\BthSQM", "Microsoft\Windows\Customer Experience Improvement Program\Consolidator", "Microsoft\Windows\Customer Experience Improvement Program\KernelCeipTask", "Microsoft\Windows\Customer Experience Improvement Program\Uploader", "Microsoft\Windows\Customer Experience Improvement Program\UsbCeip", "Microsoft\Windows\Maintenance\WinSAT", "Microsoft\Windows\PI\Sqm-Tasks", "Microsoft\Windows\Shell\FamilySafetyMonitor", "Microsoft\Windows\Shell\FamilySafetyRefresh", "Microsoft\Windows\Shell\FamilySafetyUpload", "Microsoft\Windows\Shell\FamilySafetyMonitorToastTask", "Microsoft\Windows\Shell\FamilySafetyRefreshTask", "Microsoft\Windows\WindowsUpdate\Automatic App Update", "Microsoft\Windows\NetTrace\GatherNetworkInfo", "Microsoft\Windows\Maps\MapsUpdateTask", "Microsoft\Windows\Maps\MapsToastTask", "Microsoft\XblGameSave\XblGameSaveTask", "Microsoft\XblGameSave\XblGameSaveTaskLogon")
   
@@ -5879,6 +5889,19 @@ if ($response -eq 'Y' -or $response -eq 'y') {
         }
         Set-ItemProperty -Path $aiPathHKCU -Name "SetCopilotHardwareKey" -Value "Microsoft.WindowsNotepad_8wekyb3d8bbwe!App" -Type String -Force
         
+        Reg.exe add "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\SearchSettings" /v 'IsDeviceSearchHistoryEnabled' /t REG_DWORD /d '0' /f *>$null
+        Reg.exe add "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v 'AllowCortana' /t REG_DWORD /d '0' /f *>$null
+        Reg.exe add "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v 'DisableWebSearch' /t REG_DWORD /d '1' /f *>$null
+        Reg.exe add "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v 'ConnectedSearchUseWeb' /t REG_DWORD /d '0' /f *>$null
+        Reg.exe add "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v 'ConnectedSearchUseWebOverMeteredConnections' /t REG_DWORD /d '0' /f *>$null
+        Reg.exe add "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v 'AllowCloudSearch' /t REG_DWORD /d '0' /f *>$null
+        
+        Reg.exe add "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v 'HistoryViewEnabled' /t REG_DWORD /d '0' /f *>$null
+        Reg.exe add "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v 'DeviceHistoryEnabled' /t REG_DWORD /d '0' /f *>$null
+        Reg.exe add "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v 'AllowSearchToUseLocation' /t REG_DWORD /d '0' /f *>$null
+        Reg.exe add "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v 'BingSearchEnabled' /t REG_DWORD /d '0' /f *>$null
+        Reg.exe add "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v 'CortanaConsent' /t REG_DWORD /d '0' /f *>$null
+        
         Write-Host "`nWindows Copilot Disabled Successfully!" -ForegroundColor Green
         if ($copilotRemoved) {
             Write-Host "  App packages removed" -ForegroundColor Gray
@@ -6400,6 +6423,8 @@ function Write-Status {
       Reg.exe add "$hive\SOFTWARE\Policies\Microsoft\Windows\WindowsAI" /v 'DisableClickToDo' /t REG_DWORD /d '1' /f *>$null
   }
   Reg.exe add 'HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' /v 'ShowCopilotButton' /t REG_DWORD /d '0' /f *>$null
+  Reg.exe add 'HKLM\Software\Policies\Microsoft\Edge' /v 'DefaultBrowserSettingsCampaignEnabled' /t REG_DWORD /d '0' /f *>$null
+  
   Reg.exe add 'HKCU\Software\Microsoft\input\Settings' /v 'InsightsEnabled' /t REG_DWORD /d '0' /f *>$null
   Write-Status -msg 'Disabling Copilot In Windows Search...'
   Reg.exe add 'HKCU\SOFTWARE\Policies\Microsoft\Windows\Explorer' /v 'DisableSearchBoxSuggestions' /t REG_DWORD /d '1' /f *>$null
