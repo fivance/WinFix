@@ -34,13 +34,15 @@ PS C:\> Set-ExecutionPolicy Bypass -Scope Process -Force; .\WinFix.ps1
 
 .NOTES
 Author  : Fran Ivancevic 
-Version : 1.0.0  
+Version : 1.0.367
 GitHub  : https://github.com/fivance/
 
 .LINK
 https://github.com/fivance/WinFix
 #>
 
+$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(120, 9999)
+$host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(120, 40)
 function Save-Script {
 $scriptUrl = "https://raw.githubusercontent.com/fivance/WinFix/main/WinFix.ps1"
 $tempPath = "$env:SystemRoot\Temp\WinFix.ps1"
