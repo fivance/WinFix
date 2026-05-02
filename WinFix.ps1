@@ -41,8 +41,6 @@ GitHub  : https://github.com/fivance/
 https://github.com/fivance/WinFix
 #>
 
-$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(120, 9999)
-$host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(120, 45)
 function Save-Script {
 $scriptUrl = "https://raw.githubusercontent.com/fivance/WinFix/main/WinFix.ps1"
 $tempPath = "$env:SystemRoot\Temp\WinFix.ps1"
