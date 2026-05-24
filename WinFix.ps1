@@ -1181,10 +1181,20 @@ a4,58,a9,26,10,00,54,61,73,6b,42,61,72,00,40,00,09,00,04,00,ef,be,a4,58,a9,\
 ; remove windows widgets from taskbar
 [HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Dsh]
 "AllowNewsAndInterests"=dword:00000000
+"DisableWidgetsOnLockScreen"=dword:00000000
+"DisableWidgetsBoard"=dword:00000000
 
-; left taskbar alignment
+
+; Taskbar settings
 ;[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
 ;"TaskbarAl"=dword:00000000
+"TaskbarCompanion"=dword:00000000
+"Start_TrackProgs"=dword:00000000
+"Start_AccountNotifications"=dword:00000000
+"ShowClockInNotificationCenter"=dword:00000001
+
+
+
 
 ; remove search from taskbar
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search]
@@ -1767,6 +1777,7 @@ Windows Registry Editor Version 5.00
 "Flags"="2"
 "AutoRepeatRate"="0"
 "AutoRepeatDelay"="0"
+"DelayBeforeAcceptance"="0"
 
 [HKEY_CURRENT_USER\Control Panel\Accessibility\MouseKeys]
 "Flags"="130"
@@ -1810,6 +1821,7 @@ Windows Registry Editor Version 5.00
 "RomeSdkChannelUserAuthzPolicy"=dword:00000000
 "NearShareChannelUserAuthzPolicy"=dword:00000000
 "CdpSessionUserAuthzPolicy"=dword:00000000
+"EnablePromotionalAppsForShare"=dword:00000000
 
 ; Hide frequent folders in quick access
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer]
@@ -1847,9 +1859,17 @@ Windows Registry Editor Version 5.00
 ;[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
 ;"SharingWizardOn"=dword:00000000
 
+; Colors Powershell
+[HKEY_CURRENT_USER\Console\%SystemRoot%_System32_WindowsPowerShell_v1.0_powershell.exe]
+"ScreenColors"=dword:0000000F
+"ColorTable06"=dword:00ffffff
+"ColorTable15"=dword:00ffffff
+"ColorTable00"=dword:00000000
 
-
-
+; Colors CMD
+[HKEY_CURRENT_USER\Console\%SystemRoot%_system32_cmd.exe]
+"ColorTable07"=dword:00ffffff
+"ColorTable00"=dword:00000000
 
 ; HARDWARE AND SOUND
 ; Disable lock
@@ -2095,6 +2115,12 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\CPSS\Store\AllowTelemetry]
 "Value"=dword:00000001
+
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\CPSS\Store\TailoredExperiencesWithDiagnosticDataEnabled]
+"Value"=dword:00000000
+
+[HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Privacy]
+"TailoredExperiencesWithDiagnosticDataEnabled"=dword:00000000
 
 ; Set appearance options to custom
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects]
@@ -2349,6 +2375,52 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\System]
 "PublishUserActivities"=dword:00000000
 
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\DeviceMetaDataBackup]
+"Intent"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\IntroIneligible]
+"Intent"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\IntroPostponed]
+"Intent"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\IntroSkipped]
+"Intent"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\OffDeviceConsent]
+"Intent"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\DefaultAccount\Current\default$windows.data.donotdisturb.quietmoment$quietmomentlist\windows.data.donotdisturb.quietmoment$quietmomentfullscreen]
+"Data"=hex(3):43,42,01,00,0A,02,01,00,2A,06,E0,F3,AA,CC,06,2A,2B,0E,5A,43,42,01,00,C2,0A,01,D2,1E,26,4D,00,69,00,63,00,72,00,6F,00,73,00,6F,00,66,00,74,00,2E,00,51,00,75,00,69,00,65,00,74,00,48,00,6F,00,75,00,72,00,73,00,50,00,72,00,6F,00,66,00,69,00,6C,00,65,00,2E,00,41,00,6C,00,61,00,72,00,6D,00,73,00,4F,00,6E,00,6C,00,79,00,CA,50,00,00,00,00,00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\DefaultAccount\Current\default$windows.data.donotdisturb.quietmoment$quietmomentlist\windows.data.donotdisturb.quietmoment$quietmomentgame]
+"Data"=hex(3):43,42,01,00,0A,02,01,00,2A,06,E1,F3,AA,CC,06,2A,2B,0E,5E,43,42,01,00,C2,0A,01,D2,1E,28,4D,00,69,00,63,00,72,00,6F,00,73,00,6F,00,66,00,74,00,2E,00,51,00,75,00,69,00,65,00,74,00,48,00,6F,00,75,00,72,00,73,00,50,00,72,00,6F,00,66,00,69,00,6C,00,65,00,2E,00,50,00,72,00,69,00,6F,00,72,00,69,00,74,00,79,00,4F,00,6E,00,6C,00,79,00,CA,50,00,00,00,00,00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\DefaultAccount\Current\default$windows.data.donotdisturb.quietmoment$quietmomentlist\windows.data.donotdisturb.quietmoment$quietmomentpostoobe]
+"Data"=hex(3):43,42,01,00,0A,02,01,00,2A,06,DF,F3,AA,CC,06,2A,2B,0E,5E,43,42,01,00,C2,0A,01,D2,1E,28,4D,00,69,00,63,00,72,00,6F,00,73,00,6F,00,66,00,74,00,2E,00,51,00,75,00,69,00,65,00,74,00,48,00,6F,00,75,00,72,00,73,00,50,00,72,00,6F,00,66,00,69,00,6C,00,65,00,2E,00,50,00,72,00,69,00,6F,00,72,00,69,00,74,00,79,00,4F,00,6E,00,6C,00,79,00,CA,50,00,00,00,00,00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\DefaultAccount\Current\default$windows.data.donotdisturb.quietmoment$quietmomentlist\windows.data.donotdisturb.quietmoment$quietmomentpresentation]
+"Data"=hex(3):43,42,01,00,0A,02,01,00,2A,06,E2,F3,AA,CC,06,2A,2B,0E,5A,43,42,01,00,C2,0A,01,D2,1E,26,4D,00,69,00,63,00,72,00,6F,00,73,00,6F,00,66,00,74,00,2E,00,51,00,75,00,69,00,65,00,74,00,48,00,6F,00,75,00,72,00,73,00,50,00,72,00,6F,00,66,00,69,00,6C,00,65,00,2E,00,41,00,6C,00,61,00,72,00,6D,00,73,00,4F,00,6E,00,6C,00,79,00,CA,50,00,00,00,00,00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager]
+"SubscribedContent-338387Enabled"=dword:00000000
+"SubscribedContent-314559Enabled"=dword:00000000
+"SubscribedContent-202914Enabled"=dword:00000000
+"SubscribedContent-280810Enabled"=dword:00000000
+"SubscribedContent-280811Enabled"=dword:00000000
+"SubscribedContent-280815Enabled"=dword:00000000
+"SubscribedContent-310091Enabled"=dword:00000000
+"SubscribedContent-88000045Enabled"=dword:00000000
+"SubscribedContent-88000161Enabled"=dword:00000000
+"SubscribedContent-88000163Enabled"=dword:00000000
+"SubscribedContent-88000165Enabled"=dword:00000000
+"SubscribedContent-88000325Enabled"=dword:00000000
+"SubscribedContent-88000326Enabled"=dword:00000000
+"SubscribedContent-LocksreenEnabled"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\DesktopSpotlight\Settings]
+"EnabledState"=dword:00000000
+
 
 
 
@@ -2528,6 +2600,7 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 
 
 
+
 ; APPS
 ; Disable automatically update maps
 [HKEY_LOCAL_MACHINE\SYSTEM\Maps]
@@ -2580,12 +2653,15 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 "ShowOrHideMostUsedApps"=-
 
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer]
-"NoStartMenuMFUprogramsList"=-
-"NoInstrumentation"=-
+"NoStartMenuMFUprogramsList"=dword:00000001
+"NoInstrumentation"=dword:00000001
+"NoLowDiskSpaceChecks"=dword:00000001
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer]
-"NoStartMenuMFUprogramsList"=-
-"NoInstrumentation"=-
+"NoStartMenuMFUprogramsList"=dword:00000001
+"NoInstrumentation"=dword:00000001
+"NoLowDiskSpaceChecks"=dword:00000001
+
 ; Start menu hide recommended W11
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\current\device\Start]
 "HideRecommendedSection"=dword:00000001
@@ -2595,6 +2671,8 @@ KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\KernelS
 
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Explorer]
 "HideRecommendedSection"=dword:00000001
+"HideRecommendedPersonalizedSites"=dword:00000001
+
 
 ; More pins personalization start
 [HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced]
@@ -3329,10 +3407,12 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot]
 "TurnOffWindowsCopilot"=dword:00000001
 
+[HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Windows\CopilotKey]
+"SetCopilotHardwareKey"=""
+
 ; Disable widgets
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\PolicyManager\default\NewsAndInterests\AllowNewsAndInterests]
 "value"=dword:00000000
-
 
 
 
@@ -3373,6 +3453,10 @@ E0,F6,C5,D5,0E,CA,50,00,00
 ; Disable fast boot
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power]
 "HiberbootEnabled"=dword:00000000
+
+; Disable sleep study
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Power]
+"SleepStudyDisabled"=dword:00000001
 
 ; Enable allow USB overclock with secure boot regedit
 [HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\CI\Policy]
@@ -3430,8 +3514,26 @@ E0,F6,C5,D5,0E,CA,50,00,00
 
 
 
-
 ; OTHER
+
+; Experimentation
+[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\FeatureManagement\Overrides\14\3895955085]
+"EnabledState"=dword:00000001
+
+[HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\Session Manager]
+"DisableWpbtExecution"=dword:00000001
+
+
+
+; Lockscreen settings
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Lock Screen]
+"AutoSelectWidgetsOnLockScreen"=dword:00000000
+"LockScreenWidgetsEnabled"=dword:00000000
+
+; FTH
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\FTH]
+"Enabled"=dword:00000000
+
 ; Remove 3D objects
 [-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}]
 
@@ -3446,6 +3548,14 @@ E0,F6,C5,D5,0E,CA,50,00,00
 [HKEY_CURRENT_USER\Software\Classes\CLSID\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}]
 @="CLSID_MSGraphHomeFolder"
 "System.IsPinnedToNameSpaceTree"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}]
+@="CLSID_MSGraphHomeFolder"
+"HiddenByDefault"=dword:00000001
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}]
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace\{679f85cb-0220-4080-b29b-5540cc05aab6}]
 
 ; Remove gallery
 [HKEY_CURRENT_USER\Software\Classes\CLSID\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}]
@@ -3472,6 +3582,7 @@ E0,F6,C5,D5,0E,CA,50,00,00
 ; Disable driver searching & updates
 [HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching]
 "SearchOrderConfig"=dword:00000000
+
 
 ; Mouse fix (no accel with epp on)
 [HKEY_CURRENT_USER\Control Panel\Mouse]
