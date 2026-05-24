@@ -4458,6 +4458,141 @@ function Optimize-AdvancedTweaks {
   Clear-Host
   Start-Sleep -Seconds 3
 
+  $response = Read-Host "Do you want to install Fluent Modern cursor? (Y/N)"
+
+if ($response -eq 'Y' -or $response -eq 'y') {
+    try {
+        $ErrorActionPreference = 'Stop'
+
+$RepoBase   = 'https://raw.githubusercontent.com/fivance/ModernCursor/main'
+$CursorDir  = "$env:SystemRoot\Cursors\Fluent Cursor"
+$SchemeName = 'Fluent Design'
+$RegCursors = 'HKCU:\Control Panel\Cursors'
+$RegSchemes = 'HKCU:\Control Panel\Cursors\Schemes'
+
+$CursorFiles = @(
+    'pointer.cur'
+    'help.cur'
+    'working.ani'
+    'busy.ani'
+    'beam.cur'
+    'handwriting.cur'
+    'unavailable.cur'
+    'link.cur'
+    'pin.cur'
+    'person.cur'
+    'alternate.cur'
+    'dgn1.cur'
+    'dgn2.cur'
+    'horz.cur'
+    'vert.cur'
+    'move.cur'
+    'precision.cur'
+)
+
+$F = '%SYSTEMROOT%\Cursors\Fluent Cursor'   
+$W = '%SystemRoot%\cursors'                 #
+
+$CursorMap = [ordered]@{
+    Arrow       = "$F\pointer.cur"
+    Help        = "$F\help.cur"
+    AppStarting = "$F\working.ani"
+    Wait        = "$F\busy.ani"
+    Crosshair   = "$W\cross_i.cur"
+    IBeam       = "$F\beam.cur"
+    NWPen       = "$F\handwriting.cur"
+    No          = "$F\unavailable.cur"
+    SizeNS      = "$W\aero_ns.cur"
+    SizeWE      = "$W\aero_ew.cur"
+    SizeNWSE    = "$W\aero_nwse.cur"
+    SizeNESW    = "$W\aero_nesw.cur"
+    SizeAll     = "$W\aero_move.cur"
+    UpArrow     = "$W\aero_up.cur"
+    Hand        = "$F\link.cur"
+    Pin         = "$F\pin.cur"
+    Person      = "$F\person.cur"
+}
+
+New-Item -ItemType Directory -Path $CursorDir -Force | Out-Null
+Write-Host "      $CursorDir"
+
+Write-Host "`n[2/4] Downloading cursor files from GitHub..." -ForegroundColor Cyan
+
+$wc = New-Object System.Net.WebClient
+$wc.Headers.Add('User-Agent', 'PowerShell/ModernCursorInstaller')
+
+$total  = $CursorFiles.Count
+$done   = 0
+$failed = @()
+
+foreach ($File in $CursorFiles) {
+    $Url = "$RepoBase/$File"
+    $Dst = Join-Path $CursorDir $File
+    try {
+        $wc.DownloadFile($Url, $Dst)
+        $done++
+        Write-Host "      [$done/$total] $File" -ForegroundColor Gray
+    } catch {
+        $failed += $File
+        Write-Warning "      Failed: $File — $($_.Exception.Message)"
+    }
+}
+
+$wc.Dispose()
+
+if ($failed.Count -gt 0) {
+    Write-Warning "$($failed.Count) file(s) failed to download. The scheme may be incomplete."
+} else {
+    Write-Host "      All $done files downloaded successfully." -ForegroundColor Green
+}
+
+Write-Host "`n[3/4] Writing registry settings..." -ForegroundColor Cyan
+
+if (-not (Test-Path $RegSchemes)) {
+    New-Item -Path $RegSchemes -Force | Out-Null
+}
+
+foreach ($Entry in $CursorMap.GetEnumerator()) {
+    Set-ItemProperty -Path $RegCursors -Name $Entry.Key -Value $Entry.Value -Type ExpandString
+}
+
+Set-Item -Path $RegCursors -Value $SchemeName
+Set-ItemProperty -Path $RegCursors -Name 'Scheme Source'  -Value 1           -Type DWord
+Set-ItemProperty -Path $RegCursors -Name 'CursorBaseSize' -Value 32          -Type DWord
+
+$SchemeValue = ($CursorMap.Values) -join ','
+Set-ItemProperty -Path $RegSchemes -Name $SchemeName -Value $SchemeValue -Type ExpandString
+
+Write-Host "      Scheme '$SchemeName' registered."
+
+Write-Host "`n[4/4] Activating cursors..." -ForegroundColor Cyan
+
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+public class NativeMethods {
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
+}
+"@ -Language CSharp
+
+$ok = [NativeMethods]::SystemParametersInfo(0x0057, 0, [IntPtr]::Zero, 0x01 -bor 0x02)
+
+if ($ok) {
+    Write-Host "      Cursors reloaded successfully." -ForegroundColor Green
+} else {
+    Write-Warning "Reload failed — log off and back on to apply."
+}
+
+Write-Host "`n Done! '$SchemeName' cursor scheme is now active.`n" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Failed: $_" -ForegroundColor Red
+    }
+} else {
+    Write-Host "Skipped." -ForegroundColor Yellow
+}
+  
 # Disable ACPI power savings on all connected devices
 $usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\ACPI" -Recurse -ErrorAction SilentlyContinue |
 Where-Object { $_.PSChildName -eq "Device Parameters" }
