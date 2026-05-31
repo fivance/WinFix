@@ -4458,140 +4458,114 @@ function Optimize-AdvancedTweaks {
   Clear-Host
   Start-Sleep -Seconds 3
 
-  $response = Read-Host "Do you want to install Fluent Modern cursor? (Y/N)"
+$response = Read-Host "Do you want to install Fluent Modern cursor? (Y/N)"
 
-if ($response -eq 'Y' -or $response -eq 'y') {
-    try {
-        $ErrorActionPreference = 'Stop'
+if ($response -match '^[Yy]$') {
+try {
+    #$ErrorActionPreference = 'Stop'
 
-$RepoBase   = 'https://raw.githubusercontent.com/fivance/ModernCursor/main'
-$CursorDir  = "$env:SystemRoot\Cursors\Fluent Cursor"
-$SchemeName = 'Fluent Design'
-$RegCursors = 'HKCU:\Control Panel\Cursors'
-$RegSchemes = 'HKCU:\Control Panel\Cursors\Schemes'
+    $RepoBase   = 'https://raw.githubusercontent.com/fivance/ModernCursor/main'
+    $CursorDir  = "$env:SystemRoot\Cursors\Fluent Cursor"
+    $SchemeName = 'Fluent Design'
+    $RegCursors = 'HKCU:\Control Panel\Cursors'
+    $RegSchemes = 'HKCU:\Control Panel\Cursors\Schemes'
 
-$CursorFiles = @(
-    'pointer.cur'
-    'help.cur'
-    'working.ani'
-    'busy.ani'
-    'beam.cur'
-    'handwriting.cur'
-    'unavailable.cur'
-    'link.cur'
-    'pin.cur'
-    'person.cur'
-    'alternate.cur'
-    'dgn1.cur'
-    'dgn2.cur'
-    'horz.cur'
-    'vert.cur'
-    'move.cur'
-    'precision.cur'
-)
+    $CursorFiles = @(
+        'pointer.cur','help.cur','working.ani','busy.ani','beam.cur',
+        'handwriting.cur','unavailable.cur','link.cur','pin.cur','person.cur',
+        'alternate.cur','dgn1.cur','dgn2.cur','horz.cur','vert.cur',
+        'move.cur','precision.cur'
+    )
 
-$F = '%SYSTEMROOT%\Cursors\Fluent Cursor'   
-$W = '%SystemRoot%\cursors'                 #
+    $F = '%SYSTEMROOT%\Cursors\Fluent Cursor'
+    $W = '%SystemRoot%\Cursors'
 
-$CursorMap = [ordered]@{
-    Arrow       = "$F\pointer.cur"
-    Help        = "$F\help.cur"
-    AppStarting = "$F\working.ani"
-    Wait        = "$F\busy.ani"
-    Crosshair   = "$W\cross_i.cur"
-    IBeam       = "$F\beam.cur"
-    NWPen       = "$F\handwriting.cur"
-    No          = "$F\unavailable.cur"
-    SizeNS      = "$W\aero_ns.cur"
-    SizeWE      = "$W\aero_ew.cur"
-    SizeNWSE    = "$W\aero_nwse.cur"
-    SizeNESW    = "$W\aero_nesw.cur"
-    SizeAll     = "$W\aero_move.cur"
-    UpArrow     = "$W\aero_up.cur"
-    Hand        = "$F\link.cur"
-    Pin         = "$F\pin.cur"
-    Person      = "$F\person.cur"
-}
-
-New-Item -ItemType Directory -Path $CursorDir -Force | Out-Null
-Write-Host "      $CursorDir"
-
-Write-Host "`n[2/4] Downloading cursor files from GitHub..." -ForegroundColor Cyan
-
-$wc = New-Object System.Net.WebClient
-$wc.Headers.Add('User-Agent', 'PowerShell/ModernCursorInstaller')
-
-$total  = $CursorFiles.Count
-$done   = 0
-$failed = @()
-
-foreach ($File in $CursorFiles) {
-    $Url = "$RepoBase/$File"
-    $Dst = Join-Path $CursorDir $File
-    try {
-        $wc.DownloadFile($Url, $Dst)
-        $done++
-        Write-Host "      [$done/$total] $File" -ForegroundColor Gray
-    } catch {
-        $failed += $File
-        Write-Warning "      Failed: $File — $($_.Exception.Message)"
+    $CursorMap = [ordered]@{
+        Arrow       = "$F\pointer.cur"
+        Help        = "$F\help.cur"
+        AppStarting = "$F\working.ani"
+        Wait        = "$F\busy.ani"
+        Crosshair   = "$W\cross_i.cur"
+        IBeam       = "$F\beam.cur"
+        NWPen       = "$F\handwriting.cur"
+        No          = "$F\unavailable.cur"
+        SizeNS      = "$W\aero_ns.cur"
+        SizeWE      = "$W\aero_ew.cur"
+        SizeNWSE    = "$W\aero_nwse.cur"
+        SizeNESW    = "$W\aero_nesw.cur"
+        SizeAll     = "$W\aero_move.cur"
+        UpArrow     = "$W\aero_up.cur"
+        Hand        = "$F\link.cur"
+        Pin         = "$F\pin.cur"
+        Person      = "$F\person.cur"
     }
-}
 
-$wc.Dispose()
+    Write-Host "`n[1/4] Creating cursor directory..." -ForegroundColor Cyan
+    New-Item -ItemType Directory -Path $CursorDir -Force | Out-Null
 
-if ($failed.Count -gt 0) {
-    Write-Warning "$($failed.Count) file(s) failed to download. The scheme may be incomplete."
-} else {
-    Write-Host "      All $done files downloaded successfully." -ForegroundColor Green
-}
+    Write-Host "`n[2/4] Downloading cursor files..." -ForegroundColor Cyan
 
-Write-Host "`n[3/4] Writing registry settings..." -ForegroundColor Cyan
+    $wc = New-Object System.Net.WebClient
+    $wc.Headers.Add('User-Agent', 'ModernCursorInstaller')
 
-if (-not (Test-Path $RegSchemes)) {
-    New-Item -Path $RegSchemes -Force | Out-Null
-}
+    foreach ($File in $CursorFiles) {
+        $wc.DownloadFile("$RepoBase/$File", (Join-Path $CursorDir $File))
+    }
 
-foreach ($Entry in $CursorMap.GetEnumerator()) {
-    Set-ItemProperty -Path $RegCursors -Name $Entry.Key -Value $Entry.Value -Type ExpandString
-}
+    $wc.Dispose()
 
-Set-Item -Path $RegCursors -Value $SchemeName
-Set-ItemProperty -Path $RegCursors -Name 'Scheme Source'  -Value 1           -Type DWord
-Set-ItemProperty -Path $RegCursors -Name 'CursorBaseSize' -Value 32          -Type DWord
+    Write-Host "      Downloads complete" -ForegroundColor Green
 
-$SchemeValue = ($CursorMap.Values) -join ','
-Set-ItemProperty -Path $RegSchemes -Name $SchemeName -Value $SchemeValue -Type ExpandString
+    Write-Host "`n[3/4] Writing registry settings..." -ForegroundColor Cyan
 
-Write-Host "      Scheme '$SchemeName' registered."
+    foreach ($Entry in $CursorMap.GetEnumerator()) {
+        Set-ItemProperty -Path $RegCursors -Name $Entry.Key -Value $Entry.Value
+    }
 
-Write-Host "`n[4/4] Activating cursors..." -ForegroundColor Cyan
+    # IMPORTANT: set active scheme properly
+    Set-ItemProperty -Path $RegCursors -Name '(Default)' -Value $SchemeName
 
-Add-Type -TypeDefinition @"
+    New-ItemProperty -Path $RegCursors -Name 'Scheme Source'  -Value 1  -PropertyType DWord -Force | Out-Null
+    New-ItemProperty -Path $RegCursors -Name 'CursorBaseSize' -Value 32 -PropertyType DWord -Force | Out-Null
+
+    $SchemeValue = ($CursorMap.Values) -join ','
+
+    New-ItemProperty -Path $RegSchemes -Name $SchemeName -Value $SchemeValue -PropertyType String -Force | Out-Null
+
+    Write-Host "      Registry updated" -ForegroundColor Green
+
+    Write-Host "`n[4/4] Applying cursors..." -ForegroundColor Cyan
+
+    # 1. Primary refresh (correct API trigger)
+    rundll32.exe user32.dll,UpdatePerUserSystemParameters
+
+    # 2. Strong refresh (forces cursor reload)
+    $signature = @"
 using System;
 using System.Runtime.InteropServices;
-public class NativeMethods {
+
+public class CursorFix {
     [DllImport("user32.dll", SetLastError = true)]
     public static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
 }
-"@ -Language CSharp
+"@
 
-$ok = [NativeMethods]::SystemParametersInfo(0x0057, 0, [IntPtr]::Zero, 0x01 -bor 0x02)
+    Add-Type $signature -ErrorAction SilentlyContinue
 
-if ($ok) {
-    Write-Host "      Cursors reloaded successfully." -ForegroundColor Green
-} else {
-    Write-Warning "Reload failed — log off and back on to apply."
+    [CursorFix]::SystemParametersInfo(0x0057, 0, [IntPtr]::Zero, 0x03) | Out-Null
+
+    Write-Host "      Cursors applied successfully." -ForegroundColor Green
+    Write-Host "`nDone! '$SchemeName' cursor scheme is now active.`n" -ForegroundColor Green
 }
-
-Write-Host "`n Done! '$SchemeName' cursor scheme is now active.`n" -ForegroundColor Green
-    }
-    catch {
-        Write-Host "Failed: $_" -ForegroundColor Red
-    }
-} else {
+catch {
+    Write-Host "Failed: $($_.Exception.Message)" -ForegroundColor Red
+}
+}
+else {
     Write-Host "Skipped." -ForegroundColor Yellow
 }
+
+Clear-Host
   
 # Disable ACPI power savings on all connected devices
 $usbKeys = Get-ChildItem -Path "HKLM:\SYSTEM\ControlSet001\Enum\ACPI" -Recurse -ErrorAction SilentlyContinue |
