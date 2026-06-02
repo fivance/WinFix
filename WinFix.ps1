@@ -738,6 +738,16 @@ while ($true) {
                     Write-Host "Skipping GPU P0 state enable." -ForegroundColor Cyan
                 }
 
+                $response = Read-Host "Would you like to install the NVIDIA Control Panel? (Y/N)"
+                            
+                if ($response -eq 'Y' -or $response -eq 'y') {
+                    Write-Host "Installing NVIDIA Control Panel with winget..." -ForegroundColor Cyan
+                    winget install "NVIDIA Control Panel" --id 9NF8H0H7WMLT -s msstore --accept-package-agreements --accept-source-agreements
+                    Write-Host "Done." -ForegroundColor Green
+                } else {
+                    Write-Host "Skipping NVIDIA Control Panel installation." -ForegroundColor Yellow
+                }                
+                
                 Start-Process "shell:appsFolder\NVIDIACorp.NVIDIAControlPanel_56jybvy8sckqj!NVIDIACorp.NVIDIAControlPanel"
                 
 
