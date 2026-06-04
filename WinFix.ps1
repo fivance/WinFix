@@ -3814,6 +3814,8 @@ $_.FeatureName -notlike '*ServerCore-Drivers-General*' -and
 $_.FeatureName -notlike '*ServerCore-Drivers-General-WOW64*' -and
 # Breaks Windows Server turn windows features on or off
 $_.FeatureName -notlike '*Server-Gui-Mgmt*' -and
+# Breaks Remote Desktop Connection
+$_.FeatureName -notlike '*RemoteDesktopConnection*' -and
 # Breaks Windows Server NVIDIA app
 $_.FeatureName -notlike '*WirelessNetworking*'
 } | ForEach-Object {
