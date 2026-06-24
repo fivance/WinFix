@@ -3770,6 +3770,7 @@ $_.Name -notlike '*Microsoft.Windows.Notepad*' -and
 $_.Name -notlike '*Microsoft.Windows.Notepad.System*' -and
 $_.Name -notlike '*Microsoft.Windows.Wifi*' -and
 $_.Name -notlike '*NetFX3*' -and
+$_.Name -notlike '*OpenSSH.Client*' -and
 # Windows 11 breaks MSI installers if removed
 $_.Name -notlike '*VBSCRIPT*' -and
 $_.Name -notlike '*WMIC*' -and
