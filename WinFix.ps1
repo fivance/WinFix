@@ -3776,7 +3776,6 @@ $_.Name -notlike '*VBSCRIPT*' -and
 $_.Name -notlike '*WMIC*' -and
 # Windows 10 breaks UWP snippingtool if removed
 $_.Name -notlike '*Windows.Client.ShellComponents*'
-$_.Name -notlike '*OpenSSH.Client*'
 } | ForEach-Object {
 try {
 Remove-WindowsCapability -Online -Name $_.Name | Out-Null
